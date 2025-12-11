@@ -7,21 +7,8 @@ import FeaturedCourses from "../components/FeaturedCourses";
 import Footer from "../components/Footer";
 import { Box, Grid, Container, Typography } from "@mui/material";
 import { motion } from "framer-motion";
-import { useAuth } from "../contexts/AuthContext";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-
-  // Redirect to dashboard if already logged in
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/dashboard");
-    }
-  }, [isAuthenticated, navigate]);
-
   const learningPaths = [
     {
       title: "Formal Learning",
