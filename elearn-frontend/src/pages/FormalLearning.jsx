@@ -1,3 +1,7 @@
 export default function FormalLearning() {
-  return <h1>Formal Learning Section</h1>;
+  return (
+    <div style={{ textAlign: "center", marginTop: "50px" }}>
+      <h1>Formal Learning Section</h1>
+    </div>
+  );
 }

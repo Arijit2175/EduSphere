@@ -1,3 +1,7 @@
 export default function Login() {
-  return <h1>Login Page</h1>;
+  return (
+    <div style={{ textAlign: "center", marginTop: "50px" }}>
+      <h1>Login Page</h1>
+    </div>
+  );
 }
