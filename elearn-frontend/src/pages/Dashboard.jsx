@@ -20,7 +20,7 @@ import VideocamIcon from "@mui/icons-material/Videocam";
 export default function Dashboard() {
   const { enrolledCourses } = useCourses();
   const { getEnrolledCourses: getNonFormalCourses, getCourseProgress: getNonFormalProgress, certificates } = useNonFormal();
-  const { getStudentEnrollments, getCourseById, getCourseSchedules } = useFormalEducation();
+  const { getStudentEnrollments, getCourseById, getCourseSchedules, getTeacherCourses, getCourseStudents, scheduleClass } = useFormalEducation();
   const { user } = useAuth();
   const { isOpen } = useSidebar();
   const navigate = useNavigate();
