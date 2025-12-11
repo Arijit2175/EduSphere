@@ -39,7 +39,7 @@ export default function NonFormalLearner() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
   const { courseId } = useParams();
-  const { courses, getCourseProgress, updateLessonProgress, updateAssessmentScore, resetCourseProgress } = useNonFormal();
+  const { courses, getCourseProgress, updateLessonProgress, updateAssessmentScore, resetCourseProgress, earnCertificate } = useNonFormal();
   const navigate = useNavigate();
 
   const course = courses.find((c) => c.id === courseId);
@@ -102,6 +102,11 @@ export default function NonFormalLearner() {
     setQuizScore(percentage);
     setQuizSubmitted(true);
     updateAssessmentScore(user?.id, courseId, percentage);
+    
+    // If passed, earn certificate
+    if (percentage >= 70) {
+      earnCertificate(user?.id, courseId);
+    }
     
     // If failed, reset course to first lesson
     if (percentage < 70) {
