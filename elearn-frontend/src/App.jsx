@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@mui/material/styles";
+import theme from "./theme";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -10,20 +12,22 @@ import AITutor from "./pages/AITutor";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
 
-        <Route path="/formal" element={<FormalLearning />} />
-        <Route path="/nonformal" element={<NonFormalLearning />} />
-        <Route path="/informal" element={<InformalLearning />} />
+          <Route path="/formal" element={<FormalLearning />} />
+          <Route path="/nonformal" element={<NonFormalLearning />} />
+          <Route path="/informal" element={<InformalLearning />} />
 
-        <Route path="/ai" element={<AITutor />} />
-      </Routes>
-    </BrowserRouter>
+          <Route path="/ai" element={<AITutor />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
