@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CoursesProvider } from "./contexts/CoursesContext";
@@ -14,7 +15,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import FormalLearning from "./pages/FormalLearning";
 import NonFormalLearning from "./pages/NonFormalLearning";
-import NonFormalHome from "./pages/NonFormalHome";
+const NonFormalHome = lazy(() => import("./pages/NonFormalHome"));
 import NonFormalCourseDetail from "./pages/NonFormalCourseDetail";
 import NonFormalLearner from "./pages/NonFormalLearner";
 import InformalLearning from "./pages/InformalLearning";
@@ -71,7 +72,9 @@ export default function App() {
                   path="/nonformal"
                   element={
                     <ProtectedRoute>
-                      <NonFormalHome />
+                      <Suspense fallback={<div />}> 
+                        <NonFormalHome />
+                      </Suspense>
                     </ProtectedRoute>
                   }
                 />
