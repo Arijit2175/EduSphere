@@ -1,111 +1,23 @@
-import { Box, Container, Grid } from "@mui/material";
+import { Box, Container, Grid, Card, CardContent, Typography, Button, Stack, Chip, LinearProgress } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
-import CourseCardAdvanced from "../components/CourseCardAdvanced";
 import { useSidebar } from "../contexts/SidebarContext";
+import { useAuth } from "../contexts/AuthContext";
+import { useNonFormal } from "../contexts/NonFormalContext";
+import StarIcon from "@mui/icons-material/Star";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export default function NonFormalLearning() {
   const { isOpen } = useSidebar();
-  const nonFormalCourses = [
-    {
-      id: "nonformal-1",
-      title: "UI/UX Design Bootcamp",
-      description: "Become a professional designer in 8 weeks",
-      icon: "🎨",
-      level: "Beginner",
-      duration: "8 weeks",
-      category: "Non-Formal Learning",
-      rating: 4.7,
-      students: "2,850",
-      instructor: "Amanda Davis",
-    },
-    {
-      id: "nonformal-2",
-      title: "Digital Marketing Masterclass",
-      description: "SEO, Social Media, and Content Marketing",
-      icon: "📢",
-      level: "Beginner",
-      duration: "6 weeks",
-      category: "Non-Formal Learning",
-      rating: 4.6,
-      students: "3,200",
-      instructor: "Kevin Martinez",
-    },
-    {
-      id: "nonformal-3",
-      title: "Entrepreneurship Intensive",
-      description: "From idea to market in 4 weeks",
-      icon: "🚀",
-      level: "All Levels",
-      duration: "4 weeks",
-      category: "Non-Formal Learning",
-      rating: 4.8,
-      students: "1,950",
-      instructor: "Rachel Green",
-    },
-    {
-      id: "nonformal-4",
-      title: "Video Production Workshop",
-      description: "Create professional videos from scratch",
-      icon: "🎬",
-      level: "Beginner",
-      duration: "5 weeks",
-      category: "Non-Formal Learning",
-      rating: 4.5,
-      students: "1,450",
-      instructor: "Tom Hardy",
-    },
-    {
-      id: "nonformal-5",
-      title: "Graphic Design Bootcamp",
-      description: "Adobe Creative Suite mastery",
-      icon: "✏️",
-      level: "Beginner",
-      duration: "8 weeks",
-      category: "Non-Formal Learning",
-      rating: 4.7,
-      students: "2,600",
-      instructor: "Jessica Parker",
-    },
-    {
-      id: "nonformal-6",
-      title: "Content Writing Intensive",
-      description: "Master copywriting and storytelling",
-      icon: "📝",
-      level: "Beginner",
-      duration: "6 weeks",
-      category: "Non-Formal Learning",
-      rating: 4.6,
-      students: "2,100",
-      instructor: "Mark Thompson",
-    },
-    {
-      id: "nonformal-7",
-      title: "SEO & SEM Workshop",
-      description: "Organic and paid search optimization",
-      icon: "🔍",
-      level: "Intermediate",
-      duration: "4 weeks",
-      category: "Non-Formal Learning",
-      rating: 4.5,
-      students: "1,800",
-      instructor: "Laura White",
-    },
-    {
-      id: "nonformal-8",
-      title: "Email Marketing Bootcamp",
-      description: "Build and optimize email campaigns",
-      icon: "📧",
-      level: "Beginner",
-      duration: "3 weeks",
-      category: "Non-Formal Learning",
-      rating: 4.4,
-      students: "1,550",
-      instructor: "Chris Evans",
-    },
-  ];
+  const { user } = useAuth();
+  const { courses, getEnrolledCourses, getCourseProgress, certificates } = useNonFormal();
+  const navigate = useNavigate();
+
+  const enrolledCourses = getEnrolledCourses(user?.id);
+  const userCertificates = certificates.filter((c) => c.userId === user?.id);
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -117,40 +29,204 @@ export default function NonFormalLearning() {
           mt: { xs: 6, md: 8 },
           background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
           minHeight: "100vh",
-          py: 4,
           transition: "margin-left 0.3s ease",
+          pb: 4,
         }}
       >
         <Navbar />
 
         <Container maxWidth="lg" sx={{ mt: 4 }}>
           <PageHeader
-            title="Non-Formal Learning"
-            subtitle="Flexible, skill-focused workshops and bootcamps"
+            title="My Non-Formal Learning"
+            subtitle="Continue your skill development journey"
             backgroundGradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
           />
 
-          <Section background="transparent">
-            <Grid container spacing={3}>
-              {nonFormalCourses.map((course, i) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
-                  <CourseCardAdvanced
-                    id={course.id}
-                    title={course.title}
-                    description={course.description}
-                    icon={course.icon}
-                    category={course.category}
-                    level={course.level}
-                    duration={course.duration}
-                    rating={course.rating}
-                    students={course.students}
-                    instructor={course.instructor}
-                    actionText="Enroll Now"
-                  />
-                </Grid>
-              ))}
+          <Grid container spacing={3} sx={{ mt: 2 }}>
+            {/* Stats */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ background: "#667eea20", border: "1px solid #667eea" }}>
+                <CardContent sx={{ textAlign: "center" }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: "#667eea" }}>
+                    {enrolledCourses.length}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#666" }}>
+                    Courses Enrolled
+                  </Typography>
+                </CardContent>
+              </Card>
             </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ background: "#10b98120", border: "1px solid #10b981" }}>
+                <CardContent sx={{ textAlign: "center" }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: "#10b981" }}>
+                    {userCertificates.length}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#666" }}>
+                    Certificates Earned
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ background: "#f59e0b20", border: "1px solid #f59e0b" }}>
+                <CardContent sx={{ textAlign: "center" }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: "#f59e0b" }}>
+                    {enrolledCourses.reduce((acc, c) => acc + (c.lessons?.length || 0), 0)}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#666" }}>
+                    Total Lessons
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ background: "#3b82f620", border: "1px solid #3b82f6" }}>
+                <CardContent sx={{ textAlign: "center" }}>
+                  <Button fullWidth variant="contained" size="small" onClick={() => navigate("/nonformal")}>
+                    Browse More
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+          {/* Enrolled Courses */}
+          <Section background="transparent">
+            <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
+              📚 My Learning Path
+            </Typography>
+
+            {enrolledCourses.length === 0 ? (
+              <Card sx={{ p: 4, textAlign: "center" }}>
+                <Typography variant="body1" sx={{ color: "#999", mb: 2 }}>
+                  You haven't enrolled in any courses yet.
+                </Typography>
+                <Button variant="contained" onClick={() => navigate("/nonformal")}>
+                  Explore Courses
+                </Button>
+              </Card>
+            ) : (
+              <Grid container spacing={3}>
+                {enrolledCourses.map((course) => {
+                  const progress = getCourseProgress(user?.id, course.id);
+                  const progressPercent = progress?.completedLessons
+                    ? (progress.completedLessons.length / (course.lessons?.length || 1)) * 100
+                    : 0;
+                  const hasCertificate = userCertificates.some((c) => c.courseId === course.id);
+
+                  return (
+                    <Grid item xs={12} md={6} key={course.id}>
+                      <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                        <CardContent sx={{ flex: 1 }}>
+                          <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ mb: 2 }}>
+                            <Box sx={{ fontSize: 40 }}>{course.thumbnail}</Box>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                                {course.title}
+                              </Typography>
+                              <Stack direction="row" spacing={0.5} alignItems="center">
+                                <StarIcon sx={{ fontSize: 14, color: "#fbbf24" }} />
+                                <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                  {course.rating}
+                                </Typography>
+                              </Stack>
+                            </Box>
+                            {hasCertificate && (
+                              <Chip icon={<CheckCircleIcon />} label="Certified" color="success" />
+                            )}
+                          </Stack>
+
+                          <Typography variant="body2" sx={{ color: "#6b7280", mb: 2 }}>
+                            {course.description}
+                          </Typography>
+
+                          <Stack spacing={1} sx={{ mb: 2 }}>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center">
+                              <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                Progress
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: "#9ca3af" }}>
+                                {Math.round(progressPercent)}%
+                              </Typography>
+                            </Stack>
+                            <LinearProgress variant="determinate" value={progressPercent} />
+                          </Stack>
+
+                          <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                            <Chip label={course.level} size="small" variant="outlined" />
+                            <Chip label={course.duration} size="small" variant="outlined" />
+                          </Stack>
+                        </CardContent>
+
+                        <CardContent sx={{ pt: 0 }}>
+                          <Stack direction="row" spacing={1}>
+                            <Button
+                              fullWidth
+                              variant="contained"
+                              onClick={() => navigate(`/nonformal/learn/${course.id}`)}
+                            >
+                              Continue Learning
+                            </Button>
+                            <Button
+                              fullWidth
+                              variant="outlined"
+                              onClick={() => navigate(`/nonformal/course/${course.id}`)}
+                            >
+                              Details
+                            </Button>
+                          </Stack>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            )}
           </Section>
+
+          {/* Certificates */}
+          {userCertificates.length > 0 && (
+            <Section background="transparent">
+              <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
+                🏆 Your Certificates
+              </Typography>
+              <Grid container spacing={3}>
+                {userCertificates.map((cert) => (
+                  <Grid item xs={12} md={6} key={cert.id}>
+                    <Card sx={{ background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)", color: "white" }}>
+                      <CardContent>
+                        <CheckCircleIcon sx={{ fontSize: 48, mb: 1 }} />
+                        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                          Certificate of Completion
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 2 }}>
+                          🎓 {cert.courseName}
+                        </Typography>
+                        <Typography variant="caption" sx={{ opacity: 0.9, mb: 2, display: "block" }}>
+                          Instructed by {cert.instructor}
+                        </Typography>
+                        <Typography variant="caption" sx={{ opacity: 0.8, display: "block", mb: 2 }}>
+                          ID: {cert.certificateId}
+                        </Typography>
+                        <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                          Earned on {new Date(cert.earnedAt).toLocaleDateString()}
+                        </Typography>
+                        <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                          <Button size="small" variant="contained" sx={{ background: "white", color: "#f59e0b" }}>
+                            Download
+                          </Button>
+                          <Button size="small" variant="outlined" sx={{ color: "white", borderColor: "white" }}>
+                            Share
+                          </Button>
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Section>
+          )}
         </Container>
       </Box>
     </Box>

@@ -4,6 +4,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { CoursesProvider } from "./contexts/CoursesContext";
 import { SidebarProvider } from "./contexts/SidebarContext";
 import { FormalEducationProvider } from "./contexts/FormalEducationContext";
+import { NonFormalProvider } from "./contexts/NonFormalContext";
 import theme from "./theme";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
@@ -13,6 +14,9 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import FormalLearning from "./pages/FormalLearning";
 import NonFormalLearning from "./pages/NonFormalLearning";
+import NonFormalHome from "./pages/NonFormalHome";
+import NonFormalCourseDetail from "./pages/NonFormalCourseDetail";
+import NonFormalLearner from "./pages/NonFormalLearner";
 import InformalLearning from "./pages/InformalLearning";
 import AITutor from "./pages/AITutor";
 import CourseDetailPage from "./pages/CourseDetailPage";
@@ -26,8 +30,9 @@ export default function App() {
         <AuthProvider>
           <CoursesProvider>
             <FormalEducationProvider>
-              <SidebarProvider>
-              <Routes>
+              <NonFormalProvider>
+                <SidebarProvider>
+                <Routes>
                 <Route path="/" element={<Login />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/login" element={<Login />} />
@@ -66,7 +71,25 @@ export default function App() {
                   path="/nonformal"
                   element={
                     <ProtectedRoute>
-                      <NonFormalLearning />
+                      <NonFormalHome />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/nonformal/course/:courseId"
+                  element={
+                    <ProtectedRoute>
+                      <NonFormalCourseDetail />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/nonformal/learn/:courseId"
+                  element={
+                    <ProtectedRoute>
+                      <NonFormalLearner />
                     </ProtectedRoute>
                   }
                 />
@@ -111,6 +134,7 @@ export default function App() {
                 <Route path="*" element={<Login />} />
               </Routes>
               </SidebarProvider>
+              </NonFormalProvider>
             </FormalEducationProvider>
           </CoursesProvider>
         </AuthProvider>
