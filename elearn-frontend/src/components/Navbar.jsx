@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Button, Typography, Box, Avatar, IconButton, Menu, MenuItem } from "@mui/material";
+import { AppBar, Toolbar, Button, Typography, Box, IconButton, Menu, MenuItem } from "@mui/material";
 import { AccountCircle, Logout } from "@mui/icons-material";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
@@ -23,14 +23,30 @@ export default function Navbar() {
     navigate("/");
   };
 
+  const handleHomeClick = () => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    } else {
+      navigate("/");
+    }
+  };
+
   return (
     <AppBar position="sticky" elevation={0} color="transparent">
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: "600" }}>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            flexGrow: 1, 
+            fontWeight: "600",
+            cursor: "pointer"
+          }}
+          onClick={handleHomeClick}
+        >
           EduSphere
         </Typography>
 
-        <Button href="/" color="inherit">Home</Button>
+        <Button onClick={handleHomeClick} color="inherit">Home</Button>
         
         {isAuthenticated ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
