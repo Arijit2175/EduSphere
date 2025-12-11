@@ -18,6 +18,11 @@ export default function NonFormalLearning() {
 
   const enrolledCourses = getEnrolledCourses(user?.id);
   const userCertificates = certificates.filter((c) => c.userId === user?.id);
+  
+  // Filter out courses that have certificates (completed courses)
+  const inProgressCourses = enrolledCourses.filter(
+    (course) => !userCertificates.some((cert) => cert.courseId === course.id)
+  );
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -48,7 +53,7 @@ export default function NonFormalLearning() {
               <Card sx={{ background: "#667eea20", border: "1px solid #667eea" }}>
                 <CardContent sx={{ textAlign: "center" }}>
                   <Typography variant="h4" sx={{ fontWeight: 700, color: "#667eea" }}>
-                    {enrolledCourses.length}
+                    {inProgressCourses.length}
                   </Typography>
                   <Typography variant="body2" sx={{ color: "#666" }}>
                     Courses Enrolled
@@ -72,7 +77,7 @@ export default function NonFormalLearning() {
               <Card sx={{ background: "#f59e0b20", border: "1px solid #f59e0b" }}>
                 <CardContent sx={{ textAlign: "center" }}>
                   <Typography variant="h4" sx={{ fontWeight: 700, color: "#f59e0b" }}>
-                    {enrolledCourses.reduce((acc, c) => acc + (c.lessons?.length || 0), 0)}
+                    {inProgressCourses.reduce((acc, c) => acc + (c.lessons?.length || 0), 0)}
                   </Typography>
                   <Typography variant="body2" sx={{ color: "#666" }}>
                     Total Lessons
@@ -97,10 +102,12 @@ export default function NonFormalLearning() {
               📚 My Learning Path
             </Typography>
 
-            {enrolledCourses.length === 0 ? (
+            {inProgressCourses.length === 0 ? (
               <Card sx={{ p: 4, textAlign: "center" }}>
                 <Typography variant="body1" sx={{ color: "#999", mb: 2 }}>
-                  You haven't enrolled in any courses yet.
+                  {userCertificates.length > 0 
+                    ? "All courses completed! Browse more courses to continue learning." 
+                    : "You haven't enrolled in any courses yet."}
                 </Typography>
                 <Button variant="contained" onClick={() => navigate("/nonformal")}>
                   Explore Courses
@@ -108,7 +115,7 @@ export default function NonFormalLearning() {
               </Card>
             ) : (
               <Grid container spacing={3}>
-                {enrolledCourses.map((course) => {
+                {inProgressCourses.map((course) => {
                   const progress = getCourseProgress(user?.id, course.id);
                   const progressPercent = progress?.completedLessons
                     ? (progress.completedLessons.length / (course.lessons?.length || 1)) * 100
