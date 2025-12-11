@@ -23,9 +23,17 @@ export const AuthProvider = ({ children }) => {
 
   // Load user from localStorage on mount
   useEffect(() => {
-    // On fresh run, do not auto-login; clear any stale saved session
-    localStorage.removeItem("user");
-    setLoading(false);
+    try {
+      const saved = localStorage.getItem("user");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setUser(buildUser(parsed));
+      }
+    } catch (_) {
+      // ignore parse issues and start fresh
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const login = (email, password, role = "student") => {
