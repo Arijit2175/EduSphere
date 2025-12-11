@@ -1,6 +1,6 @@
 import { Drawer, List, ListItem, ListItemText, IconButton, Box } from "@mui/material";
 import { Link } from "react-router-dom";
-import { ChevronLeft } from "@mui/icons-material";
+import { Menu } from "@mui/icons-material";
 import { useSidebar } from "../contexts/SidebarContext";
 
 export default function Sidebar() {
@@ -21,11 +21,11 @@ export default function Sidebar() {
         },
       }}
     >
-      {/* Close Button */}
+      {/* Hamburger Menu Button - Centered */}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "center",
           alignItems: "center",
           p: 1,
           mt: 8,
@@ -42,7 +42,7 @@ export default function Sidebar() {
             },
           }}
         >
-          <ChevronLeft />
+          <Menu />
         </IconButton>
       </Box>
 

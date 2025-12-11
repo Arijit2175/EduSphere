@@ -24,11 +24,7 @@ export default function Navbar() {
   };
 
   const handleHomeClick = () => {
-    if (isAuthenticated) {
-      navigate("/dashboard");
-    } else {
-      navigate("/");
-    }
+    navigate("/");
   };
 
   return (
