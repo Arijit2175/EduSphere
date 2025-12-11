@@ -3,44 +3,156 @@ import Sidebar from "../components/Sidebar";
 import HeroSection from "../components/HeroSection";
 import CourseCard from "../components/CourseCard";
 import AnimatedButton from "../components/AnimatedButton";
-import { Box, Grid } from "@mui/material";
+import StatsSection from "../components/StatsSection";
+import FeaturedCourses from "../components/FeaturedCourses";
+import Footer from "../components/Footer";
+import { Box, Grid, Container, Typography } from "@mui/material";
+import { motion } from "framer-motion";
 
 export default function Home() {
+  const learningPaths = [
+    {
+      title: "Formal Learning",
+      link: "/formal",
+      description: "Structured, curriculum-driven courses",
+      icon: "📚",
+    },
+    {
+      title: "Non-Formal Learning",
+      link: "/nonformal",
+      description: "Workshops, bootcamps & skill-building",
+      icon: "🎯",
+    },
+    {
+      title: "Informal Learning",
+      link: "/informal",
+      description: "AI-powered personalized learning",
+      icon: "💡",
+    },
+    {
+      title: "AI Tutor",
+      link: "/ai",
+      description: "24/7 intelligent learning companion",
+      icon: "🤖",
+    },
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 },
+    },
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main content */}
-      <Box sx={{ flexGrow: 1, ml: 25, mt: 8, p: 3 }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          ml: { xs: 0, md: 25 },
+          mt: { xs: 6, md: 8 },
+          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+          minHeight: "100vh",
+        }}
+      >
         {/* Navbar */}
         <Navbar />
 
         {/* Hero Section */}
         <HeroSection
           title="Welcome to E-Learning Platform"
-          subtitle="Learn anytime, anywhere. Choose your path:"
+          subtitle="Learn anytime, anywhere. Choose your path to success"
         />
 
-        {/* Course Buttons / Cards */}
-        <Grid container spacing={3} sx={{ mt: 3 }}>
-          {[
-            { title: "Formal Learning", link: "/formal" },
-            { title: "Non-Formal Learning", link: "/nonformal" },
-            { title: "Informal Learning", link: "/informal" },
-            { title: "AI Tutor", link: "/ai" },
-          ].map((course, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <CourseCard>
-                <AnimatedButton
-                  text={course.title}
-                  href={course.link}
-                  sx={{ width: "100%", height: 150, fontSize: "1.2rem" }}
-                />
-              </CourseCard>
+        {/* Main Container */}
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          {/* Learning Paths Section */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                textAlign: "center",
+                color: "#2c3e50",
+                fontSize: { xs: "1.5rem", md: "2rem" },
+              }}
+            >
+              Choose Your Learning Path
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                textAlign: "center",
+                color: "#666",
+                mb: 4,
+                fontSize: { xs: "0.9rem", md: "1rem" },
+              }}
+            >
+              Select the learning method that works best for you
+            </Typography>
+
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+              {learningPaths.map((course, index) => (
+                <motion.div key={index} variants={itemVariants} style={{ width: "100%" }}>
+                  <Grid item xs={12} sm={6} md={3} sx={{ width: "100%" }}>
+                    <CourseCard
+                      title={course.title}
+                      description={course.description}
+                      icon={course.icon}
+                    >
+                      <AnimatedButton
+                        text={course.title}
+                        href={course.link}
+                        sx={{
+                          width: "100%",
+                          height: 50,
+                          fontSize: "1rem",
+                          mt: 2,
+                        }}
+                      />
+                    </CourseCard>
+                  </Grid>
+                </motion.div>
+              ))}
             </Grid>
-          ))}
-        </Grid>
+          </motion.div>
+
+          {/* Stats Section */}
+          <Box sx={{ mt: 8 }}>
+            <StatsSection />
+          </Box>
+
+          {/* Featured Courses */}
+          <Box sx={{ mt: 8, mb: 8 }}>
+            <FeaturedCourses />
+          </Box>
+        </Container>
+
+        {/* Footer */}
+        <Footer />
       </Box>
     </Box>
   );
