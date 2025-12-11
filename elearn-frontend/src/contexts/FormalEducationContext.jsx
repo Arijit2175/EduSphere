@@ -182,8 +182,12 @@ export const FormalEducationProvider = ({ children }) => {
   const scheduleClass = (courseId, schedule) => {
     const newSchedule = {
       id: `schedule-${Date.now()}`,
-      ...schedule,
+      title: schedule.title || "Live Class",
+      startTime: schedule.startTime,
+      duration: schedule.duration || 60,
+      meetLink: schedule.meetLink || "",
       createdAt: new Date().toISOString(),
+      attendees: [],
     };
 
     setCourses(courses.map(c => c.id === courseId
@@ -192,6 +196,31 @@ export const FormalEducationProvider = ({ children }) => {
     ));
 
     return newSchedule;
+  };
+
+  const markAttendanceForClass = (courseId, scheduleId, studentId) => {
+    // Update schedule attendee list and enrollment attendance count
+    setCourses(courses.map(c => {
+      if (c.id !== courseId) return c;
+      return {
+        ...c,
+        schedules: c.schedules.map(s =>
+          s.id === scheduleId
+            ? { ...s, attendees: s.attendees?.includes(studentId) ? s.attendees : [...(s.attendees || []), studentId] }
+            : s
+        ),
+      };
+    }));
+
+    setEnrollments(enrollments.map(e =>
+      e.courseId === courseId && e.studentId === studentId
+        ? { ...e, attendance: e.attendance + 1 }
+        : e
+    ));
+  };
+
+  const getCourseSchedules = (courseId) => {
+    return courses.find(c => c.id === courseId)?.schedules || [];
   };
 
   // Mark attendance
@@ -268,6 +297,8 @@ export const FormalEducationProvider = ({ children }) => {
     submitQuiz,
     scheduleClass,
     markAttendance,
+    markAttendanceForClass,
+    getCourseSchedules,
     updateProgress,
     generateCertificate,
     getStudentEnrollments,

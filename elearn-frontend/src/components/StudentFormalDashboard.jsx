@@ -4,7 +4,7 @@ import { useFormalEducation } from "../contexts/FormalEducationContext";
 import { useAuth } from "../contexts/AuthContext";
 import Section from "./Section";
 import SectionTitle from "./SectionTitle";
-import { Download, Description, Quiz, CheckCircle } from "@mui/icons-material";
+import { Download, Description, Quiz, CheckCircle, CalendarMonth, VideoCall, Link } from "@mui/icons-material";
 
 export default function StudentFormalDashboard() {
   const { user } = useAuth();
@@ -142,6 +142,57 @@ export default function StudentFormalDashboard() {
                             >
                               {material.title}
                             </Button>
+                          ))}
+                        </Box>
+                      )}
+
+                      {/* Live Classes */}
+                      {course.schedules && course.schedules.length > 0 && (
+                        <Box sx={{ mb: 3 }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                            🎥 Live Classes
+                          </Typography>
+                          {course.schedules.map((session) => (
+                            <Box
+                              key={session.id}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                border: "1px solid #eee",
+                                borderRadius: 1,
+                                p: 1,
+                                mb: 0.5,
+                              }}
+                            >
+                              <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                  <VideoCall fontSize="small" />
+                                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                    {session.title || "Live Session"}
+                                  </Typography>
+                                </Box>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "#666" }}>
+                                  <CalendarMonth fontSize="small" />
+                                  <Typography variant="caption">
+                                    {session.startTime ? new Date(session.startTime).toLocaleString() : "TBD"}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                              {session.meetLink ? (
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  href={session.meetLink}
+                                  target="_blank"
+                                  startIcon={<Link />}
+                                >
+                                  Join
+                                </Button>
+                              ) : (
+                                <Typography variant="caption" sx={{ color: "#999" }}>Link coming soon</Typography>
+                              )}
+                            </Box>
                           ))}
                         </Box>
                       )}
