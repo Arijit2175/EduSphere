@@ -70,8 +70,10 @@ export default function NonFormalLearner() {
   const isLastLesson = currentLessonIdx === course.lessons.length - 1;
 
   const handleNextLesson = () => {
+    // Mark current lesson as complete before moving to next
+    updateLessonProgress(user?.id, courseId, currentLessonIdx);
+    
     if (!isLastLesson) {
-      updateLessonProgress(user?.id, courseId, currentLessonIdx + 1);
       setCurrentLessonIdx(currentLessonIdx + 1);
     } else {
       setOpenQuiz(true);
@@ -85,6 +87,12 @@ export default function NonFormalLearner() {
   };
 
   const handleSubmitQuiz = () => {
+    // Only allow assessment if all lessons are completed (100%)
+    if (progressPercentage < 100) {
+      alert("⚠️ You must complete all lessons before taking the assessment!");
+      return;
+    }
+
     let score = 0;
     SAMPLE_QUIZ.forEach((q, idx) => {
       if (quizAnswers[q.id] === idx.toString()) score += 1;
@@ -263,10 +271,13 @@ export default function NonFormalLearner() {
                       variant="contained"
                       color="success"
                       onClick={() => setOpenQuiz(true)}
+                      disabled={progressPercentage < 100}
                       sx={{ mt: 2 }}
                       startIcon={<AssignmentIcon />}
                     >
-                      Take Final Assessment
+                      {progressPercentage < 100 
+                        ? `Take Final Assessment (${Math.round(progressPercentage)}% Complete)` 
+                        : "Take Final Assessment"}
                     </Button>
                   )}
                 </CardContent>
@@ -319,7 +330,11 @@ export default function NonFormalLearner() {
             {!quizSubmitted ? (
               <>
                 <Button onClick={() => setOpenQuiz(false)}>Cancel</Button>
-                <Button variant="contained" onClick={handleSubmitQuiz}>
+                <Button 
+                  variant="contained" 
+                  onClick={handleSubmitQuiz}
+                  disabled={progressPercentage < 100}
+                >
                   Submit Assessment
                 </Button>
               </>
