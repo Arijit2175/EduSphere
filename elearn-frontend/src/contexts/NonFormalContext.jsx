@@ -188,22 +188,28 @@ export const NonFormalProvider = ({ children }) => {
   }, [certificates]);
 
   const enrollCourse = (userId, courseId) => {
+    // Block enrolling if already certified
+    const hasCert = certificates.some((c) => c.userId === userId && c.courseId === courseId);
+    if (hasCert) return { success: false, message: "Course already completed" };
     const existing = enrollments.find((e) => e.userId === userId && e.courseId === courseId);
-    if (!existing) {
-      const enrollment = { id: `enr-${Date.now()}`, userId, courseId, enrolledAt: new Date().toISOString() };
-      setEnrollments((prev) => [...prev, enrollment]);
-      setProgress((prev) => ({
-        ...prev,
-        [`${userId}-${courseId}`]: { currentLessonIndex: 0, completedLessons: [], score: 0, assessment: null, attemptsRemaining: 3, totalAttempts: 3 },
-      }));
-    }
+    if (existing) return { success: false, message: "Already enrolled" };
+
+    const enrollment = { id: `enr-${Date.now()}`, userId, courseId, enrolledAt: new Date().toISOString() };
+    setEnrollments((prev) => [...prev, enrollment]);
+    setProgress((prev) => ({
+      ...prev,
+      [`${userId}-${courseId}`]: { currentLessonIndex: 0, completedLessons: [], score: 0, assessment: null, attemptsRemaining: 3, totalAttempts: 3 },
+    }));
+    return { success: true, message: "Enrolled" };
   };
 
   const isEnrolled = (userId, courseId) => enrollments.some((e) => e.userId === userId && e.courseId === courseId);
 
   const getEnrolledCourses = (userId) => {
     const courseIds = enrollments.filter((e) => e.userId === userId).map((e) => e.courseId);
-    return courses.filter((c) => courseIds.includes(c.id));
+    // Exclude courses that have already been certified for this user
+    const certifiedIds = new Set(certificates.filter((c) => c.userId === userId).map((c) => c.courseId));
+    return courses.filter((c) => courseIds.includes(c.id) && !certifiedIds.has(c.id));
   };
 
   const updateLessonProgress = (userId, courseId, lessonIndex) => {

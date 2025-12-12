@@ -39,6 +39,7 @@ export default function NonFormalCourseDetail() {
   const navigate = useNavigate();
   const [openPreview, setOpenPreview] = useState(false);
   const [previewLesson, setPreviewLesson] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
 
   const course = courses.find((c) => c.id === courseId);
   const enrolled = isEnrolled(user?.id, courseId);
@@ -56,9 +57,15 @@ export default function NonFormalCourseDetail() {
   }
 
   const handleEnroll = () => {
-    enrollCourse(user?.id, courseId);
-    navigate(`/nonformal/learn/${courseId}`);
+    const result = enrollCourse(user?.id, courseId);
+    if (result?.success) {
+      navigate(`/nonformal/learn/${courseId}`);
+    } else {
+      setSnackbar({ open: true, message: result?.message || "Unable to enroll", severity: "info" });
+    }
   };
+
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -77,6 +84,17 @@ export default function NonFormalCourseDetail() {
         <Navbar />
 
         <Container maxWidth="lg" sx={{ mt: 4 }}>
+          {/* Feedback Snackbar */}
+          <Snackbar
+            open={snackbar.open}
+            autoHideDuration={3000}
+            onClose={handleCloseSnackbar}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          >
+            <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
+              {snackbar.message}
+            </Alert>
+          </Snackbar>
           {/* Hero Section */}
           <Card sx={{ mb: 3, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white" }}>
             <CardContent sx={{ p: 4 }}>

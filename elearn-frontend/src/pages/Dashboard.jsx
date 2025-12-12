@@ -45,8 +45,9 @@ export default function Dashboard() {
       schedules,
     };
   });
-  const nonFormalCourses = getNonFormalCourses(user?.id) || [];
   const userCertificates = certificates?.filter((c) => c.userId === user?.id) || [];
+  const certifiedIds = new Set(userCertificates.map(c => c.courseId));
+  const nonFormalCourses = (getNonFormalCourses(user?.id) || []).filter(c => !certifiedIds.has(c.id));
 
   // Calculate total learning hours
   const totalHours = formalCourses.reduce((acc, course) => {
@@ -338,13 +339,15 @@ export default function Dashboard() {
 
                           <CardContent sx={{ pt: 0 }}>
                             <Stack direction="row" spacing={1}>
-                              <Button
-                                fullWidth
-                                variant="contained"
-                                onClick={() => navigate(`/nonformal/learn/${course.id}`)}
-                              >
-                                Continue Learning
-                              </Button>
+                              {!certifiedIds.has(course.id) && (
+                                <Button
+                                  fullWidth
+                                  variant="contained"
+                                  onClick={() => navigate(`/nonformal/learn/${course.id}`)}
+                                >
+                                  Continue Learning
+                                </Button>
+                              )}
                               <Button
                                 fullWidth
                                 variant="outlined"
