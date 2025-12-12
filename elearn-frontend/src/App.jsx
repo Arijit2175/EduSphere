@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CoursesProvider } from "./contexts/CoursesContext";
@@ -25,6 +25,16 @@ import QuizPage from "./pages/QuizPage";
 import Profile from "./pages/Profile";
 
 export default function App() {
+  // Global demo reset for Informal Learning data on app startup
+  useEffect(() => {
+    try {
+      localStorage.removeItem("informalPosts");
+      localStorage.removeItem("informalSaved");
+      localStorage.removeItem("informalFollowingTopics");
+      localStorage.removeItem("informalFollowingCreators");
+      localStorage.removeItem("informalBadges");
+    } catch {}
+  }, []);
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>
