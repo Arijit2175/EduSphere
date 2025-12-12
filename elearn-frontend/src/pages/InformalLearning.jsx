@@ -237,6 +237,63 @@ export default function InformalLearning() {
     setCommentDraft((prev) => ({ ...prev, [id]: "" }));
   };
 
+  // Load persisted informal state on first render
+  useEffect(() => {
+    try {
+      // Demo-friendly reset: start clean each run
+      localStorage.removeItem("informalPosts");
+      localStorage.removeItem("informalSaved");
+      localStorage.removeItem("informalFollowingTopics");
+      localStorage.removeItem("informalFollowingCreators");
+      localStorage.removeItem("informalBadges");
+
+      const storedPosts = JSON.parse(localStorage.getItem("informalPosts") || "null");
+      const storedSaved = JSON.parse(localStorage.getItem("informalSaved") || "null");
+      const storedFollowingTopics = JSON.parse(localStorage.getItem("informalFollowingTopics") || "null");
+      const storedFollowingCreators = JSON.parse(localStorage.getItem("informalFollowingCreators") || "null");
+      const storedBadges = JSON.parse(localStorage.getItem("informalBadges") || "null");
+
+      if (storedPosts) setPosts(storedPosts);
+      if (storedSaved) setSaved(storedSaved);
+      if (storedFollowingTopics) setFollowingTopics(storedFollowingTopics);
+      if (storedFollowingCreators) setFollowingCreators(storedFollowingCreators);
+      if (storedBadges) setBadges(storedBadges);
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, []);
+
+  // Persist changes
+  useEffect(() => {
+    try {
+      localStorage.setItem("informalPosts", JSON.stringify(posts));
+    } catch {}
+  }, [posts]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("informalSaved", JSON.stringify(saved));
+    } catch {}
+  }, [saved]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("informalFollowingTopics", JSON.stringify(followingTopics));
+    } catch {}
+  }, [followingTopics]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("informalFollowingCreators", JSON.stringify(followingCreators));
+    } catch {}
+  }, [followingCreators]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("informalBadges", JSON.stringify(badges));
+    } catch {}
+  }, [badges]);
+
   const handleAddPost = () => {
     if (!composer.title.trim() || !composer.body.trim()) return;
     const tags = composer.tagsInput
