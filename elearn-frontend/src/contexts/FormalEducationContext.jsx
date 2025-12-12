@@ -17,6 +17,10 @@ export const FormalEducationProvider = ({ children }) => {
 
   // Load data from localStorage
   useEffect(() => {
+    // Demo-friendly: reset formal data on fresh server run
+    localStorage.removeItem("formalCourses");
+    localStorage.removeItem("formalEnrollments");
+    localStorage.removeItem("formalSubmissions");
     const storedCourses = localStorage.getItem("formalCourses");
     const storedEnrollments = localStorage.getItem("formalEnrollments");
     const storedSubmissions = localStorage.getItem("formalSubmissions");

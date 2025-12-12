@@ -163,14 +163,18 @@ const DEFAULT_COURSES = [
 export const NonFormalProvider = ({ children }) => {
   const [courses, setCourses] = useState(DEFAULT_COURSES);
   const [enrollments, setEnrollments] = useState(() => {
+    // Demo-friendly: reset non-formal data on fresh server run
+    localStorage.removeItem("nfEnrollments");
     const stored = localStorage.getItem("nfEnrollments");
     return stored ? JSON.parse(stored) : [];
   });
   const [progress, setProgress] = useState(() => {
+    localStorage.removeItem("nfProgress");
     const stored = localStorage.getItem("nfProgress");
     return stored ? JSON.parse(stored) : {};
   });
   const [certificates, setCertificates] = useState(() => {
+    localStorage.removeItem("nfCertificates");
     const stored = localStorage.getItem("nfCertificates");
     return stored ? JSON.parse(stored) : [];
   });
