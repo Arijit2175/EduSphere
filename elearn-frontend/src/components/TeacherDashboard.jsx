@@ -40,7 +40,11 @@ export default function TeacherDashboard() {
 
   const handleScheduleClass = () => {
     if (!scheduleForm.courseId || !scheduleForm.startTime) return;
-    scheduleClass(scheduleForm.courseId, scheduleForm);
+    const startIso = (() => {
+      const d = new Date(scheduleForm.startTime);
+      return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+    })();
+    scheduleClass(scheduleForm.courseId, { ...scheduleForm, startTime: startIso });
     setScheduleForm({ title: "", startTime: "", duration: 60, meetLink: "", courseId: "" });
     setOpenScheduleDialog(false);
   };
