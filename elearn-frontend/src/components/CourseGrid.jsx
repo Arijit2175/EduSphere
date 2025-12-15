@@ -3,7 +3,7 @@ import CourseCard from "./CourseCard";
 
 export default function CourseGrid({ courses, title, subtitle }) {
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }} className="section">
       {title && (
         <Box sx={{ mb: 4 }}>
           <Typography
@@ -11,14 +11,14 @@ export default function CourseGrid({ courses, title, subtitle }) {
             sx={{
               fontWeight: 700,
               mb: 1,
-              color: "#2c3e50",
+              color: 'var(--color-text)',
               fontSize: { xs: "1.5rem", md: "2rem" },
             }}
           >
             {title}
           </Typography>
           {subtitle && (
-            <Typography variant="body1" sx={{ color: "#666" }}>
+            <Typography variant="body1" sx={{ color: 'var(--color-muted)' }}>
               {subtitle}
             </Typography>
           )}
@@ -39,7 +39,7 @@ export default function CourseGrid({ courses, title, subtitle }) {
               <Typography
                 variant="caption"
                 sx={{
-                  color: "#667eea",
+                  color: 'var(--color-primary)',
                   fontWeight: 600,
                   display: "block",
                   mt: 1,

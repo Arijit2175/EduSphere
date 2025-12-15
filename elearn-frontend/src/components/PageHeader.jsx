@@ -10,21 +10,22 @@ export default function PageHeader({ title, subtitle, backgroundGradient }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       sx={{
-        background: backgroundGradient || "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        color: "white",
+        background:
+          backgroundGradient ||
+          "linear-gradient(180deg, rgba(37, 99, 235, 0.08), transparent)",
+        color: "var(--color-text)",
         py: { xs: 4, md: 6 },
         mb: 4,
-        borderRadius: 3,
-        boxShadow: "0 8px 32px rgba(102, 126, 234, 0.2)",
+        borderBottom: '1px solid var(--color-border)',
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" className="page-header">
         <Typography
           variant="h3"
           sx={{
             fontWeight: 800,
             mb: 1,
-            fontSize: { xs: "2rem", md: "2.8rem" },
+            fontSize: { xs: "2rem", md: "2.6rem" },
           }}
         >
           {title}
@@ -33,9 +34,9 @@ export default function PageHeader({ title, subtitle, backgroundGradient }) {
           <Typography
             variant="h6"
             sx={{
-              fontWeight: 300,
-              opacity: 0.95,
-              fontSize: { xs: "0.95rem", md: "1.1rem" },
+              fontWeight: 400,
+              opacity: 0.9,
+              fontSize: { xs: "0.95rem", md: "1.05rem" },
             }}
           >
             {subtitle}

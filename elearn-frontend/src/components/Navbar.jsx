@@ -29,7 +29,16 @@ export default function Navbar() {
   };
 
   return (
-    <AppBar position="sticky" elevation={0} color="transparent">
+      <AppBar
+        position="sticky"
+        elevation={0}
+        color="transparent"
+        sx={{
+          backdropFilter: 'saturate(180%) blur(8px)',
+          borderBottom: '1px solid var(--color-border)',
+          background: 'color-mix(in oklab, var(--color-surface) 88%, transparent)',
+        }}
+      >
       <Toolbar>
         <Typography 
           variant="h6" 
@@ -43,18 +52,14 @@ export default function Navbar() {
           EduSphere
         </Typography>
 
-        <Button onClick={handleHomeClick} color="inherit">Home</Button>
+          <Button onClick={handleHomeClick} color="inherit" sx={{ borderRadius: 'var(--radius-sm)' }}>Home</Button>
         
         {isAuthenticated ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Typography variant="body2" sx={{ mr: 1, display: { xs: 'none', sm: 'block' } }}>
               {displayName}
             </Typography>
-            <IconButton
-              size="large"
-              onClick={handleMenu}
-              color="inherit"
-            >
+              <IconButton size="large" onClick={handleMenu} color="inherit" sx={{ borderRadius: 'var(--radius-sm)' }}>
               <AccountCircle />
             </IconButton>
             <Menu
@@ -81,8 +86,8 @@ export default function Navbar() {
           </Box>
         ) : (
           <>
-            <Button href="/login" color="inherit">Login</Button>
-            <Button href="/register" color="inherit">Register</Button>
+              <Button href="/login" color="inherit" sx={{ borderRadius: 'var(--radius-sm)' }}>Login</Button>
+              <Button href="/register" color="inherit" sx={{ borderRadius: 'var(--radius-sm)' }}>Register</Button>
           </>
         )}
       </Toolbar>

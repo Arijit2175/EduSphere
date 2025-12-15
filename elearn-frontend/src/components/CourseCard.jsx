@@ -6,33 +6,24 @@ const MotionCard = motion(Card);
 export default function CourseCard({ children, title, description, icon, sx }) {
   return (
     <MotionCard
-      whileHover={{ scale: 1.05, y: -8 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      whileHover={{ scale: 1.01, y: -2 }}
+      transition={{ duration: 0.18, ease: "easeOut" }}
       sx={{
         minHeight: 280,
-        borderRadius: 3,
-        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+        borderRadius: 'var(--radius-lg)',
+        boxShadow: 'var(--shadow-sm)',
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%)",
-        border: "1px solid rgba(102, 126, 234, 0.1)",
-        transition: "all 0.3s ease",
+        background: 'var(--color-surface)',
+        border: '1px solid var(--color-border)',
+        transition: "transform 180ms ease-out, box-shadow 180ms ease-out",
         cursor: "pointer",
         position: "relative",
         overflow: "hidden",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "3px",
-          background: "linear-gradient(90deg, #667eea, #764ba2, #f093fb)",
-        },
         "&:hover": {
-          boxShadow: "0 12px 40px rgba(102, 126, 234, 0.2)",
+          boxShadow: 'var(--shadow-lg)',
         },
         ...sx,
       }}
@@ -65,7 +56,7 @@ export default function CourseCard({ children, title, description, icon, sx }) {
             variant="h6"
             sx={{
               fontWeight: 700,
-              color: "#2c3e50",
+              color: "var(--color-text)",
               fontSize: "1.1rem",
             }}
           >
@@ -77,7 +68,7 @@ export default function CourseCard({ children, title, description, icon, sx }) {
           <Typography
             variant="body2"
             sx={{
-              color: "#666",
+              color: "var(--color-muted)",
               fontSize: "0.9rem",
               lineHeight: 1.5,
             }}
