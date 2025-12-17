@@ -155,13 +155,12 @@ export default function Home() {
               Select the learning method that works best for you
             </Typography>
 
-            <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Grid container spacing={3} sx={{ mt: 1 }} justifyContent="center">
               {learningPaths.map((course, index) => (
                 <motion.div key={index} variants={itemVariants} style={{ width: "100%" }}>
                   <Grid item xs={12} sm={6} md={3} sx={{ width: "100%" }}>
                     <CourseCard
                       title={course.title}
-                      description={course.description}
                       icon={course.icon}
                       sx={{
                         minHeight: 180,
