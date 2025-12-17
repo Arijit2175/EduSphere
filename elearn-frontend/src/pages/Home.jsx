@@ -72,7 +72,7 @@ export default function Home() {
 
         {/* Hero Section */}
         <HeroSection
-          title="Welcome to E-Learning Platform"
+          title="Welcome to EduSphere"
           subtitle="Learn anytime, anywhere. Choose your path to success"
         />
 

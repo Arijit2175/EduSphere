@@ -4,22 +4,28 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 
 const MotionBox = motion(Box);
 
+const letterColors = ["#ffffff", "#e0e7ff", "#c7d2fe", "#a5b4fc", "#c4b5fd"];
+
 export default function HeroSection({ title, subtitle }) {
+  const displayTitle = title || "Welcome to EduSphere";
+  const letters = displayTitle.split("");
+
   return (
     <MotionBox
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       sx={{
-        minHeight: { xs: "50vh", md: "60vh" },
+        minHeight: { xs: "46vh", md: "54vh" },
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 45%, #f093fb 100%)",
+        background: "linear-gradient(135deg, #5b7bff 0%, #7a5bff 45%, #f38ff3 100%)",
         color: "white",
-        borderRadius: 'var(--radius-lg)',
-        p: { xs: 3, md: 6 },
+        borderRadius: "22px",
+        p: { xs: 3, md: 5 },
+        mx: { xs: 2, sm: 3, md: 4 },
         mt: 2,
         mb: 4,
         position: "relative",
@@ -59,6 +65,7 @@ export default function HeroSection({ title, subtitle }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
+          style={{ display: "flex", justifyContent: "center", gap: 4, flexWrap: "wrap" }}
         >
           <Typography
             component="h1"
@@ -66,12 +73,33 @@ export default function HeroSection({ title, subtitle }) {
             sx={{
               fontWeight: 800,
               mb: 2,
-              fontSize: { xs: "2rem", sm: "2.5rem", md: "3.5rem" },
+              fontSize: { xs: "1.9rem", sm: "2.4rem", md: "3rem" },
               textAlign: "center",
               textShadow: "0 2px 10px rgba(0,0,0,0.2)",
+              letterSpacing: 0.35,
+              display: "flex",
+              gap: 1,
+              flexWrap: "nowrap",
+              justifyContent: "center",
+              whiteSpace: "nowrap",
             }}
           >
-            {title || "Learn. Grow. Evolve."}
+            {letters.map((char, i) => (
+              <motion.span
+                key={i + char}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 * i, duration: 0.35, ease: "easeOut" }}
+                style={{
+                  background: `linear-gradient(135deg, ${letterColors[i % letterColors.length]} 0%, #ffffff 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  display: "inline-block",
+                }}
+              >
+                {char === " " ? "\u00A0" : char}
+              </motion.span>
+            ))}
           </Typography>
         </motion.div>
 
