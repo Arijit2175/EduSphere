@@ -72,7 +72,7 @@ export default function FeaturedCourses() {
         initial="hidden"
         animate="visible"
       >
-        <Grid container spacing={3}>
+        <Grid container spacing={2.5}>
           {featuredCourses.map((course) => (
             <Grid item xs={12} sm={6} md={3} lg={3} key={course.id}>
               <motion.div variants={itemVariants}>
@@ -109,7 +109,7 @@ export default function FeaturedCourses() {
                   </Box>
 
                   {/* Course Content */}
-                  <Box sx={{ p: 3, flexGrow: 1, display: "flex", flexDirection: "column" }}>
+                  <Box sx={{ p: 2.5, flexGrow: 1, display: "flex", flexDirection: "column" }}>
                     <Chip
                       label={course.category}
                       size="small"
