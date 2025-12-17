@@ -117,17 +117,20 @@ export default function Home() {
                       title={course.title}
                       description={course.description}
                       icon={course.icon}
+                      sx={{
+                        minHeight: 220,
+                        borderStyle: "dashed",
+                        borderColor: "var(--color-border)",
+                        background: "var(--color-surface)",
+                        boxShadow: "var(--shadow-sm)",
+                        textAlign: "left",
+                        alignItems: "flex-start",
+                        justifyContent: "flex-start",
+                      }}
                     >
-                      <AnimatedButton
-                        text={course.title}
-                        href={course.link}
-                        sx={{
-                          width: "100%",
-                          height: 50,
-                          fontSize: "1rem",
-                          mt: 2,
-                        }}
-                      />
+                      <Box sx={{ mt: 1, color: "var(--color-muted)", fontSize: "0.9rem", textAlign: "left" }}>
+                        Explore {course.title} to find structured paths, curated resources, and quick starts tailored to this track.
+                      </Box>
                     </CourseCard>
                   </Grid>
                 </motion.div>
