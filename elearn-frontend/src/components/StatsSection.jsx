@@ -116,7 +116,15 @@ export default function StatsSection() {
                     >
                       {displayValues[index].toLocaleString()}+
                     </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.95 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "#ffffff",
+                        opacity: 0.98,
+                        fontWeight: 600,
+                        textShadow: "0 1px 2px rgba(0,0,0,0.25)",
+                      }}
+                    >
                       {stat.label}
                     </Typography>
                   </MotionBox>
