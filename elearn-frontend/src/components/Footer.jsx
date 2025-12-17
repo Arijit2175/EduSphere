@@ -26,7 +26,8 @@ export default function Footer() {
         color: "white",
         pt: 6,
         pb: 3,
-        mt: 8,
+        mt: 0,
+        backdropFilter: "blur(3px)",
       }}
     >
       <Container maxWidth="lg">

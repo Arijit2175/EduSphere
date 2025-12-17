@@ -45,10 +45,14 @@ export default function Navbar() {
           sx={{ 
             flexGrow: 1, 
             fontWeight: "600",
-            cursor: "pointer"
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
           }}
           onClick={handleHomeClick}
         >
+          <Box sx={{ fontSize: "1.8rem" }}>🎓</Box>
           EduSphere
         </Typography>
 
@@ -86,8 +90,37 @@ export default function Navbar() {
           </Box>
         ) : (
           <>
-              <Button href="/login" color="inherit" sx={{ borderRadius: 'var(--radius-sm)' }}>Login</Button>
-              <Button href="/register" color="inherit" sx={{ borderRadius: 'var(--radius-sm)' }}>Register</Button>
+              <Button 
+                href="/login" 
+                color="inherit" 
+                sx={{ 
+                  borderRadius: 'var(--radius-sm)',
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    background: "rgba(122, 91, 255, 0.1)",
+                  }
+                }}
+              >
+                Login
+              </Button>
+              <Button 
+                href="/register" 
+                color="inherit"
+                sx={{ 
+                  borderRadius: 'var(--radius-sm)',
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  px: 2.5,
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 6px 20px rgba(122, 91, 255, 0.4)",
+                  }
+                }}
+              >
+                Register
+              </Button>
           </>
         )}
       </Toolbar>
