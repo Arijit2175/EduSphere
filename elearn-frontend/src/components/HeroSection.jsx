@@ -26,7 +26,7 @@ export default function HeroSection({ title, subtitle }) {
             border: "1px solid rgba(255, 255, 255, 0.3)",
             borderRadius: "20px",
             padding: "8px 20px",
-            color: "#7a5bff",
+            color: "#ffffff",
             fontWeight: 600,
             fontSize: "0.95rem",
             letterSpacing: 0.5,

@@ -73,7 +73,7 @@ export default function FeaturedCourses() {
         initial="hidden"
         animate="visible"
       >
-        <Grid container spacing={2.5}>
+        <Grid container spacing={2.5} justifyContent="center">
           {featuredCourses.map((course) => (
             <Grid item xs={12} sm={6} md={3} lg={3} key={course.id}>
               <motion.div variants={itemVariants}>
@@ -173,15 +173,22 @@ export default function FeaturedCourses() {
       </motion.div>
 
       {/* View All Button */}
-      <Box sx={{ textAlign: "center", mt: 4 }}>
+      <Box sx={{ textAlign: "center", mt: 6 }}>
         <Button
           href="/nonformal"
           size="large"
           sx={{
-            color: "var(--color-primary)",
+            background: "#7a5bff",
+            color: "#ffffff",
             fontWeight: 700,
+            px: 4,
+            py: 1.5,
+            borderRadius: 2,
+            transition: "all 0.3s ease",
             "&:hover": {
-              background: "rgba(37, 99, 235, 0.1)",
+              background: "#6b4cdd",
+              transform: "translateY(-2px)",
+              boxShadow: "0 6px 20px rgba(122, 91, 255, 0.3)",
             },
           }}
         >
