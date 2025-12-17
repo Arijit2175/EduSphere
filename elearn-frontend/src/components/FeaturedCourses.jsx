@@ -74,7 +74,7 @@ export default function FeaturedCourses() {
       >
         <Grid container spacing={3}>
           {featuredCourses.map((course) => (
-            <Grid item xs={12} sm={6} md={6} lg={3} key={course.id}>
+            <Grid item xs={12} sm={6} md={3} lg={3} key={course.id}>
               <motion.div variants={itemVariants}>
                 <MotionBox
                   whileHover={{ y: -4, boxShadow: 'var(--shadow-lg)' }}
