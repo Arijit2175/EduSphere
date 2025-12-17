@@ -86,7 +86,7 @@ export default function StatsSection() {
           initial="hidden"
           animate="visible"
         >
-          <Grid container spacing={3}>
+          <Grid container spacing={3} justifyContent="center" alignItems="stretch">
             {stats.map((stat, index) => (
               <Grid item xs={12} sm={6} md={3} key={index}>
                 <motion.div variants={itemVariants}>
@@ -99,6 +99,10 @@ export default function StatsSection() {
                       borderRadius: 2,
                       color: "white",
                       transition: "all 0.3s ease",
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
                     }}
                   >
                     <Box sx={{ fontSize: "2.5rem", mb: 1 }}>{stat.icon}</Box>
