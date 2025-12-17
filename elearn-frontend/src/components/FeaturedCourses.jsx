@@ -1,53 +1,14 @@
 import { Box, Grid, Typography, Container, Button, Chip } from "@mui/material";
 import { motion } from "framer-motion";
+import { useNonFormal } from "../contexts/NonFormalContext";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import StarIcon from "@mui/icons-material/Star";
 
 const MotionBox = motion(Box);
 
 export default function FeaturedCourses() {
-  const featuredCourses = [
-    {
-      id: 1,
-      title: "Advanced Web Development",
-      category: "Formal Learning",
-      level: "Advanced",
-      students: 3450,
-      rating: 4.8,
-      image: "🌐",
-      duration: "12 weeks",
-    },
-    {
-      id: 2,
-      title: "Python for Data Science",
-      category: "Formal Learning",
-      level: "Intermediate",
-      students: 5200,
-      rating: 4.9,
-      image: "📊",
-      duration: "10 weeks",
-    },
-    {
-      id: 3,
-      title: "UI/UX Design Bootcamp",
-      category: "Non-Formal Learning",
-      level: "Beginner",
-      students: 2100,
-      rating: 4.7,
-      image: "🎨",
-      duration: "8 weeks",
-    },
-    {
-      id: 4,
-      title: "AI & Machine Learning Basics",
-      category: "Informal Learning",
-      level: "Advanced",
-      students: 6800,
-      rating: 4.9,
-      image: "🤖",
-      duration: "6 weeks",
-    },
-  ];
+  const { courses = [] } = useNonFormal();
+  const featuredCourses = courses.slice(0, 4);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -69,16 +30,15 @@ export default function FeaturedCourses() {
   };
 
   const getCategoryColor = (category) => {
-    switch (category) {
-      case "Formal Learning":
-        return "#667eea";
-      case "Non-Formal Learning":
-        return "#f093fb";
-      case "Informal Learning":
-        return "#4facfe";
-      default:
-        return "#667eea";
-    }
+    const palette = {
+      "Tech Skills": "#2563eb",
+      "Creative Skills": "#f472b6",
+      "Career Skills": "#f59e0b",
+      "Language Skills": "#10b981",
+      "Personal Growth": "#8b5cf6",
+      Entrepreneurship: "#22c55e",
+    };
+    return palette[category] || "#2563eb";
   };
 
   return (
@@ -93,7 +53,7 @@ export default function FeaturedCourses() {
           fontSize: { xs: "1.5rem", md: "2rem" },
         }}
       >
-        Featured Courses
+        Non-Formal Courses
       </Typography>
       <Typography
         variant="body1"
@@ -104,7 +64,7 @@ export default function FeaturedCourses() {
           fontSize: { xs: "0.9rem", md: "1rem" },
         }}
       >
-        Start learning from our most popular courses
+        Explore the exact non-formal modules available right now
       </Typography>
 
       <motion.div
@@ -145,7 +105,7 @@ export default function FeaturedCourses() {
                       borderBottom: `3px solid ${getCategoryColor(course.category)}`,
                     }}
                   >
-                    {course.image}
+                    {course.thumbnail || course.image || "📚"}
                   </Box>
 
                   {/* Course Content */}
@@ -166,7 +126,7 @@ export default function FeaturedCourses() {
                       variant="h6"
                       sx={{
                         fontWeight: 700,
-                        color: "#2c3e50",
+                        color: 'var(--color-text)',
                         mb: 1.5,
                         fontSize: "1.1rem",
                         lineHeight: 1.4,
@@ -177,7 +137,7 @@ export default function FeaturedCourses() {
 
                     {/* Course Meta */}
                     <Box sx={{ mb: 2, flexGrow: 1 }}>
-                      <Box sx={{ display: "flex", gap: 2, mb: 1, fontSize: "0.85rem", color: "#666" }}>
+                      <Box sx={{ display: "flex", gap: 2, mb: 1, fontSize: "0.85rem", color: 'var(--color-muted)' }}>
                         <span>📚 {course.level}</span>
                         <span>⏱️ {course.duration}</span>
                       </Box>
@@ -193,33 +153,16 @@ export default function FeaturedCourses() {
                             />
                           ))}
                         </Box>
-                        <Typography sx={{ fontSize: "0.85rem", color: "#666" }}>
-                          {course.rating} ({course.students.toLocaleString()})
+                        <Typography sx={{ fontSize: "0.85rem", color: 'var(--color-muted)' }}>
+                          {course.rating} ({course.reviews?.toLocaleString?.() || course.reviews || 0})
                         </Typography>
                       </Box>
                     </Box>
 
-                    {/* Enroll Button */}
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      endIcon={<ArrowRightIcon />}
-                      sx={{
-                        background: `linear-gradient(135deg, ${getCategoryColor(
-                          course.category
-                        )} 0%, ${getCategoryColor(course.category)}dd 100%)`,
-                        color: "white",
-                        fontWeight: 600,
-                        py: 1.2,
-                        "&:hover": {
-                          transform: "translateY(-2px)",
-                          boxShadow: `0 8px 20px ${getCategoryColor(course.category)}40`,
-                        },
-                        transition: "all 0.3s ease",
-                      }}
-                    >
-                      Enroll Now
-                    </Button>
+                    {/* Showcase only - no enroll action on home */}
+                    <Box sx={{ mt: 1, color: 'var(--color-muted)', fontSize: "0.85rem", fontWeight: 600 }}>
+                      Non-formal module preview
+                    </Box>
                   </Box>
                 </MotionBox>
               </motion.div>
@@ -231,16 +174,17 @@ export default function FeaturedCourses() {
       {/* View All Button */}
       <Box sx={{ textAlign: "center", mt: 4 }}>
         <Button
+          href="/nonformal"
           size="large"
           sx={{
-            color: "#667eea",
+            color: "var(--color-primary)",
             fontWeight: 700,
             "&:hover": {
-              background: "rgba(102, 126, 234, 0.1)",
+              background: "rgba(37, 99, 235, 0.1)",
             },
           }}
         >
-          View All Courses →
+          View All Non-Formal Courses →
         </Button>
       </Box>
     </Box>
