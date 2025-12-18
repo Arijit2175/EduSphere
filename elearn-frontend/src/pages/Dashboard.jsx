@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [tabValue, setTabValue] = useState(0);
   const [userAvatar, setUserAvatar] = useState(null);
   const [statsModalOpen, setStatsModalOpen] = useState(false);
+  const [certModalOpen, setCertModalOpen] = useState(false);
   // Teacher: schedule dialog state
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [scheduleCourseId, setScheduleCourseId] = useState("");
@@ -79,18 +80,21 @@ export default function Dashboard() {
     setStatsModalOpen(true);
   };
 
-  const handleShareCertificates = () => {
-    const certificateText = `I've earned ${completedCourses + userCertificates.length} certificates on EduSphere! 🏆 Check out my learning journey.`;
+  const shareCertificate = (cert) => {
+    const certificateText = `I earned a certificate for ${cert.courseName || "a course"} on EduSphere! Certificate ID: ${cert.certificateId}`;
     if (navigator.share) {
       navigator.share({
-        title: "My EduSphere Certificates",
+        title: "My EduSphere Certificate",
         text: certificateText,
-      }).catch(err => console.log("Share cancelled"));
-    } else {
-      // Fallback: copy to clipboard
+      }).catch(() => {});
+    } else if (navigator.clipboard) {
       navigator.clipboard.writeText(certificateText);
-      alert("Certificate achievement copied to clipboard!");
+      alert("Certificate details copied to clipboard!");
     }
+  };
+
+  const handleShareCertificates = () => {
+    setCertModalOpen(true);
   };
 
   const handleCreateCourse = () => {
@@ -513,6 +517,49 @@ export default function Dashboard() {
             <Button onClick={() => setStatsModalOpen(false)} variant="contained" sx={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
               Close
             </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Certificates Modal */}
+        <Dialog open={certModalOpen} onClose={() => setCertModalOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ fontWeight: 700, fontSize: "1.2rem" }}>🏆 Share Your Certificates</DialogTitle>
+          <DialogContent sx={{ mt: 1.5 }}>
+            {userCertificates.length === 0 ? (
+              <Typography variant="body2" sx={{ color: "#666" }}>
+                You have not earned any certificates yet.
+              </Typography>
+            ) : (
+              <Grid container spacing={2}>
+                {userCertificates.map((cert) => (
+                  <Grid item xs={12} key={cert.id}>
+                    <Box sx={{ p: 2, border: "1px solid #e5e7eb", borderRadius: 2, background: "#f8fafc" }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5 }}>
+                        {cert.courseName || "Course"}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "#6b7280", mb: 0.5 }}>
+                        Certificate ID: {cert.certificateId}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: "#9ca3af" }}>
+                        Earned on {new Date(cert.earnedAt).toLocaleDateString()}
+                      </Typography>
+                      <Box sx={{ mt: 1.5, display: "flex", justifyContent: "flex-end" }}>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          onClick={() => shareCertificate(cert)}
+                          sx={{ background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)" }}
+                        >
+                          Share
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setCertModalOpen(false)} variant="outlined">Close</Button>
           </DialogActions>
         </Dialog>
         </Box>
