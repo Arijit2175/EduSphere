@@ -30,22 +30,30 @@ export default function NonFormalLearning() {
       <Box
         sx={{
           flexGrow: 1,
-          ml: { xs: 0, md: isOpen ? 25 : 8.75 },
-          mt: { xs: 6, md: 8 },
           background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
           minHeight: "100vh",
-          transition: "margin-left 0.3s ease",
+          display: "flex",
+          flexDirection: "column",
           pb: 4,
         }}
       >
         <Navbar />
-
+        <Box
+          sx={{
+            flexGrow: 1,
+            ml: { xs: 0, md: isOpen ? 25 : 8.75 },
+            transition: "margin-left 0.3s ease",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
         <Container maxWidth="lg" sx={{ mt: 4 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <PageHeader
               title="My Non-Formal Learning"
               subtitle="Continue your skill development journey"
               backgroundGradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+              disableAnimation
             />
             <Button 
               variant="outlined" 
@@ -250,6 +258,7 @@ export default function NonFormalLearning() {
             </Section>
           )}
         </Container>
+        </Box>
       </Box>
     </Box>
   );

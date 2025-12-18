@@ -27,15 +27,22 @@ export default function FormalLearning() {
           <Box
             sx={{
               flexGrow: 1,
-              ml: { xs: 0, md: isOpen ? 25 : 8.75 },
-              mt: { xs: 6, md: 8 },
               background: "linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%)",
               minHeight: "100vh",
-              transition: "margin-left 0.3s ease",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             <Navbar />
-            <TeacherDashboard />
+            <Box
+              sx={{
+                flexGrow: 1,
+                ml: { xs: 0, md: isOpen ? 25 : 8.75 },
+                transition: "margin-left 0.3s ease",
+              }}
+            >
+              <TeacherDashboard />
+            </Box>
           </Box>
         </Box>
       );
@@ -56,14 +63,22 @@ export default function FormalLearning() {
       <Box
         sx={{
           flexGrow: 1,
-          ml: { xs: 0, md: isOpen ? 25 : 8.75 },
-          mt: { xs: 6, md: 8 },
           background: "linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%)",
           minHeight: "100vh",
-          transition: "margin-left 0.3s ease",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Navbar />
+        <Box
+          sx={{
+            flexGrow: 1,
+            ml: { xs: 0, md: isOpen ? 25 : 8.75 },
+            transition: "margin-left 0.3s ease",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
 
         {/* Tab Navigation */}
         <Section background="transparent" pt={2} pb={0}>
@@ -80,7 +95,7 @@ export default function FormalLearning() {
         </Section>
 
         {/* My Courses Tab */}
-        {tabValue === 0 && <StudentFormalDashboard />}
+        {tabValue === 0 && <StudentFormalDashboard onExploreCourses={() => setTabValue(1)} />}
 
         {/* Browse Courses Tab */}
         {tabValue === 1 && (
@@ -89,8 +104,9 @@ export default function FormalLearning() {
             <Section background="transparent" pt={4} pb={2} animated={false}>
           <PageHeader
             title="Formal Learning"
-            subtitle="Structured, curriculum-driven courses with certifications"
+            subtitle="Structured, curriculum-driven courses for students"
             backgroundGradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+            disableAnimation
           />
             </Section>
 
@@ -145,6 +161,7 @@ export default function FormalLearning() {
             </Section>
           </>
         )}
+        </Box>
       </Box>
     </Box>
   );

@@ -7,7 +7,7 @@ const MotionBox = motion(Box);
 const MotionTypography = motion(Typography);
 const MotionAvatar = motion(Avatar);
 
-export default function PageHeader({ title, subtitle, backgroundGradient, showAvatar, avatarSrc, userName, onAvatarChange }) {
+export default function PageHeader({ title, subtitle, backgroundGradient, showAvatar, avatarSrc, userName, onAvatarChange, disableAnimation }) {
   const [scrollY, setScrollY] = useState(0);
   const fileInputRef = useRef(null);
 
@@ -36,24 +36,26 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
   };
 
   useEffect(() => {
+    if (disableAnimation) return;
+    
     const handleScroll = () => {
       setScrollY(window.scrollY);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [disableAnimation]);
 
   // Calculate scroll-based transformations
-  const scrollProgress = Math.min(scrollY / 200, 1); // Normalize to 0-1 over 200px
-  const headerHeight = 1 - (scrollProgress * 0.5); // Shrink to 50% height
-  const headerOpacity = 1 - (scrollProgress * 0.3); // Reduce opacity slightly
-  const translateY = -(scrollProgress * 30); // Move up by 30px
+  const scrollProgress = disableAnimation ? 0 : Math.min(scrollY / 200, 1);
+  const headerHeight = disableAnimation ? 1 : 1 - (scrollProgress * 0.5);
+  const headerOpacity = disableAnimation ? 1 : 1 - (scrollProgress * 0.3);
+  const translateY = disableAnimation ? 0 : -(scrollProgress * 30);
 
   return (
     <MotionBox
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ 
+      initial={disableAnimation ? false : { opacity: 0, y: -20 }}
+      animate={disableAnimation ? {} : { 
         opacity: headerOpacity, 
         y: translateY,
         scaleY: headerHeight,

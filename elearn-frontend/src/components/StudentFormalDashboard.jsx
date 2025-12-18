@@ -6,7 +6,7 @@ import Section from "./Section";
 import SectionTitle from "./SectionTitle";
 import { Download, Description, Quiz, CheckCircle, CalendarMonth, VideoCall, Link } from "@mui/icons-material";
 
-export default function StudentFormalDashboard() {
+export default function StudentFormalDashboard({ onExploreCourses }) {
   const { user } = useAuth();
   const { enrollments, courses, getStudentEnrollments, getCourseById, submitAssignment, uploadMaterial } = useFormalEducation();
   const [openAssignment, setOpenAssignment] = useState(false);
@@ -42,7 +42,7 @@ export default function StudentFormalDashboard() {
             <Typography variant="body1" sx={{ color: "#999", mb: 2 }}>
               You haven't enrolled in any formal courses yet.
             </Typography>
-            <Button variant="contained" href="/formal" sx={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
+            <Button variant="contained" onClick={onExploreCourses} sx={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
               Explore Courses
             </Button>
           </Card>
