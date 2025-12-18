@@ -368,7 +368,6 @@ export default function NonFormalLearner() {
             )}
           </DialogActions>
         </Dialog>
-        </Container>
         </Box>
       </Box>
     </Box>

@@ -92,6 +92,7 @@ export default function NonFormalCourseDetail() {
           }}
         >
           <Container maxWidth="lg" sx={{ mt: 4 }}>
+          <Box sx={{ maxWidth: 1000, mx: "auto" }}>
           {/* Feedback Snackbar */}
           <Snackbar
             open={snackbar.open}
@@ -104,9 +105,9 @@ export default function NonFormalCourseDetail() {
             </Alert>
           </Snackbar>
           {/* Hero Section */}
-          <Card sx={{ mb: 3, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white" }}>
+          <Card sx={{ mb: 3, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white", width: { xs: "100%", md: "92%" }, ml: 0, mr: "auto" }}>
             <CardContent sx={{ p: 4 }}>
-              <Grid container spacing={3} alignItems="center">
+              <Grid container spacing={{ xs: 2, md: 5 }} alignItems="flex-start">
                 <Grid item xs={12} md={8}>
                   <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
                     {course.title}
@@ -132,19 +133,38 @@ export default function NonFormalCourseDetail() {
                     </Stack>
                   )}
                 </Grid>
-                <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
-                  <Box sx={{ fontSize: 80, mb: 2 }}>{course.thumbnail}</Box>
-                  <Stack spacing={1}>
+                <Grid
+                  item 
+                  xs={12} 
+                  md={4} 
+                  sx={{ 
+                    textAlign: { xs: "center", md: "right" },
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: { xs: "center", md: "flex-end" },
+                    justifyContent: "flex-start",
+                    ml: { md: "auto" },
+                    pr: { md: 0 },
+                  }}
+                >
+                  <Box sx={{ fontSize: 80, mb: 2, alignSelf: { xs: "center", md: "flex-end" } }}>
+                    {course.thumbnail}
+                  </Box>
+                  <Stack spacing={1} sx={{ width: { xs: "100%", md: "auto" }, alignItems: { xs: "stretch", md: "flex-end" } }}>
                     {hasCertificate && (
                       <Chip color="success" label="Certified" />
                     )}
                     <Button
-                      fullWidth
                       variant="contained"
                       size="large"
                       onClick={handleEnroll}
                       disabled={hasCertificate}
-                      sx={{ background: hasCertificate ? "#e5e7eb" : "white", color: hasCertificate ? "#9ca3af" : "#667eea", fontWeight: 700 }}
+                      sx={{ 
+                        width: { xs: "100%", md: "auto" },
+                        background: hasCertificate ? "#e5e7eb" : "white", 
+                        color: hasCertificate ? "#9ca3af" : "#667eea", 
+                        fontWeight: 700 
+                      }}
                     >
                       {hasCertificate ? "Completed" : enrolled ? "Continue Learning" : "Enroll Now"}
                     </Button>
@@ -154,6 +174,7 @@ export default function NonFormalCourseDetail() {
             </CardContent>
           </Card>
 
+          <Box sx={{ width: { xs: "100%", md: "92%" }, mx: "auto", transform: { md: "translateX(16px)" } }}>
           <Grid container spacing={3}>
             {/* Main Content */}
             <Grid item xs={12} md={8}>
@@ -328,7 +349,8 @@ export default function NonFormalCourseDetail() {
                 </CardContent>
               </Card>
             </Grid>
-          </Grid>
+            </Grid>
+          </Box>
 
           {/* Preview Dialog */}
           <Dialog open={openPreview} onClose={() => setOpenPreview(false)} maxWidth="md" fullWidth>
@@ -378,6 +400,7 @@ export default function NonFormalCourseDetail() {
               )}
             </DialogActions>
           </Dialog>
+          </Box>
           </Container>
         </Box>
       </Box>

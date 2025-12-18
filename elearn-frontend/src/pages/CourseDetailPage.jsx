@@ -124,6 +124,7 @@ export default function CourseDetailPage() {
           }}
         >
           <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Box sx={{ maxWidth: 1000, mx: "auto" }}>
           {/* Course Header */}
           <Card
             sx={{
@@ -131,6 +132,9 @@ export default function CourseDetailPage() {
               color: "white",
               mb: 4,
               borderRadius: "15px",
+              width: { xs: "100%", md: "92%" },
+              ml: 0,
+              mr: "auto",
             }}
           >
             <CardContent>
@@ -170,7 +174,7 @@ export default function CourseDetailPage() {
           </Card>
 
           {/* Tabs */}
-          <Card sx={{ mb: 3, borderRadius: "15px" }}>
+          <Card sx={{ mb: 3, borderRadius: "15px", mx: "auto" }}>
             <Tabs
               value={tabValue}
               onChange={(e, newValue) => setTabValue(newValue)}
@@ -185,7 +189,7 @@ export default function CourseDetailPage() {
 
           {/* Overview Tab */}
           {tabValue === 0 && (
-            <Card sx={{ borderRadius: "15px", mb: 3 }}>
+            <Card sx={{ borderRadius: "15px", mb: 3, mx: "auto" }}>
               <CardContent>
                 <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
                   Course Overview
@@ -219,7 +223,7 @@ export default function CourseDetailPage() {
 
           {/* Materials Tab */}
           {tabValue === 1 && (
-            <Card sx={{ borderRadius: "15px" }}>
+            <Card sx={{ borderRadius: "15px", mx: "auto" }}>
               <CardContent>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
                   <Typography variant="h5" sx={{ fontWeight: "bold" }}>
@@ -280,7 +284,7 @@ export default function CourseDetailPage() {
 
           {/* Assignments Tab */}
           {tabValue === 2 && (
-            <Card sx={{ borderRadius: "15px" }}>
+            <Card sx={{ borderRadius: "15px", mx: "auto" }}>
               <CardContent>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
                   <Typography variant="h5" sx={{ fontWeight: "bold" }}>
@@ -358,7 +362,7 @@ export default function CourseDetailPage() {
 
           {/* Students Tab (Teacher Only) */}
           {isTeacher && tabValue === 3 && (
-            <Card sx={{ borderRadius: "15px" }}>
+            <Card sx={{ borderRadius: "15px", mx: "auto" }}>
               <CardContent>
                 <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
                   Enrolled Students ({students.length})
@@ -547,6 +551,7 @@ export default function CourseDetailPage() {
             </Button>
           </DialogActions>
         </Dialog>
+        </Box>
         </Container>
       </Box>
     </Box>
