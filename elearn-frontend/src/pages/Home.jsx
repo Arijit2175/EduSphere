@@ -231,7 +231,7 @@ export default function Home() {
         </Container>
 
         {/* Footer */}
-        <Footer />
+        <Footer disableAnimations />
         </Box>
       </Box>
     </Box>

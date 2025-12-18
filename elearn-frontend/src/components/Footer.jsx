@@ -9,27 +9,28 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 
 const MotionBox = motion(Box);
 
-export default function Footer({ compact = false, disableGutters = false }) {
+export default function Footer({ compact = false, disableGutters = false, disableAnimations = false, sticky = false }) {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
+    if (disableAnimations) return;
+    
     const handleScroll = () => {
       setScrollY(window.scrollY);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [disableAnimations]);
 
   // Calculate scroll-based transformations (same as PageHeader)
   const scrollProgress = Math.min(scrollY / 200, 1); // Normalize to 0-1 over 200px
-  const footerHeight = 1 - (scrollProgress * 0.4); // Shrink slightly
-  const footerOpacity = 1 - (scrollProgress * 0.2); // Slight opacity reduction
-  const translateY = -(scrollProgress * 20); // Move up by 20px as user scrolls down
+  const footerHeight = disableAnimations ? 1 : 1 - (scrollProgress * 0.4); // Shrink slightly
+  const footerOpacity = disableAnimations ? 1 : 1 - (scrollProgress * 0.2); // Slight opacity reduction
+  const translateY = disableAnimations ? 0 : -(scrollProgress * 20); // Move up by 20px as user scrolls down
 
   const footerLinks = {
-    Company: ["About Us", "Careers", "Blog", "Press"],
-    Learning: ["Browse Courses", "Scholarships", "Help Center", "Accessibility"],
+    Company: ["About Us", "Blog"],
     Legal: ["Privacy Policy", "Terms of Service", "Cookie Policy", "Contact Us"],
   };
 
@@ -46,24 +47,30 @@ export default function Footer({ compact = false, disableGutters = false }) {
       }}
       transition={{ duration: 0.3, ease: "easeOut" }}
       sx={{
-        background: "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
+        background: "rgba(44, 62, 80, 0.3)",
         color: "white",
-        pt: compact ? 1.5 : 6,
-        pb: compact ? 1 : 3,
+        pt: compact ? 2 : 6,
+        pb: compact ? 2 : 3,
         mt: 0,
-        backdropFilter: "blur(3px)",
-        width: "100%",
-        maxWidth: "95%",
-        ml: 0,
-        mr: "auto",
+        backdropFilter: "blur(10px)",
+        borderRadius: "16px",
+        width: sticky ? "100%" : "95%",
+        maxWidth: sticky ? "100%" : "95%",
+        ml: sticky ? 0 : "auto",
+        mr: sticky ? 0 : "auto",
         transformOrigin: "bottom right",
+        ...(sticky && {
+          position: "sticky",
+          bottom: 0,
+          zIndex: 8,
+        }),
       }}
     >
       <Container maxWidth="lg" disableGutters={disableGutters} sx={{ px: disableGutters ? 0 : 2 }}>
         {/* Footer Content */}
         <Grid container spacing={compact ? 1.5 : 4} sx={{ mb: compact ? 1 : 4 }}>
           {/* About Section */}
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12}>
             <MotionBox
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -109,8 +116,8 @@ export default function Footer({ compact = false, disableGutters = false }) {
           </Grid>
 
           {/* Links Sections */}
-          {Object.entries(footerLinks).map(([category, links]) => (
-            <Grid item xs={12} sm={6} md={2.67} key={category}>
+          {Object.entries(footerLinks).map(([category, links], index) => (
+            <Grid item xs={6} sm={3} md={2} key={category}>
               <MotionBox
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
