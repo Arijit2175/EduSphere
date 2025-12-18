@@ -60,11 +60,13 @@ export default function CourseDetailPage() {
 
   if (!course) {
     return (
-      <Box sx={{ display: "flex" }}>
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
         <Sidebar />
-        <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, mt: { xs: 6, md: 8 }, p: 4 }}>
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Navbar />
-          <Alert severity="error">Course not found</Alert>
+          <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, transition: "margin-left 0.3s ease", p: 4 }}>
+            <Alert severity="error">Course not found</Alert>
+          </Box>
         </Box>
       </Box>
     );
@@ -103,22 +105,25 @@ export default function CourseDetailPage() {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar />
       <Box
         sx={{
           flexGrow: 1,
-          ml: { xs: 0, md: isOpen ? 25 : 8.75 },
-          mt: { xs: 6, md: 8 },
           background: "linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%)",
-          minHeight: "100vh",
-          transition: "margin-left 0.3s ease",
-          pb: 4,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Navbar />
-
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box
+          sx={{
+            flexGrow: 1,
+            ml: { xs: 0, md: isOpen ? 25 : 8.75 },
+            transition: "margin-left 0.3s ease",
+          }}
+        >
+          <Container maxWidth="lg" sx={{ py: 4 }}>
           {/* Course Header */}
           <Card
             sx={{
@@ -409,7 +414,7 @@ export default function CourseDetailPage() {
               </CardContent>
             </Card>
           )}
-        </Container>
+        {/* Container continues below; dialogs are part of the same layout */}
 
         {/* Upload Material Dialog */}
         <Dialog open={openMaterialDialog} onClose={() => setOpenMaterialDialog(false)} maxWidth="sm" fullWidth>
@@ -542,7 +547,9 @@ export default function CourseDetailPage() {
             </Button>
           </DialogActions>
         </Dialog>
+        </Container>
       </Box>
     </Box>
+  </Box>
   );
 }

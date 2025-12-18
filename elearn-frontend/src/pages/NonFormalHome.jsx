@@ -84,21 +84,25 @@ export default function NonFormalHome() {
   const isTeacher = user?.role === "teacher";
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar />
       <Box
         sx={{
           flexGrow: 1,
-          ml: { xs: 0, md: isOpen ? 25 : 8.75 },
-          mt: { xs: 6, md: 8 },
           background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-          minHeight: "100vh",
-          transition: "margin-left 0.3s ease",
-          pb: 4,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Navbar />
-        <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Box
+          sx={{
+            flexGrow: 1,
+            ml: { xs: 0, md: isOpen ? 25 : 8.75 },
+            transition: "margin-left 0.3s ease",
+          }}
+        >
+          <Container maxWidth="lg" sx={{ mt: 4 }}>
           {isTeacher && (
             <Alert severity="info" sx={{ mt: 4 }}>
               <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
@@ -118,6 +122,7 @@ export default function NonFormalHome() {
                 title="Non-Formal Learning"
                 subtitle="Flexible, skill-focused micro-courses and workshops"
                 backgroundGradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+                disableAnimation={true}
               />
 
               <Card sx={{ mb: 3 }}>
@@ -293,7 +298,8 @@ export default function NonFormalHome() {
               </Section>
             </>
           )}
-        </Container>
+          </Container>
+        </Box>
       </Box>
     </Box>
   );

@@ -70,8 +70,9 @@ h3 { font-size: 1.5rem; }
 h4 { font-size: 1.3rem; }
 h5 { font-size: 1.1rem; }
 h6 { font-size: 1rem; }
+body {
   color: var(--color-text);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;

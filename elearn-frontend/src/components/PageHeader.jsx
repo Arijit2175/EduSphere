@@ -62,8 +62,8 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
       }}
       transition={{ duration: 0.3, ease: "easeOut" }}
       sx={{
-        position: "sticky",
-        top: 80,
+        position: disableAnimation ? "relative" : "sticky",
+        top: disableAnimation ? 0 : 80,
         zIndex: 9,
         background: backgroundGradient || "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         color: "#ffffff",

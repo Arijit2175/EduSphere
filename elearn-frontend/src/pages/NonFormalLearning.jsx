@@ -24,26 +24,22 @@ export default function NonFormalLearning() {
   );
 
   return (
-    <Box sx={{ display: "flex", width: "100%" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar />
-      
       <Box
         sx={{
           flexGrow: 1,
-          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
         }}
       >
         <Navbar />
-        
         <Box
           sx={{
             flexGrow: 1,
             ml: { xs: 0, md: isOpen ? 25 : 8.75 },
             transition: "margin-left 0.3s ease",
-            pb: 4,
           }}
         >
           <Container maxWidth="lg" sx={{ mt: 4 }}>

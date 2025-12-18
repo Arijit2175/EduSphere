@@ -60,7 +60,7 @@ export default function Sidebar() {
       {/* Navigation Items */}
       <List sx={{ mt: 2 }}>
         {links.map((item) => (
-          <ListItem key={item.to} button component={Link} to={item.to} title={item.label}>
+          <ListItem key={item.to} component={Link} to={item.to} title={item.label} sx={{ cursor: "pointer" }}>
             <ListItemText
               primary={item.label}
               sx={{

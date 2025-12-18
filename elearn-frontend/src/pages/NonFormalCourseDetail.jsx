@@ -49,11 +49,13 @@ export default function NonFormalCourseDetail() {
 
   if (!course) {
     return (
-      <Box sx={{ display: "flex" }}>
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
         <Sidebar />
-        <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, mt: { xs: 6, md: 8 }, p: 4 }}>
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Navbar />
-          <Typography variant="h5">Course not found</Typography>
+          <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, transition: "margin-left 0.3s ease", p: 4 }}>
+            <Typography variant="h5">Course not found</Typography>
+          </Box>
         </Box>
       </Box>
     );
@@ -71,22 +73,25 @@ export default function NonFormalCourseDetail() {
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar />
       <Box
         sx={{
           flexGrow: 1,
-          ml: { xs: 0, md: isOpen ? 25 : 8.75 },
-          mt: { xs: 6, md: 8 },
           background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-          minHeight: "100vh",
-          transition: "margin-left 0.3s ease",
-          pb: 4,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Navbar />
-
-        <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Box
+          sx={{
+            flexGrow: 1,
+            ml: { xs: 0, md: isOpen ? 25 : 8.75 },
+            transition: "margin-left 0.3s ease",
+          }}
+        >
+          <Container maxWidth="lg" sx={{ mt: 4 }}>
           {/* Feedback Snackbar */}
           <Snackbar
             open={snackbar.open}
@@ -373,7 +378,8 @@ export default function NonFormalCourseDetail() {
               )}
             </DialogActions>
           </Dialog>
-        </Container>
+          </Container>
+        </Box>
       </Box>
     </Box>
   );
