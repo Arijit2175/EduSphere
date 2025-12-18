@@ -68,92 +68,181 @@ export default function Footer({ compact = false, disableGutters = false, disabl
     >
       <Container maxWidth="lg" disableGutters={disableGutters} sx={{ px: disableGutters ? 0 : 2 }}>
         {/* Footer Content */}
-        <Grid container spacing={compact ? 1.5 : 4} sx={{ mb: compact ? 1 : 4 }}>
+        <Box sx={{ mb: compact ? 1 : 4 }}>
           {/* About Section */}
-          <Grid item xs={12}>
+          <MotionBox
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            sx={{ mb: 3 }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: compact ? 1.5 : 2, fontSize: compact ? "1.1rem" : "1.3rem", color: "#ffffff" }}>
+              EduSphere
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.8, mb: compact ? 2 : 3, lineHeight: 1.5, color: "#ffffff" }}>
+              Empowering learners worldwide with accessible, affordable, and high-quality
+              education through formal, non-formal, and informal learning pathways.
+            </Typography>
+            <Box sx={{ display: "flex", gap: compact ? 1.5 : 2, mb: 3 }}>
+              {[FacebookIcon, TwitterIcon, LinkedInIcon, InstagramIcon].map((Icon, i) => (
+                <motion.div
+                  key={i}
+                  whileHover={{ scale: 1.2, rotate: 10 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Link
+                    href="#"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: compact ? 34 : 40,
+                      height: compact ? 34 : 40,
+                      background: "rgba(255,255,255,0.1)",
+                      borderRadius: "50%",
+                      color: "white",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        background: "#667eea",
+                      },
+                    }}
+                  >
+                    <Icon />
+                  </Link>
+                </motion.div>
+              ))}
+            </Box>
+          </MotionBox>
+
+          {/* Links Row */}
+          <Box sx={{ display: "flex", gap: 4 }}>
+            {/* Company Section */}
             <MotionBox
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              sx={{ minWidth: 80, maxWidth: 100 }}
             >
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: compact ? 1.5 : 2, fontSize: compact ? "1.1rem" : "1.3rem", color: "#ffffff" }}>
-                EduSphere
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: 700, mb: compact ? 1.5 : 2, fontSize: compact ? "0.95rem" : "1rem", color: "#ffffff" }}
+              >
+                Company
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8, mb: compact ? 2 : 3, lineHeight: 1.5, color: "#ffffff" }}>
-                Empowering learners worldwide with accessible, affordable, and high-quality
-                education through formal, non-formal, and informal learning pathways.
-              </Typography>
-              <Box sx={{ display: "flex", gap: compact ? 1.5 : 2 }}>
-                {[FacebookIcon, TwitterIcon, LinkedInIcon, InstagramIcon].map((Icon, i) => (
-                  <motion.div
-                    key={i}
-                    whileHover={{ scale: 1.2, rotate: 10 }}
-                    transition={{ type: "spring", stiffness: 400 }}
-                  >
-                    <Link
-                      href="#"
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: compact ? 34 : 40,
-                        height: compact ? 34 : 40,
-                        background: "rgba(255,255,255,0.1)",
-                        borderRadius: "50%",
-                        color: "white",
-                        transition: "all 0.3s ease",
-                        "&:hover": {
-                          background: "#667eea",
-                        },
-                      }}
-                    >
-                      <Icon />
-                    </Link>
-                  </motion.div>
-                ))}
+              <Box sx={{ display: "flex", flexDirection: "column", gap: compact ? 1 : 1.5 }}>
+                <Link
+                  href="#"
+                  sx={{
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    fontSize: compact ? "0.85rem" : "0.9rem",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      color: "#667eea",
+                      ml: 1,
+                    },
+                  }}
+                >
+                  About Us
+                </Link>
+                <Link
+                  href="#"
+                  sx={{
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    fontSize: compact ? "0.85rem" : "0.9rem",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      color: "#667eea",
+                      ml: 1,
+                    },
+                  }}
+                >
+                  Blog
+                </Link>
               </Box>
             </MotionBox>
-          </Grid>
 
-          {/* Links Sections */}
-          {Object.entries(footerLinks).map(([category, links], index) => (
-            <Grid item xs={6} sm={3} md={2} key={category}>
-              <MotionBox
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
+            {/* Legal Section */}
+            <MotionBox
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              sx={{ minWidth: 80, maxWidth: 100 }}
+            >
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: 700, mb: compact ? 1.5 : 2, fontSize: compact ? "0.95rem" : "1rem", color: "#ffffff" }}
               >
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: 700, mb: compact ? 1.5 : 2, fontSize: compact ? "0.95rem" : "1rem", color: "#ffffff" }}
+                Legal
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: compact ? 1 : 1.5 }}>
+                <Link
+                  href="#"
+                  sx={{
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    fontSize: compact ? "0.85rem" : "0.9rem",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      color: "#667eea",
+                      ml: 1,
+                    },
+                  }}
                 >
-                  {category}
-                </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: compact ? 1 : 1.5 }}>
-                  {links.map((link) => (
-                    <Link
-                      key={link}
-                      href="#"
-                      sx={{
-                        color: "#ffffff",
-                        textDecoration: "none",
-                        fontSize: compact ? "0.85rem" : "0.9rem",
-                        transition: "all 0.3s ease",
-                        "&:hover": {
-                          color: "#667eea",
-                          ml: 1,
-                        },
-                      }}
-                    >
-                      {link}
-                    </Link>
-                  ))}
-                </Box>
-              </MotionBox>
-            </Grid>
-          ))}
-        </Grid>
+                  Privacy Policy
+                </Link>
+                <Link
+                  href="#"
+                  sx={{
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    fontSize: compact ? "0.85rem" : "0.9rem",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      color: "#667eea",
+                      ml: 1,
+                    },
+                  }}
+                >
+                  Terms of Service
+                </Link>
+                <Link
+                  href="#"
+                  sx={{
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    fontSize: compact ? "0.85rem" : "0.9rem",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      color: "#667eea",
+                      ml: 1,
+                    },
+                  }}
+                >
+                  Cookie Policy
+                </Link>
+                <Link
+                  href="#"
+                  sx={{
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    fontSize: compact ? "0.85rem" : "0.9rem",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      color: "#667eea",
+                      ml: 1,
+                    },
+                  }}
+                >
+                  Contact Us
+                </Link>
+              </Box>
+            </MotionBox>
+          </Box>
+        </Box>
 
         {/* Divider */}
         <Box sx={{ my: compact ? 1 : 4, height: "1px", background: "rgba(255,255,255,0.1)" }} />
