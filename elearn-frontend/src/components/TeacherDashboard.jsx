@@ -4,16 +4,22 @@ import { useFormalEducation } from "../contexts/FormalEducationContext";
 import { useAuth } from "../contexts/AuthContext";
 import Section from "./Section";
 import SectionTitle from "./SectionTitle";
-import { Add, Edit, VideoCall, People, CalendarMonth, Link } from "@mui/icons-material";
+import { Add, Edit, VideoCall, People, CalendarMonth, Link, Check, Close } from "@mui/icons-material";
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
-  const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass } = useFormalEducation();
+  const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass, getAssignmentSubmissions, reviewSubmission, deleteMaterial } = useFormalEducation();
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState({ title: "", description: "", duration: "", schedule: "" });
   const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
   const [scheduleForm, setScheduleForm] = useState({ title: "", startTime: "", duration: 60, meetLink: "", courseId: "" });
   const [attendanceDialog, setAttendanceDialog] = useState({ open: false, courseId: "", scheduleId: "" });
+  const [attendanceDetailsDialog, setAttendanceDetailsDialog] = useState({ open: false, students: [], type: "" });
+  const [manageDialog, setManageDialog] = useState({ open: false, course: null });
+  const [materialForm, setMaterialForm] = useState({ name: "", file: null });
+  const [assignmentForm, setAssignmentForm] = useState({ title: "", description: "", dueDate: "" });
+  const [gradeDialog, setGradeDialog] = useState({ open: false, submission: null });
+  const [gradeForm, setGradeForm] = useState({ grade: "", feedback: "" });
   const teacherCourses = getTeacherCourses(user?.id);
 
   const liveClasses = useMemo(() => {
@@ -49,10 +55,43 @@ export default function TeacherDashboard() {
     setOpenScheduleDialog(false);
   };
 
-  const handleMarkAttendance = (studentId) => {
+  const handleMarkAttendance = (studentId, status) => {
     const { courseId, scheduleId } = attendanceDialog;
     if (!courseId || !scheduleId) return;
+    
+    // Find and update the session's attendees
+    const course = teacherCourses.find(c => c.id === courseId);
+    if (course && course.schedules) {
+      const schedule = course.schedules.find(s => s.id === scheduleId);
+      if (schedule) {
+        // Initialize attendees array if it doesn't exist
+        if (!schedule.attendees) {
+          schedule.attendees = [];
+        }
+        
+        // Check if student is already marked
+        const existingAttendance = schedule.attendees.find(a => a.studentId === studentId || a.id === studentId);
+        
+        if (existingAttendance) {
+          // Update existing attendance
+          existingAttendance.status = status;
+        } else {
+          // Add new attendance record
+          schedule.attendees.push({
+            id: studentId,
+            studentId: studentId,
+            studentName: getCourseStudents(courseId).find(s => (s.studentId || s.id) === studentId)?.studentName || 
+                         getCourseStudents(courseId).find(s => (s.studentId || s.id) === studentId)?.name || 
+                         "Student",
+            status: status
+          });
+        }
+      }
+    }
+    
     markAttendanceForClass(courseId, scheduleId, studentId);
+    // Trigger re-render by updating state
+    setAttendanceDialog({ ...attendanceDialog });
   };
 
   return (
@@ -159,7 +198,12 @@ export default function TeacherDashboard() {
                     <TableCell>{course.materials.length}</TableCell>
                     <TableCell>{course.assignments.length}</TableCell>
                     <TableCell>
-                      <Button size="small" variant="outlined" startIcon={<Edit />}>
+                      <Button 
+                        size="small" 
+                        variant="outlined" 
+                        startIcon={<Edit />}
+                        onClick={() => setManageDialog({ open: true, course })}
+                      >
                         Manage
                       </Button>
                     </TableCell>
@@ -200,12 +244,18 @@ export default function TeacherDashboard() {
                   <TableCell sx={{ fontWeight: 700 }}>Course</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Start Time</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Meet Link</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Attendees</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Present</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Absent</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {liveClasses.map((session) => (
+                {liveClasses.map((session) => {
+                  const presentCount = session.attendees?.filter(a => a.status === "present")?.length || 0;
+                  const absentCount = session.attendees?.filter(a => a.status === "absent")?.length || 0;
+                  const presentStudents = session.attendees?.filter(a => a.status === "present") || [];
+                  const absentStudents = session.attendees?.filter(a => a.status === "absent") || [];
+                  return (
                   <TableRow key={session.id} sx={{ "&:hover": { background: "#f9f9f9" } }}>
                     <TableCell sx={{ fontWeight: 600 }}>{session.title}</TableCell>
                     <TableCell>{session.courseTitle}</TableCell>
@@ -227,7 +277,26 @@ export default function TeacherDashboard() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Chip icon={<People />} label={`${session.attendees?.length || 0}`} size="small" />
+                      <Chip
+                        icon={<Check />}
+                        label={presentCount}
+                        size="small"
+                        color="success"
+                        variant="outlined"
+                        onClick={() => setAttendanceDetailsDialog({ open: true, students: presentStudents, type: "Present" })}
+                        sx={{ cursor: "pointer" }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        icon={<Close />}
+                        label={absentCount}
+                        size="small"
+                        color="error"
+                        variant="outlined"
+                        onClick={() => setAttendanceDetailsDialog({ open: true, students: absentStudents, type: "Absent" })}
+                        sx={{ cursor: "pointer" }}
+                      />
                     </TableCell>
                     <TableCell>
                       <Button
@@ -239,7 +308,8 @@ export default function TeacherDashboard() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
@@ -347,6 +417,43 @@ export default function TeacherDashboard() {
       </DialogActions>
     </Dialog>
 
+    {/* Attendance Details Dialog - Show Present/Absent Students */}
+    <Dialog 
+      open={attendanceDetailsDialog.open} 
+      onClose={() => setAttendanceDetailsDialog({ open: false, students: [], type: "" })} 
+      maxWidth="sm" 
+      fullWidth
+    >
+      <DialogTitle>
+        {attendanceDetailsDialog.type} Students ({attendanceDetailsDialog.students?.length || 0})
+      </DialogTitle>
+      <DialogContent sx={{ pt: 2 }}>
+        {attendanceDetailsDialog.students?.length > 0 ? (
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ background: "#f3f4f6" }}>
+                <TableCell sx={{ fontWeight: 700 }}>Student</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {attendanceDetailsDialog.students.map((student, idx) => (
+                <TableRow key={idx}>
+                  <TableCell>{student.studentName || student.name || "Student"}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <Typography variant="body2" sx={{ color: "#9ca3af", textAlign: "center", py: 2 }}>
+            No {attendanceDetailsDialog.type?.toLowerCase()} students yet
+          </Typography>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setAttendanceDetailsDialog({ open: false, students: [], type: "" })}>Close</Button>
+      </DialogActions>
+    </Dialog>
+
     {/* Attendance Dialog */}
     <Dialog open={attendanceDialog.open} onClose={() => setAttendanceDialog({ open: false, courseId: "", scheduleId: "" })} maxWidth="sm" fullWidth>
       <DialogTitle>Mark Attendance</DialogTitle>
@@ -364,9 +471,28 @@ export default function TeacherDashboard() {
                 <TableRow key={student.id}>
                   <TableCell>{student.studentName || student.name || student.email}</TableCell>
                   <TableCell align="right">
-                    <Button size="small" variant="outlined" onClick={() => handleMarkAttendance(student.studentId || student.id)}>
-                      Present
-                    </Button>
+                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                      <Button 
+                        size="small" 
+                        variant="contained" 
+                        color="success"
+                        startIcon={<Check />}
+                        onClick={() => handleMarkAttendance(student.studentId || student.id, "present")}
+                        sx={{ minWidth: 100 }}
+                      >
+                        Present
+                      </Button>
+                      <Button 
+                        size="small" 
+                        variant="contained" 
+                        color="error"
+                        startIcon={<Close />}
+                        onClick={() => handleMarkAttendance(student.studentId || student.id, "absent")}
+                        sx={{ minWidth: 100 }}
+                      >
+                        Absent
+                      </Button>
+                    </Stack>
                   </TableCell>
                 </TableRow>
               ))}
@@ -378,6 +504,351 @@ export default function TeacherDashboard() {
       </DialogContent>
       <DialogActions>
         <Button onClick={() => setAttendanceDialog({ open: false, courseId: "", scheduleId: "" })}>Close</Button>
+      </DialogActions>
+    </Dialog>
+
+    {/* Manage Course Dialog */}
+    <Dialog 
+      open={manageDialog.open} 
+      onClose={() => {
+        setManageDialog({ open: false, course: null });
+        setMaterialForm({ name: "", file: null });
+        setAssignmentForm({ title: "", description: "", dueDate: "" });
+      }} 
+      maxWidth="md" 
+      fullWidth
+    >
+      <DialogTitle>
+        Manage Course: {manageDialog.course?.title}
+      </DialogTitle>
+      <DialogContent sx={{ pt: 2 }}>
+        {manageDialog.course && (
+          <Box>
+            {/* Course Info */}
+            <Card sx={{ mb: 3, background: "#f9fafb" }}>
+              <CardContent>
+                <Typography variant="subtitle2" sx={{ color: "#6b7280", mb: 1 }}>Description</Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>{manageDialog.course.description}</Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Typography variant="caption" sx={{ color: "#6b7280" }}>Duration</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{manageDialog.course.duration} weeks</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="caption" sx={{ color: "#6b7280" }}>Schedule</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{manageDialog.course.schedule}</Typography>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+
+            {/* Enrolled Students */}
+            <Box sx={{ mb: 3 }}>
+              {(() => {
+                const courseEnrollments = getCourseStudents(manageDialog.course.id);
+                return (
+                  <>
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>📚 Enrolled Students ({courseEnrollments?.length || 0})</Typography>
+                    {courseEnrollments && courseEnrollments.length > 0 ? (
+                      <TableContainer component={Paper} sx={{ maxHeight: 200 }}>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow sx={{ background: "#f3f4f6" }}>
+                              <TableCell sx={{ fontWeight: 700 }}>Student Name</TableCell>
+                              <TableCell sx={{ fontWeight: 700 }}>Enrolled Date</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {courseEnrollments.map((enrollment, idx) => (
+                              <TableRow key={idx}>
+                                <TableCell>{enrollment.studentName || "Student"}</TableCell>
+                                <TableCell>{enrollment.enrolledDate ? new Date(enrollment.enrolledDate).toLocaleDateString() : "N/A"}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    ) : (
+                      <Typography variant="body2" sx={{ color: "#9ca3af", fontStyle: "italic" }}>No students enrolled yet</Typography>
+                    )}
+                  </>
+                );
+              })()}
+            </Box>
+
+            {/* Materials Section */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>📄 Course Materials ({manageDialog.course.materials?.length || 0})</Typography>
+              {manageDialog.course.materials?.length > 0 && (
+                <Stack spacing={1} sx={{ mb: 2 }}>
+                  {manageDialog.course.materials.map((material, idx) => (
+                    <Paper key={idx} sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ flex: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>{material.name}</Typography>
+                        {material.file && (
+                          <Typography variant="caption" sx={{ color: "#6b7280" }}>
+                            ({(material.file.size / 1024).toFixed(2)} KB)
+                          </Typography>
+                        )}
+                      </Stack>
+                      <Stack direction="row" spacing={1}>
+                        <Button 
+                          size="small" 
+                          variant="outlined"
+                          href={material.fileUrl}
+                          download={material.name}
+                        >
+                          Download
+                        </Button>
+                        <Button 
+                          size="small" 
+                          variant="outlined"
+                          color="error"
+                          onClick={() => {
+                            if (window.confirm('Are you sure you want to delete this material?')) {
+                              deleteMaterial(manageDialog.course.id, material.id);
+                            }
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </Stack>
+                    </Paper>
+                  ))}
+                </Stack>
+              )}
+              <Card sx={{ background: "#f0fdf4", border: "1px solid #10b981" }}>
+                <CardContent>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>Add New Material</Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Material Name"
+                    value={materialForm.name}
+                    onChange={(e) => setMaterialForm({ ...materialForm, name: e.target.value })}
+                    sx={{ mb: 2 }}
+                  />
+                  <Box sx={{ mb: 2 }}>
+                    <input
+                      type="file"
+                      id="material-upload"
+                      hidden
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setMaterialForm({ ...materialForm, file });
+                        }
+                      }}
+                    />
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      component="label"
+                      htmlFor="material-upload"
+                    >
+                      {materialForm.file ? `✓ ${materialForm.file.name}` : "Choose File"}
+                    </Button>
+                  </Box>
+                  <Button 
+                    variant="contained" 
+                    size="small"
+                    fullWidth
+                    onClick={() => {
+                      if (materialForm.name && materialForm.file) {
+                        // Create a file URL using FileReader
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                          manageDialog.course.materials.push({
+                            id: Date.now(),
+                            name: materialForm.name,
+                            file: materialForm.file,
+                            fileUrl: e.target?.result,
+                            fileSize: materialForm.file.size
+                          });
+                          setMaterialForm({ name: "", file: null });
+                        };
+                        reader.readAsDataURL(materialForm.file);
+                      }
+                    }}
+                  >
+                    Add Material
+                  </Button>
+                </CardContent>
+              </Card>
+            </Box>
+
+            {/* Assignments Section */}
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>📝 Assignments ({manageDialog.course.assignments?.length || 0})</Typography>
+              {manageDialog.course.assignments?.length > 0 && (
+                <Stack spacing={2} sx={{ mb: 2 }}>
+                  {manageDialog.course.assignments.map((assignment) => {
+                    const submissions = getAssignmentSubmissions(assignment.id);
+                    return (
+                      <Paper key={assignment.id} sx={{ p: 2 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>{assignment.title}</Typography>
+                        <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 1 }}>{assignment.description}</Typography>
+                        <Typography variant="caption" sx={{ display: "block", mb: 2, color: "#ef4444" }}>Due: {assignment.dueDate}</Typography>
+                        
+                        {/* Submissions */}
+                        {submissions.length > 0 ? (
+                          <Box sx={{ mt: 2, background: "#f9fafb", p: 2, borderRadius: 1 }}>
+                            <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>
+                              📬 Submissions ({submissions.length})
+                            </Typography>
+                            <Stack spacing={1}>
+                              {submissions.map((submission) => {
+                                const enrollment = manageDialog.course.students?.find(s => s.id === submission.enrollmentId);
+                                const studentEnrollment = getCourseStudents(manageDialog.course.id).find(e => e.id === submission.enrollmentId);
+                                return (
+                                  <Box key={submission.id} sx={{ p: 1.5, background: "white", borderRadius: 1, border: "1px solid #e5e7eb" }}>
+                                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                      <Box sx={{ flex: 1 }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                          {studentEnrollment?.studentName || "Student"}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ color: "#6b7280" }}>
+                                          Submitted: {new Date(submission.submittedAt).toLocaleString()}
+                                        </Typography>
+                                        {submission.status === "graded" && (
+                                          <Typography variant="caption" sx={{ display: "block", color: "#10b981", fontWeight: 600 }}>
+                                            Grade: {submission.grade} | {submission.feedback}
+                                          </Typography>
+                                        )}
+                                      </Box>
+                                      <Stack direction="row" spacing={1}>
+                                        <Button
+                                          size="small"
+                                          variant="outlined"
+                                          onClick={() => {
+                                            setGradeDialog({ open: true, submission });
+                                            setGradeForm({ grade: submission.grade || "", feedback: submission.feedback || "" });
+                                          }}
+                                        >
+                                          {submission.status === "graded" ? "Edit Grade" : "Grade"}
+                                        </Button>
+                                      </Stack>
+                                    </Stack>
+                                    <Typography variant="body2" sx={{ mt: 1, p: 1, background: "#f3f4f6", borderRadius: 1, fontSize: "0.85rem" }}>
+                                      {submission.content}
+                                    </Typography>
+                                  </Box>
+                                );
+                              })}
+                            </Stack>
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" sx={{ color: "#9ca3af", fontStyle: "italic" }}>No submissions yet</Typography>
+                        )}
+                      </Paper>
+                    );
+                  })}
+                </Stack>
+              )}
+              <Card sx={{ background: "#fef3c7", border: "1px solid #f59e0b" }}>
+                <CardContent>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>Create New Assignment</Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Assignment Title"
+                    value={assignmentForm.title}
+                    onChange={(e) => setAssignmentForm({ ...assignmentForm, title: e.target.value })}
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Description"
+                    multiline
+                    rows={2}
+                    value={assignmentForm.description}
+                    onChange={(e) => setAssignmentForm({ ...assignmentForm, description: e.target.value })}
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="date"
+                    label="Due Date"
+                    value={assignmentForm.dueDate}
+                    onChange={(e) => setAssignmentForm({ ...assignmentForm, dueDate: e.target.value })}
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ mb: 2 }}
+                  />
+                  <Button 
+                    variant="contained" 
+                    size="small"
+                    onClick={() => {
+                      if (assignmentForm.title && assignmentForm.dueDate) {
+                        manageDialog.course.assignments.push({ id: Date.now(), ...assignmentForm });
+                        setAssignmentForm({ title: "", description: "", dueDate: "" });
+                      }
+                    }}
+                  >
+                    Create Assignment
+                  </Button>
+                </CardContent>
+              </Card>
+            </Box>
+          </Box>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => {
+          setManageDialog({ open: false, course: null });
+          setMaterialForm({ name: "", url: "" });
+          setAssignmentForm({ title: "", description: "", dueDate: "" });
+        }}>Close</Button>
+      </DialogActions>
+    </Dialog>
+
+    {/* Grade Submission Dialog */}
+    <Dialog open={gradeDialog.open} onClose={() => setGradeDialog({ open: false, submission: null })} maxWidth="sm" fullWidth>
+      <DialogTitle>Grade Submission</DialogTitle>
+      <DialogContent sx={{ pt: 2 }}>
+        {gradeDialog.submission && (
+          <Box>
+            <Typography variant="body2" sx={{ mb: 2, color: "#6b7280" }}>
+              <strong>Submission:</strong> {gradeDialog.submission.content}
+            </Typography>
+            <Typography variant="caption" sx={{ display: "block", mb: 2, color: "#9ca3af" }}>
+              Submitted: {new Date(gradeDialog.submission.submittedAt).toLocaleString()}
+            </Typography>
+            <TextField
+              fullWidth
+              label="Grade (e.g., A+, 95, Pass)"
+              value={gradeForm.grade}
+              onChange={(e) => setGradeForm({ ...gradeForm, grade: e.target.value })}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Feedback"
+              multiline
+              rows={3}
+              value={gradeForm.feedback}
+              onChange={(e) => setGradeForm({ ...gradeForm, feedback: e.target.value })}
+              placeholder="Provide feedback to the student..."
+            />
+          </Box>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setGradeDialog({ open: false, submission: null })}>Cancel</Button>
+        <Button 
+          variant="contained" 
+          onClick={() => {
+            if (gradeDialog.submission && gradeForm.grade) {
+              reviewSubmission(gradeDialog.submission.id, gradeForm.grade, gradeForm.feedback);
+              setGradeDialog({ open: false, submission: null });
+              setGradeForm({ grade: "", feedback: "" });
+            }
+          }}
+          sx={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)" }}
+        >
+          Save Grade
+        </Button>
       </DialogActions>
     </Dialog>
     </>

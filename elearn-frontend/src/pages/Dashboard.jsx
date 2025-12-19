@@ -1,4 +1,4 @@
-import { Box, Grid, Card, CardContent, Typography, Button, Stack, LinearProgress, Chip, Tab, Tabs, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
+import { Box, Grid, Card, CardContent, Typography, Button, Stack, LinearProgress, Chip, Tab, Tabs, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Section from "../components/Section";
@@ -28,6 +28,7 @@ export default function Dashboard() {
   const [userAvatar, setUserAvatar] = useState(null);
   const [statsModalOpen, setStatsModalOpen] = useState(false);
   const [certModalOpen, setCertModalOpen] = useState(false);
+  const [studentsModalOpen, setStudentsModalOpen] = useState(false);
   // Teacher: schedule dialog state
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [scheduleCourseId, setScheduleCourseId] = useState("");
@@ -102,7 +103,11 @@ export default function Dashboard() {
   };
 
   const handleViewStudents = () => {
-    setTabValue(1); // Switch to view students
+    if (user?.role === "teacher") {
+      setStudentsModalOpen(true);
+    } else {
+      setTabValue(1); // Switch to view students for regular users
+    }
   };
 
   const handleScheduleClass = () => {
@@ -560,6 +565,66 @@ export default function Dashboard() {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setCertModalOpen(false)} variant="outlined">Close</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Enrolled Students Modal (Teacher) */}
+        <Dialog open={studentsModalOpen} onClose={() => setStudentsModalOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle sx={{ fontWeight: 700, fontSize: "1.2rem" }}>
+            👩‍🎓 All Enrolled Students
+          </DialogTitle>
+          <DialogContent sx={{ mt: 1.5 }}>
+            {teacherCourses.length === 0 ? (
+              <Typography variant="body2" sx={{ color: "#666", textAlign: "center", py: 3 }}>
+                No courses created yet.
+              </Typography>
+            ) : (
+              <Box>
+                {teacherCourses.map((course) => {
+                  const courseEnrollments = getCourseStudents(course.id);
+                  return (
+                  <Box key={course.id} sx={{ mb: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: "#667eea" }}>
+                      {course.title}
+                    </Typography>
+                    {courseEnrollments && courseEnrollments.length > 0 ? (
+                      <TableContainer component={Paper} sx={{ mb: 2 }}>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow sx={{ background: "#f3f4f6" }}>
+                              <TableCell sx={{ fontWeight: 700 }}>Student Name</TableCell>
+                              <TableCell sx={{ fontWeight: 700 }}>Enrolled Date</TableCell>
+                              <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {courseEnrollments.map((enrollment, idx) => (
+                              <TableRow key={idx} sx={{ "&:hover": { background: "#f9fafb" } }}>
+                                <TableCell>{enrollment.studentName || "Student"}</TableCell>
+                                <TableCell>{enrollment.enrolledDate ? new Date(enrollment.enrolledDate).toLocaleDateString() : "N/A"}</TableCell>
+                                <TableCell>
+                                  <Chip label="Enrolled" size="small" color="success" variant="outlined" />
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    ) : (
+                      <Typography variant="body2" sx={{ color: "#9ca3af", fontStyle: "italic", mb: 2 }}>
+                        No students enrolled in this course yet.
+                      </Typography>
+                    )}
+                  </Box>
+                  );
+                })}
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setStudentsModalOpen(false)} variant="contained" sx={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
+              Close
+            </Button>
           </DialogActions>
         </Dialog>
         </Box>

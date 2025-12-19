@@ -288,6 +288,24 @@ export const FormalEducationProvider = ({ children }) => {
     ));
   };
 
+  // Get submissions for an assignment
+  const getAssignmentSubmissions = (assignmentId) => {
+    return submissions.filter(s => s.assignmentId === assignmentId);
+  };
+
+  // Get submission by enrollment and assignment
+  const getSubmission = (enrollmentId, assignmentId) => {
+    return submissions.find(s => s.enrollmentId === enrollmentId && s.assignmentId === assignmentId);
+  };
+
+  // Delete material
+  const deleteMaterial = (courseId, materialId) => {
+    setCourses(courses.map(c => c.id === courseId
+      ? { ...c, materials: c.materials.filter(m => m.id !== materialId) }
+      : c
+    ));
+  };
+
   const value = {
     courses,
     enrollments,
@@ -310,6 +328,9 @@ export const FormalEducationProvider = ({ children }) => {
     getCourseById,
     getTeacherCourses,
     reviewSubmission,
+    getAssignmentSubmissions,
+    getSubmission,
+    deleteMaterial,
   };
 
   return (

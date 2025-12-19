@@ -27,88 +27,134 @@ export default function EnrolledCoursesList({ courses = [] }) {
     >
       <Grid container spacing={3}>
         {courses.map((course, i) => (
-          <Grid item xs={12} key={i}>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
             <motion.div variants={itemVariants}>
               <MotionCard
-                whileHover={{ scale: 1.01, boxShadow: "0 12px 32px rgba(0,0,0,0.1)" }}
+                whileHover={{ y: -12, boxShadow: "0 20px 40px rgba(102, 126, 234, 0.25)" }}
                 sx={{
-                  borderRadius: 3,
-                  border: "1px solid rgba(0,0,0,0.08)",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  borderRadius: 4,
+                  border: "1px solid #e5e7eb",
                   background: "white",
                   overflow: "hidden",
                   transition: "all 0.3s ease",
+                  position: "relative",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "4px",
+                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  },
                 }}
               >
-                <CardContent>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}>
-                        {course.title}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: "#7f8c8d" }}>
-                        {course.instructor} • {course.duration}
-                      </Typography>
-                    </Box>
-                    <Button variant="contained" size="small" sx={{ background: "#667eea" }}>
-                      Continue
-                    </Button>
-                                    {/* Meeting Links */}
-                                    {course.schedules && course.schedules.length > 0 && (
-                                      <Stack spacing={1} sx={{ mb: 2 }}>
-                                        {course.schedules.map((schedule) => (
-                                          <Box key={schedule.id} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                            <Chip 
-                                              icon={<VideocamIcon />}
-                                              label={schedule.title || "Live Class"}
-                                              size="small"
-                                              sx={{ backgroundColor: "#10b981", color: "white" }}
-                                            />
-                                            {schedule.meetLink && (
-                                              <Button
-                                                size="small"
-                                                variant="outlined"
-                                                href={schedule.meetLink}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                startIcon={<VideocamIcon />}
-                                                sx={{ textTransform: "none" }}
-                                              >
-                                                Join Meeting
-                                              </Button>
-                                            )}
-                                            <Typography variant="caption" sx={{ color: "#666" }}>
-                                              {new Date(schedule.startTime).toLocaleString()}
-                                            </Typography>
-                                          </Box>
-                                        ))}
-                                      </Stack>
-                                    )}
-                  </Box>
+                {/* Gradient Header */}
+                <Box sx={{ 
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  p: 3,
+                  position: "relative",
+                  overflow: "hidden",
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    top: "-50%",
+                    right: "-30%",
+                    width: "150px",
+                    height: "150px",
+                    background: "rgba(255,255,255,0.1)",
+                    borderRadius: "50%",
+                  }
+                }}>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 800, 
+                    color: "white", 
+                    mb: 1,
+                    lineHeight: 1.3,
+                    minHeight: "2.6em",
+                    position: "relative",
+                    zIndex: 1
+                  }}>
+                    {course.title}
+                  </Typography>
+                  <Typography variant="caption" sx={{ 
+                    color: "rgba(255,255,255,0.95)", 
+                    fontWeight: 600,
+                    position: "relative",
+                    zIndex: 1,
+                    display: "block"
+                  }}>
+                    👨‍🏫 {course.instructor}
+                  </Typography>
+                  {course.duration && (
+                    <Typography variant="caption" sx={{ 
+                      color: "rgba(255,255,255,0.85)", 
+                      fontWeight: 500,
+                      position: "relative",
+                      zIndex: 1,
+                      display: "block",
+                      mt: 0.5
+                    }}>
+                      ⏱️ {course.duration}
+                    </Typography>
+                  )}
+                </Box>
 
-                  {/* Progress Bar */}
-                  <Box>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                      <Typography variant="caption" sx={{ color: "#666" }}>
-                        Progress
+                <CardContent sx={{ flexGrow: 1, p: 2.5, display: "flex", flexDirection: "column" }}>
+                  {/* Meeting Links */}
+                  {course.schedules && course.schedules.length > 0 && (
+                    <Box sx={{ mb: 2.5, flexGrow: 1 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5, color: "#1f2937", fontSize: "0.85rem" }}>
+                        🎥 Live Classes
                       </Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: "#667eea" }}>
-                        {course.progress}%
-                      </Typography>
+                      <Stack spacing={1}>
+                        {course.schedules.slice(0, 2).map((schedule) => (
+                          <Box 
+                            key={schedule.id} 
+                            sx={{ 
+                              p: 1.5,
+                              background: schedule.meetLink ? "linear-gradient(135deg, #667eea15 0%, #764ba225 100%)" : "#f9fafb",
+                              border: schedule.meetLink ? "1px solid #667eea30" : "1px solid #e5e7eb",
+                              borderRadius: 2,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 0.5
+                            }}
+                          >
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: "#1f2937" }}>
+                              {schedule.title || "Live Class"}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: "#6b7280", fontSize: "0.7rem" }}>
+                              {new Date(schedule.startTime).toLocaleString()}
+                            </Typography>
+                            {schedule.meetLink && (
+                              <Button
+                                fullWidth
+                                size="small"
+                                variant="contained"
+                                href={schedule.meetLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                startIcon={<VideocamIcon />}
+                                sx={{ 
+                                  mt: 0.5,
+                                  textTransform: "none",
+                                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                                  fontWeight: 700,
+                                  fontSize: "0.75rem"
+                                }}
+                              >
+                                Join Now
+                              </Button>
+                            )}
+                          </Box>
+                        ))}
+                      </Stack>
                     </Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={course.progress}
-                      sx={{
-                        height: 8,
-                        borderRadius: 4,
-                        background: "#eee",
-                        "& .MuiLinearProgress-bar": {
-                          background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
-                          borderRadius: 4,
-                        },
-                      }}
-                    />
-                  </Box>
+                  )}
                 </CardContent>
               </MotionCard>
             </motion.div>
