@@ -6,6 +6,37 @@ import Section from "./Section";
 import SectionTitle from "./SectionTitle";
 import { Download, Description, Quiz, CheckCircle, CalendarMonth, VideoCall, Link } from "@mui/icons-material";
 
+// Helper function to get grade color
+const getGradeColor = (grade) => {
+  if (!grade) return { color: "#6b7280", background: "#f3f4f6", border: "#e5e7eb" };
+  
+  const gradeStr = String(grade).toUpperCase().trim();
+  
+  // Letter grades
+  if (/^A[+]?$/.test(gradeStr)) return { color: "#047857", background: "#d1fae5", border: "#10b981" };
+  if (/^B[+]?$/.test(gradeStr)) return { color: "#16a34a", background: "#dcfce7", border: "#22c55e" };
+  if (/^C[+]?$/.test(gradeStr)) return { color: "#ca8a04", background: "#fef9c3", border: "#eab308" };
+  if (/^D[+]?$/.test(gradeStr)) return { color: "#ea580c", background: "#fed7aa", border: "#f97316" };
+  if (/^F$/.test(gradeStr)) return { color: "#dc2626", background: "#fecaca", border: "#ef4444" };
+  
+  // Numeric grades (0-100)
+  const numericGrade = parseFloat(gradeStr);
+  if (!isNaN(numericGrade)) {
+    if (numericGrade >= 90) return { color: "#047857", background: "#d1fae5", border: "#10b981" };
+    if (numericGrade >= 80) return { color: "#16a34a", background: "#dcfce7", border: "#22c55e" };
+    if (numericGrade >= 70) return { color: "#ca8a04", background: "#fef9c3", border: "#eab308" };
+    if (numericGrade >= 60) return { color: "#ea580c", background: "#fed7aa", border: "#f97316" };
+    return { color: "#dc2626", background: "#fecaca", border: "#ef4444" };
+  }
+  
+  // Pass/Fail
+  if (/^PASS(ED)?$/i.test(gradeStr)) return { color: "#047857", background: "#d1fae5", border: "#10b981" };
+  if (/^FAIL(ED)?$/i.test(gradeStr)) return { color: "#dc2626", background: "#fecaca", border: "#ef4444" };
+  
+  // Default
+  return { color: "#6b7280", background: "#f3f4f6", border: "#e5e7eb" };
+};
+
 export default function StudentFormalDashboard({ onExploreCourses }) {
   const { user } = useAuth();
   const { enrollments, courses, getStudentEnrollments, getCourseById, submitAssignment, uploadMaterial, getSubmission } = useFormalEducation();
@@ -225,21 +256,46 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                               <Typography variant="caption" sx={{ color: "#667eea", fontWeight: 700, fontSize: "0.65rem", display: "block", mb: 1 }}>
                                 📝 ASSIGNMENTS
                               </Typography>
-                              <Button
-                                fullWidth
-                                size="small"
-                                variant="outlined"
-                                onClick={() => {
+                              <Grid container spacing={0.5}>
+                                {(() => {
                                   const pending = course.assignments.find(a => !enrollment.completedAssignments.includes(a.id));
-                                  if (pending) {
-                                    setSelectedAssignment({ ...pending, courseId: course.id, enrollmentId: enrollment.id });
-                                    setOpenAssignment(true);
-                                  }
-                                }}
-                                sx={{ fontSize: "0.7rem", py: 0.5 }}
-                              >
-                                Submit
-                              </Button>
+                                  return pending ? (
+                                    <Grid item xs={12}>
+                                      <Button
+                                        fullWidth
+                                        size="small"
+                                        variant="outlined"
+                                        onClick={() => {
+                                          setSelectedAssignment({ ...pending, courseId: course.id, enrollmentId: enrollment.id });
+                                          setOpenAssignment(true);
+                                        }}
+                                        sx={{ fontSize: "0.7rem", py: 0.5 }}
+                                      >
+                                        Submit
+                                      </Button>
+                                    </Grid>
+                                  ) : null;
+                                })()}
+                                {enrollment.completedAssignments.length > 0 && (
+                                  <Grid item xs={12}>
+                                    <Button
+                                      fullWidth
+                                      size="small"
+                                      variant="text"
+                                      onClick={() => {
+                                        const submitted = course.assignments.find(a => enrollment.completedAssignments.includes(a.id));
+                                        if (submitted) {
+                                          setSelectedAssignment({ ...submitted, courseId: course.id, enrollmentId: enrollment.id });
+                                          setOpenAssignment(true);
+                                        }
+                                      }}
+                                      sx={{ fontSize: "0.65rem", py: 0.3, color: "#10b981" }}
+                                    >
+                                      View Grades
+                                    </Button>
+                                  </Grid>
+                                )}
+                              </Grid>
                             </Box>
                           </Grid>
                         )}
@@ -306,16 +362,25 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                   <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 1 }}>
                     Submitted: {new Date(existingSubmission.submittedAt).toLocaleString()}
                   </Typography>
-                  {existingSubmission.status === "graded" && (
-                    <Box sx={{ mt: 2, p: 2, background: "#fff7ed", border: "1px solid #f59e0b", borderRadius: 1 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#f59e0b", mb: 0.5 }}>
-                        Grade: {existingSubmission.grade}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: "#6b7280" }}>
-                        <strong>Feedback:</strong> {existingSubmission.feedback || "No feedback provided"}
-                      </Typography>
-                    </Box>
-                  )}
+                  {existingSubmission.status === "graded" && (() => {
+                    const gradeColors = getGradeColor(existingSubmission.grade);
+                    return (
+                      <Box sx={{ 
+                        mt: 2, 
+                        p: 2, 
+                        background: gradeColors.background, 
+                        border: `1px solid ${gradeColors.border}`, 
+                        borderRadius: 1 
+                      }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: gradeColors.color, mb: 0.5 }}>
+                          Grade: {existingSubmission.grade}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: "#6b7280" }}>
+                          <strong>Feedback:</strong> {existingSubmission.feedback || "No feedback provided"}
+                        </Typography>
+                      </Box>
+                    );
+                  })()}
                   {existingSubmission.status === "submitted" && (
                     <Chip label="Pending Review" size="small" color="warning" sx={{ mt: 1 }} />
                   )}

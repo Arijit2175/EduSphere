@@ -292,6 +292,7 @@ export default function Dashboard() {
                     placeholder="https://meet.google.com/xxx-xxxx-xxx"
                     value={scheduleForm.meetLink}
                     onChange={(e)=> setScheduleForm({ ...scheduleForm, meetLink: e.target.value })}
+                    helperText="Enter a valid meeting link (Google Meet, Zoom, Teams, Whereby, or Webex)"
                     fullWidth
                   />
                 </Stack>
@@ -302,6 +303,19 @@ export default function Dashboard() {
                   variant="contained" 
                   onClick={()=>{
                     if (!scheduleCourseId) return;
+                    
+                    // Validate meet link if provided
+                    if (scheduleForm.meetLink && scheduleForm.meetLink.trim()) {
+                      const validPatterns = [
+                        /^https?:\/\/(meet\.google\.com|zoom\.us|teams\.microsoft\.com|whereby\.com|webex\.com)/i,
+                      ];
+                      const isValid = validPatterns.some(pattern => pattern.test(scheduleForm.meetLink));
+                      if (!isValid) {
+                        alert('Please enter a valid meeting link from Google Meet, Zoom, Microsoft Teams, Whereby, or Webex');
+                        return;
+                      }
+                    }
+                    
                     const start = scheduleForm.startTime && !isNaN(new Date(scheduleForm.startTime)) ? new Date(scheduleForm.startTime).toISOString() : new Date().toISOString();
                     scheduleClass(scheduleCourseId, { ...scheduleForm, startTime: start });
                     setScheduleOpen(false);

@@ -6,6 +6,37 @@ import Section from "./Section";
 import SectionTitle from "./SectionTitle";
 import { Add, Edit, VideoCall, People, CalendarMonth, Link, Check, Close } from "@mui/icons-material";
 
+// Helper function to get grade color
+const getGradeColor = (grade) => {
+  if (!grade) return { color: "#6b7280", background: "#f3f4f6", border: "#e5e7eb" };
+  
+  const gradeStr = String(grade).toUpperCase().trim();
+  
+  // Letter grades
+  if (/^A[+]?$/.test(gradeStr)) return { color: "#047857", background: "#d1fae5", border: "#10b981" };
+  if (/^B[+]?$/.test(gradeStr)) return { color: "#16a34a", background: "#dcfce7", border: "#22c55e" };
+  if (/^C[+]?$/.test(gradeStr)) return { color: "#ca8a04", background: "#fef9c3", border: "#eab308" };
+  if (/^D[+]?$/.test(gradeStr)) return { color: "#ea580c", background: "#fed7aa", border: "#f97316" };
+  if (/^F$/.test(gradeStr)) return { color: "#dc2626", background: "#fecaca", border: "#ef4444" };
+  
+  // Numeric grades (0-100)
+  const numericGrade = parseFloat(gradeStr);
+  if (!isNaN(numericGrade)) {
+    if (numericGrade >= 90) return { color: "#047857", background: "#d1fae5", border: "#10b981" };
+    if (numericGrade >= 80) return { color: "#16a34a", background: "#dcfce7", border: "#22c55e" };
+    if (numericGrade >= 70) return { color: "#ca8a04", background: "#fef9c3", border: "#eab308" };
+    if (numericGrade >= 60) return { color: "#ea580c", background: "#fed7aa", border: "#f97316" };
+    return { color: "#dc2626", background: "#fecaca", border: "#ef4444" };
+  }
+  
+  // Pass/Fail
+  if (/^PASS(ED)?$/i.test(gradeStr)) return { color: "#047857", background: "#d1fae5", border: "#10b981" };
+  if (/^FAIL(ED)?$/i.test(gradeStr)) return { color: "#dc2626", background: "#fecaca", border: "#ef4444" };
+  
+  // Default
+  return { color: "#6b7280", background: "#f3f4f6", border: "#e5e7eb" };
+};
+
 export default function TeacherDashboard() {
   const { user } = useAuth();
   const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass, getAssignmentSubmissions, reviewSubmission, deleteMaterial } = useFormalEducation();
@@ -46,6 +77,19 @@ export default function TeacherDashboard() {
 
   const handleScheduleClass = () => {
     if (!scheduleForm.courseId || !scheduleForm.startTime) return;
+    
+    // Validate meet link if provided
+    if (scheduleForm.meetLink && scheduleForm.meetLink.trim()) {
+      const validPatterns = [
+        /^https?:\/\/(meet\.google\.com|zoom\.us|teams\.microsoft\.com|whereby\.com|webex\.com)/i,
+      ];
+      const isValid = validPatterns.some(pattern => pattern.test(scheduleForm.meetLink));
+      if (!isValid) {
+        alert('Please enter a valid meeting link from Google Meet, Zoom, Microsoft Teams, Whereby, or Webex');
+        return;
+      }
+    }
+    
     const startIso = (() => {
       const d = new Date(scheduleForm.startTime);
       return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
@@ -408,6 +452,8 @@ export default function TeacherDashboard() {
           label="Meet Link"
           value={scheduleForm.meetLink}
           onChange={(e) => setScheduleForm({ ...scheduleForm, meetLink: e.target.value })}
+          placeholder="https://meet.google.com/xxx-xxxx-xxx"
+          helperText="Enter a valid meeting link (Google Meet, Zoom, Teams, Whereby, or Webex)"
           sx={{ mb: 2 }}
         />
       </DialogContent>
@@ -713,11 +759,14 @@ export default function TeacherDashboard() {
                                         <Typography variant="caption" sx={{ color: "#6b7280" }}>
                                           Submitted: {new Date(submission.submittedAt).toLocaleString()}
                                         </Typography>
-                                        {submission.status === "graded" && (
-                                          <Typography variant="caption" sx={{ display: "block", color: "#10b981", fontWeight: 600 }}>
-                                            Grade: {submission.grade} | {submission.feedback}
-                                          </Typography>
-                                        )}
+                                        {submission.status === "graded" && (() => {
+                                          const gradeColors = getGradeColor(submission.grade);
+                                          return (
+                                            <Typography variant="caption" sx={{ display: "block", color: gradeColors.color, fontWeight: 600 }}>
+                                              Grade: {submission.grade} | {submission.feedback}
+                                            </Typography>
+                                          );
+                                        })()}
                                       </Box>
                                       <Stack direction="row" spacing={1}>
                                         <Button
