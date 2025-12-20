@@ -123,6 +123,39 @@ const theme = createTheme({
         root: {
           "& .MuiOutlinedInput-root": {
             borderRadius: 8,
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#667eea",
+              borderWidth: "1px",
+            },
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "rgba(0, 0, 0, 0.23)",
+          },
+          "& .MuiInputBase-root": {
+            "&:focus": {
+              outline: "none",
+            },
+          },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          "&:focus": {
+            outline: "none",
+          },
+          "&.Mui-focused": {
+            outline: "none",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#667eea",
+              borderWidth: "1px",
+            },
+          },
+        },
+        input: {
+          "&:focus": {
+            outline: "none",
           },
         },
       },

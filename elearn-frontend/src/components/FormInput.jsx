@@ -27,11 +27,34 @@ export default function FormInput({ label, type = "text", placeholder, fullWidth
           },
           "&.Mui-focused fieldset": {
             borderColor: "#667eea",
-            boxShadow: "0 0 0 3px rgba(102, 126, 234, 0.1)",
+          },
+          "&:focus": {
+            outline: "none",
+            boxShadow: "none",
+          },
+          "&:focus-visible": {
+            outline: "none",
+            boxShadow: "none",
           },
         },
         "& .MuiInputBase-input": {
           py: 1.5,
+          "&:focus": {
+            outline: "none",
+            boxShadow: "none",
+          },
+          "&:focus-visible": {
+            outline: "none",
+            boxShadow: "none",
+          },
+        },
+        "&:focus": {
+          outline: "none",
+          boxShadow: "none",
+        },
+        "&:focus-within": {
+          outline: "none",
+          boxShadow: "none",
         },
       }}
       {...props}

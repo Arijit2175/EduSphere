@@ -4,6 +4,14 @@
   box-sizing: border-box;
 }
 
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 body {
   background: #f7f9fc;
   font-family: 'Inter', sans-serif;
