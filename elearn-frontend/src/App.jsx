@@ -23,6 +23,12 @@ import AITutor from "./pages/AITutor";
 import CourseDetailPage from "./pages/CourseDetailPage";
 import QuizPage from "./pages/QuizPage";
 import Profile from "./pages/Profile";
+import AboutUs from "./pages/AboutUs";
+import Blog from "./pages/Blog";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import CookiePolicy from "./pages/CookiePolicy";
+import ContactUs from "./pages/ContactUs";
 
 export default function App() {
   // Global demo reset for Informal Learning data on app startup
@@ -142,6 +148,14 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 />
+
+                {/* Footer Pages - Public Access */}
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/cookies" element={<CookiePolicy />} />
+                <Route path="/contact" element={<ContactUs />} />
 
                 {/* Default entry fallback */}
                 <Route path="*" element={<Login />} />

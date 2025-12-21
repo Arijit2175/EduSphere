@@ -1,6 +1,7 @@
 import { Box, Container, Grid, Typography, Link, Button } from "@mui/material";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
@@ -132,7 +133,8 @@ export default function Footer({ compact = false, disableGutters = false, disabl
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: compact ? 1 : 1.5 }}>
                 <Link
-                  href="#"
+                  component={RouterLink}
+                  to="/about"
                   sx={{
                     color: "#ffffff",
                     textDecoration: "none",
@@ -147,7 +149,8 @@ export default function Footer({ compact = false, disableGutters = false, disabl
                   About Us
                 </Link>
                 <Link
-                  href="#"
+                  component={RouterLink}
+                  to="/blog"
                   sx={{
                     color: "#ffffff",
                     textDecoration: "none",
@@ -180,7 +183,8 @@ export default function Footer({ compact = false, disableGutters = false, disabl
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: compact ? 1 : 1.5 }}>
                 <Link
-                  href="#"
+                  component={RouterLink}
+                  to="/privacy"
                   sx={{
                     color: "#ffffff",
                     textDecoration: "none",
@@ -195,7 +199,8 @@ export default function Footer({ compact = false, disableGutters = false, disabl
                   Privacy Policy
                 </Link>
                 <Link
-                  href="#"
+                  component={RouterLink}
+                  to="/terms"
                   sx={{
                     color: "#ffffff",
                     textDecoration: "none",
@@ -210,7 +215,8 @@ export default function Footer({ compact = false, disableGutters = false, disabl
                   Terms of Service
                 </Link>
                 <Link
-                  href="#"
+                  component={RouterLink}
+                  to="/cookies"
                   sx={{
                     color: "#ffffff",
                     textDecoration: "none",
@@ -225,7 +231,8 @@ export default function Footer({ compact = false, disableGutters = false, disabl
                   Cookie Policy
                 </Link>
                 <Link
-                  href="#"
+                  component={RouterLink}
+                  to="/contact"
                   sx={{
                     color: "#ffffff",
                     textDecoration: "none",
