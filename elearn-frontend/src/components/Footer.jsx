@@ -184,7 +184,7 @@ export default function Footer({ compact = false, disableGutters = false, disabl
               <Box sx={{ display: "flex", flexDirection: "column", gap: compact ? 1 : 1.5 }}>
                 <Link
                   component={RouterLink}
-                  to="/privacy"
+                  to="/data-protection"
                   sx={{
                     color: "#ffffff",
                     textDecoration: "none",
@@ -216,7 +216,7 @@ export default function Footer({ compact = false, disableGutters = false, disabl
                 </Link>
                 <Link
                   component={RouterLink}
-                  to="/cookies"
+                  to="/cookie-settings"
                   sx={{
                     color: "#ffffff",
                     textDecoration: "none",

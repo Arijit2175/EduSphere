@@ -25,9 +25,9 @@ import QuizPage from "./pages/QuizPage";
 import Profile from "./pages/Profile";
 import AboutUs from "./pages/AboutUs";
 import Blog from "./pages/Blog";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
+import DataProtection from "./pages/DataProtection";
 import TermsOfService from "./pages/TermsOfService";
-import CookiePolicy from "./pages/CookiePolicy";
+import CookieSettings from "./pages/CookieSettings";
 import ContactUs from "./pages/ContactUs";
 
 export default function App() {
@@ -152,9 +152,9 @@ export default function App() {
                 {/* Footer Pages - Public Access */}
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/blog" element={<Blog />} />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/data-protection" element={<DataProtection />} />
                 <Route path="/terms" element={<TermsOfService />} />
-                <Route path="/cookies" element={<CookiePolicy />} />
+                <Route path="/cookie-settings" element={<CookieSettings />} />
                 <Route path="/contact" element={<ContactUs />} />
 
                 {/* Default entry fallback */}
