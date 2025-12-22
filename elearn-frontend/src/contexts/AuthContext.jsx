@@ -68,12 +68,18 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("enrolledCourses");
   };
 
+  // Add updateUser to allow profile editing
+  const updateUser = (updatedFields) => {
+    setUser((prev) => ({ ...prev, ...updatedFields }));
+  };
+
   const value = {
     user,
     loading,
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!user,
   };
 
