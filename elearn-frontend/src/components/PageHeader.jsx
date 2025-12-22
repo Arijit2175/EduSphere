@@ -1,14 +1,9 @@
+
+import { useRef } from "react";
 import { Box, Container, Typography, Avatar, IconButton, Tooltip } from "@mui/material";
-import { motion } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 
-const MotionBox = motion(Box);
-const MotionTypography = motion(Typography);
-const MotionAvatar = motion(Avatar);
-
-export default function PageHeader({ title, subtitle, backgroundGradient, showAvatar, avatarSrc, userName, onAvatarChange, disableAnimation }) {
-  const [scrollY, setScrollY] = useState(0);
+export default function PageHeader({ title, subtitle, backgroundGradient, showAvatar, avatarSrc, userName, onAvatarChange }) {
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -35,35 +30,11 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
     }
   };
 
-  useEffect(() => {
-    if (disableAnimation) return;
-    
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [disableAnimation]);
-
-  // Calculate scroll-based transformations
-  const scrollProgress = disableAnimation ? 0 : Math.min(scrollY / 200, 1);
-  const headerHeight = disableAnimation ? 1 : 1 - (scrollProgress * 0.5);
-  const headerOpacity = disableAnimation ? 1 : 1 - (scrollProgress * 0.3);
-  const translateY = disableAnimation ? 0 : -(scrollProgress * 30);
-
   return (
-    <MotionBox
-      initial={disableAnimation ? false : { opacity: 0, y: -20 }}
-      animate={disableAnimation ? {} : { 
-        opacity: headerOpacity, 
-        y: translateY,
-        scaleY: headerHeight,
-      }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+    <Box
       sx={{
-        position: disableAnimation ? "relative" : "sticky",
-        top: disableAnimation ? 0 : 80,
+        position: "relative",
+        top: 0,
         zIndex: 9,
         background: backgroundGradient || "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         color: "#ffffff",
@@ -100,11 +71,8 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Box sx={{ flex: 1 }}>
-            <MotionTypography
+            <Typography
               variant="h3"
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
               sx={{
                 fontWeight: 800,
                 mb: 1.5,
@@ -117,13 +85,10 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
               }}
             >
               {title}
-            </MotionTypography>
+            </Typography>
             {subtitle && (
-              <MotionTypography
+              <Typography
                 variant="h6"
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
                 sx={{
                   fontWeight: 500,
                   opacity: 0.95,
@@ -141,7 +106,7 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
                 }}
               >
                 {subtitle}
-              </MotionTypography>
+              </Typography>
             )}
           </Box>
 
@@ -156,10 +121,7 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
                 style={{ display: "none" }}
               />
               <Tooltip title={avatarSrc ? "Change profile picture" : "Add profile picture"}>
-                <MotionAvatar
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, delay: 0.5 }}
+                <Avatar
                   src={avatarSrc || ""}
                   alt={userName || "User"}
                   onClick={handleAvatarClick}
@@ -180,7 +142,7 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
                   }}
                 >
                   {!avatarSrc && userName ? userName.charAt(0).toUpperCase() : "U"}
-                </MotionAvatar>
+                </Avatar>
               </Tooltip>
               <Box sx={{ display: "flex", gap: 0.5, position: "absolute", bottom: 0, right: 0 }}>
                 {avatarSrc && (
@@ -222,6 +184,6 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
           )}
         </Box>
       </Container>
-    </MotionBox>
+    </Box>
   );
 }

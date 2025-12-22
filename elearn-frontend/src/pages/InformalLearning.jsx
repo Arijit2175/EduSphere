@@ -384,7 +384,7 @@ export default function InformalLearning() {
         >
           <Box sx={{ mt: 4, pl: { xs: 2, md: 1 }, pr: { xs: 2, md: 3 }, maxWidth: "1600px", mx: "auto" }}>
             <PageHeader
-              title="Informal Learning"
+              title="Community Feed"
               subtitle="A modern, free-flow feed for micro-learning, tips, and peer knowledge"
               backgroundGradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
               disableAnimation={true}
