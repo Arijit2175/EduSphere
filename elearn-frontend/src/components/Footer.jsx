@@ -209,7 +209,7 @@ export default function Footer({ compact = false, disableGutters = false, sticky
           }}
         >
           <Typography variant="body2" sx={{ opacity: 0.7, color: "#ffffff", fontSize: compact ? "0.85rem" : "0.9rem" }}>
-            © 2025 EduSphere. All rights reserved. Made with ❤️ by Arijit
+            © 2025 EduSphere. All rights reserved. 
           </Typography>
 
           <Button
