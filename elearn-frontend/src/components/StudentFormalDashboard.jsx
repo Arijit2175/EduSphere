@@ -64,8 +64,8 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
     <Box>
       <Section background="transparent">
         <SectionTitle 
-          title="My Formal Courses" 
-          subtitle={`${studentEnrollments.length} courses enrolled`}
+          title="My Classes" 
+          subtitle={`${studentEnrollments.length} classes enrolled`}
           centered={false}
         />
 
