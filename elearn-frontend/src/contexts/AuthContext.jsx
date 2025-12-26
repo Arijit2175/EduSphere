@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
 const buildUser = (data) => {
-  const firstName = data.firstName || data.email?.split("@")[0] || "User";
-  const lastName = data.lastName || "";
-  const name = data.name || `${firstName} ${lastName}`.trim() || data.email || "Learner";
-  return { ...data, firstName, lastName, name };
+  const first_name = data.first_name || data.email?.split("@")[0] || "User";
+  const last_name = data.last_name || "";
+  const name = data.name || `${first_name} ${last_name}`.trim() || data.email || "Learner";
+  return { ...data, first_name, last_name, name };
 };
 
 const AuthContext = createContext();
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
       if (profileRes.ok) {
         profile = await profileRes.json();
       }
-      const userObj = { ...profile, email, access_token: data.access_token, token_type: data.token_type };
+      const userObj = buildUser({ ...profile, email, access_token: data.access_token, token_type: data.token_type });
       setUser(userObj);
       localStorage.setItem("user", JSON.stringify(userObj));
       return userObj;
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
       if (!res.ok) {
         throw new Error("Failed to update profile");
       }
-      setUser((prev) => ({ ...prev, ...updatedFields }));
+      setUser((prev) => buildUser({ ...prev, ...updatedFields }));
     } catch (err) {
       // Optionally handle error (show toast, etc.)
     }
