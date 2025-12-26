@@ -56,6 +56,11 @@ export default function Profile() {
   // Temp state for editing
   const [editForm, setEditForm] = React.useState(form);
 
+  // Keep editForm in sync with form/user when opening the edit dialog
+  React.useEffect(() => {
+    setEditForm(form);
+  }, [form, user]);
+
   const handleEditOpen = () => {
     setEditForm(form); // Start editing with current values
     setEditOpen(true);
@@ -147,11 +152,11 @@ export default function Profile() {
                 {/* First Name & Last Name */}
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" sx={{ color: '#666' }}>First Name</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>{form.firstName}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>{form.first_name}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" sx={{ color: '#666' }}>Last Name</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>{form.lastName}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>{form.last_name}</Typography>
                 </Grid>
                 {/* Country Code, Phone & Gender */}
                 <Grid item xs={12} sm={4}>
