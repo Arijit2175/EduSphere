@@ -310,19 +310,21 @@ export const NonFormalProvider = ({ children }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const coursesRes = await fetch("http://127.0.0.1:8000/nonformal/courses/");
+        const token = JSON.parse(localStorage.getItem("user"))?.access_token;
+        const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+        const coursesRes = await fetch("http://127.0.0.1:8000/nonformal/courses/", { headers: authHeader });
         if (coursesRes.ok) {
           setCourses(await coursesRes.json());
         }
-        const enrollmentsRes = await fetch("http://127.0.0.1:8000/nonformal/enrollments/");
+        const enrollmentsRes = await fetch("http://127.0.0.1:8000/nonformal/enrollments/", { headers: authHeader });
         if (enrollmentsRes.ok) {
           setEnrollments(await enrollmentsRes.json());
         }
-        const progressRes = await fetch("http://127.0.0.1:8000/nonformal/progress/");
+        const progressRes = await fetch("http://127.0.0.1:8000/nonformal/progress/", { headers: authHeader });
         if (progressRes.ok) {
           setProgress(await progressRes.json());
         }
-        const certsRes = await fetch("http://127.0.0.1:8000/nonformal/certificates/");
+        const certsRes = await fetch("http://127.0.0.1:8000/nonformal/certificates/", { headers: authHeader });
         if (certsRes.ok) {
           setCertificates(await certsRes.json());
         }
@@ -333,10 +335,14 @@ export const NonFormalProvider = ({ children }) => {
 
   const enrollCourse = async (userId, courseId) => {
     try {
+      const token = JSON.parse(localStorage.getItem("user"))?.access_token;
       const res = await fetch("http://127.0.0.1:8000/nonformal/enrollments/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, course_id: courseId }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ course_id: courseId }),
       });
       if (!res.ok) {
         const errorData = await res.json();
@@ -361,10 +367,14 @@ export const NonFormalProvider = ({ children }) => {
 
   const updateLessonProgress = async (userId, courseId, lessonIndex) => {
     try {
+      const token = JSON.parse(localStorage.getItem("user"))?.access_token;
       const res = await fetch("http://127.0.0.1:8000/nonformal/progress/", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, course_id: courseId, lesson_index: lessonIndex }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ course_id: courseId, lesson_index: lessonIndex }),
       });
       if (res.ok) {
         setProgress((prev) => ({
@@ -381,10 +391,14 @@ export const NonFormalProvider = ({ children }) => {
 
   const updateAssessmentScore = async (userId, courseId, score) => {
     try {
+      const token = JSON.parse(localStorage.getItem("user"))?.access_token;
       const res = await fetch("http://127.0.0.1:8000/nonformal/progress/score", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, course_id: courseId, score }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ course_id: courseId, score }),
       });
       if (res.ok) {
         setProgress((prev) => ({
@@ -428,10 +442,14 @@ export const NonFormalProvider = ({ children }) => {
   // Only one earnCertificate function should exist
   const earnCertificate = async (userId, courseId) => {
     try {
+      const token = JSON.parse(localStorage.getItem("user"))?.access_token;
       const res = await fetch("http://127.0.0.1:8000/nonformal/certificates/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, course_id: courseId }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ course_id: courseId }),
       });
       if (res.ok) {
         const cert = await res.json();
