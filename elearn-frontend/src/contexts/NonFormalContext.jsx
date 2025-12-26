@@ -301,82 +301,105 @@ const DEFAULT_COURSES = [
 ];
 
 export const NonFormalProvider = ({ children }) => {
-  const [courses, setCourses] = useState(DEFAULT_COURSES);
-  const [enrollments, setEnrollments] = useState(() => {
-    // Demo-friendly: reset non-formal data on fresh server run
-    localStorage.removeItem("nfEnrollments");
-    const stored = localStorage.getItem("nfEnrollments");
-    return stored ? JSON.parse(stored) : [];
-  });
-  const [progress, setProgress] = useState(() => {
-    localStorage.removeItem("nfProgress");
-    const stored = localStorage.getItem("nfProgress");
-    return stored ? JSON.parse(stored) : {};
-  });
-  const [certificates, setCertificates] = useState(() => {
-    localStorage.removeItem("nfCertificates");
-    const stored = localStorage.getItem("nfCertificates");
-    return stored ? JSON.parse(stored) : [];
-  });
+  const [courses, setCourses] = useState([]);
+  const [enrollments, setEnrollments] = useState([]);
+  const [progress, setProgress] = useState({});
+  const [certificates, setCertificates] = useState([]);
 
+  // Fetch all non-formal data from backend on mount
   useEffect(() => {
-    localStorage.setItem("nfEnrollments", JSON.stringify(enrollments));
-  }, [enrollments]);
+    const fetchData = async () => {
+      try {
+        const coursesRes = await fetch("http://127.0.0.1:8000/nonformal/courses/");
+        if (coursesRes.ok) {
+          setCourses(await coursesRes.json());
+        }
+        const enrollmentsRes = await fetch("http://127.0.0.1:8000/nonformal/enrollments/");
+        if (enrollmentsRes.ok) {
+          setEnrollments(await enrollmentsRes.json());
+        }
+        const progressRes = await fetch("http://127.0.0.1:8000/nonformal/progress/");
+        if (progressRes.ok) {
+          setProgress(await progressRes.json());
+        }
+        const certsRes = await fetch("http://127.0.0.1:8000/nonformal/certificates/");
+        if (certsRes.ok) {
+          setCertificates(await certsRes.json());
+        }
+      } catch (err) {}
+    };
+    fetchData();
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem("nfProgress", JSON.stringify(progress));
-  }, [progress]);
-
-  useEffect(() => {
-    localStorage.setItem("nfCertificates", JSON.stringify(certificates));
-  }, [certificates]);
-
-  const enrollCourse = (userId, courseId) => {
-    // Block enrolling if already certified
-    const hasCert = certificates.some((c) => c.userId === userId && c.courseId === courseId);
-    if (hasCert) return { success: false, message: "Course already completed" };
-    const existing = enrollments.find((e) => e.userId === userId && e.courseId === courseId);
-    if (existing) return { success: false, message: "Already enrolled" };
-
-    const enrollment = { id: `enr-${Date.now()}`, userId, courseId, enrolledAt: new Date().toISOString() };
-    setEnrollments((prev) => [...prev, enrollment]);
-    setProgress((prev) => ({
-      ...prev,
-      [`${userId}-${courseId}`]: { currentLessonIndex: 0, completedLessons: [], score: 0, assessment: null, attemptsRemaining: 3, totalAttempts: 3 },
-    }));
-    return { success: true, message: "Enrolled" };
+  const enrollCourse = async (userId, courseId) => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/nonformal/enrollments/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, course_id: courseId }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, message: errorData.detail || "Enrollment failed" };
+      }
+      const enrollment = await res.json();
+      setEnrollments((prev) => [...prev, enrollment]);
+      return { success: true, message: "Enrolled" };
+    } catch (err) {
+      return { success: false, message: "Enrollment failed" };
+    }
   };
 
-  const isEnrolled = (userId, courseId) => enrollments.some((e) => e.userId === userId && e.courseId === courseId);
+  const isEnrolled = (userId, courseId) => enrollments.some((e) => e.user_id === userId && e.course_id === courseId);
 
   const getEnrolledCourses = (userId) => {
-    const courseIds = enrollments.filter((e) => e.userId === userId).map((e) => e.courseId);
+    const courseIds = enrollments.filter((e) => e.user_id === userId).map((e) => e.course_id);
     // Exclude courses that have already been certified for this user
-    const certifiedIds = new Set(certificates.filter((c) => c.userId === userId).map((c) => c.courseId));
+    const certifiedIds = new Set(certificates.filter((c) => c.user_id === userId).map((c) => c.course_id));
     return courses.filter((c) => courseIds.includes(c.id) && !certifiedIds.has(c.id));
   };
 
-  const updateLessonProgress = (userId, courseId, lessonIndex) => {
-    const key = `${userId}-${courseId}`;
-    setProgress((prev) => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        currentLessonIndex: lessonIndex,
-        completedLessons: [...new Set([...(prev[key]?.completedLessons || []), lessonIndex])],
-      },
-    }));
+  const updateLessonProgress = async (userId, courseId, lessonIndex) => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/nonformal/progress/", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, course_id: courseId, lesson_index: lessonIndex }),
+      });
+      if (res.ok) {
+        setProgress((prev) => ({
+          ...prev,
+          [`${userId}-${courseId}`]: {
+            ...(prev[`${userId}-${courseId}`] || {}),
+            currentLessonIndex: lessonIndex,
+            completedLessons: [...new Set([...(prev[`${userId}-${courseId}`]?.completedLessons || []), lessonIndex])],
+          },
+        }));
+      }
+    } catch (err) {}
   };
 
-  const updateAssessmentScore = (userId, courseId, score) => {
-    const key = `${userId}-${courseId}`;
-    setProgress((prev) => ({
-      ...prev,
-      [key]: { ...prev[key], score, assessment: { score, completedAt: new Date().toISOString(), attempts: (prev[key]?.assessment?.attempts || 0) + 1 } },
-    }));
-    if (score >= 70) {
-      earnCertificate(userId, courseId);
-    }
+  const updateAssessmentScore = async (userId, courseId, score) => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/nonformal/progress/score", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, course_id: courseId, score }),
+      });
+      if (res.ok) {
+        setProgress((prev) => ({
+          ...prev,
+          [`${userId}-${courseId}`]: {
+            ...(prev[`${userId}-${courseId}`] || {}),
+            score,
+            assessment: { score, completedAt: new Date().toISOString(), attempts: ((prev[`${userId}-${courseId}`]?.assessment?.attempts || 0) + 1) },
+          },
+        }));
+        if (score >= 70) {
+          earnCertificate(userId, courseId);
+        }
+      }
+    } catch (err) {}
   };
 
   const decrementAttempts = (userId, courseId) => {
@@ -403,19 +426,18 @@ export const NonFormalProvider = ({ children }) => {
   };
 
   // Only one earnCertificate function should exist
-  const earnCertificate = (userId, courseId) => {
-    const course = courses.find((c) => c.id === courseId);
-    if (!course || certificates.some((c) => c.userId === userId && c.courseId === courseId)) return;
-    const cert = {
-      id: `cert-${Date.now()}`,
-      userId,
-      courseId,
-      courseName: course.title,
-      instructor: course.instructor,
-      earnedAt: new Date().toISOString(),
-      certificateId: `CERT-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-    };
-    setCertificates((prev) => [...prev, cert]);
+  const earnCertificate = async (userId, courseId) => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/nonformal/certificates/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, course_id: courseId }),
+      });
+      if (res.ok) {
+        const cert = await res.json();
+        setCertificates((prev) => [...prev, cert]);
+      }
+    } catch (err) {}
   };
 
   const getCourseProgress = (userId, courseId) => progress[`${userId}-${courseId}`];
@@ -432,13 +454,12 @@ export const NonFormalProvider = ({ children }) => {
     }));
   };
 
-  const resetAllData = () => {
+  const resetAllData = async () => {
     setEnrollments([]);
     setProgress({});
     setCertificates([]);
-    localStorage.removeItem("nfEnrollments");
-    localStorage.removeItem("nfProgress");
-    localStorage.removeItem("nfCertificates");
+    // Optionally, call backend endpoint to reset all data for the user
+    // await fetch("http://127.0.0.1:8000/nonformal/reset", { method: "POST" });
   };
 
   return (

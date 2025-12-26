@@ -12,54 +12,71 @@ export const useCourses = () => {
 
 export const CoursesProvider = ({ children }) => {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
-
-  // Load enrolled courses from localStorage
+  // Fetch enrolled courses from backend on mount
   useEffect(() => {
-    const stored = localStorage.getItem("enrolledCourses");
-    if (stored) {
-      setEnrolledCourses(JSON.parse(stored));
-    }
+    const fetchEnrolledCourses = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/enrollments/me"); // Adjust endpoint as needed
+        if (res.ok) {
+          const data = await res.json();
+          setEnrolledCourses(data);
+        }
+      } catch (err) {
+        // handle error
+      }
+    };
+    fetchEnrolledCourses();
   }, []);
 
-  // Save to localStorage whenever enrolledCourses changes
-  useEffect(() => {
-    localStorage.setItem("enrolledCourses", JSON.stringify(enrolledCourses));
-  }, [enrolledCourses]);
-
-  const enrollCourse = (course) => {
-    const isAlreadyEnrolled = enrolledCourses.some((c) => c.id === course.id);
-    
-    if (isAlreadyEnrolled) {
-      return { success: false, message: "You're already enrolled in this course!" };
+  const enrollCourse = async (courseId) => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/enrollments/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ course_id: courseId }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, message: errorData.detail || "Enrollment failed" };
+      }
+      const data = await res.json();
+      setEnrolledCourses((prev) => [...prev, data]);
+      return { success: true, message: "Successfully enrolled!" };
+    } catch (err) {
+      return { success: false, message: "Enrollment failed" };
     }
-
-    const enrolledCourse = {
-      ...course,
-      enrolledDate: new Date().toISOString(),
-      progress: 0,
-      lastAccessed: new Date().toISOString(),
-    };
-
-    setEnrolledCourses([...enrolledCourses, enrolledCourse]);
-    return { success: true, message: "Successfully enrolled!" };
   };
 
-  const unenrollCourse = (courseId) => {
-    setEnrolledCourses(enrolledCourses.filter((c) => c.id !== courseId));
+  const unenrollCourse = async (courseId) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/enrollments/${courseId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setEnrolledCourses((prev) => prev.filter((c) => c.course_id !== courseId && c.id !== courseId));
+      }
+    } catch (err) {}
   };
 
-  const updateProgress = (courseId, progress) => {
-    setEnrolledCourses(
-      enrolledCourses.map((course) =>
-        course.id === courseId
-          ? { ...course, progress, lastAccessed: new Date().toISOString() }
-          : course
-      )
-    );
+  const updateProgress = async (courseId, progress) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/enrollments/${courseId}/progress`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ progress }),
+      });
+      if (res.ok) {
+        setEnrolledCourses((prev) =>
+          prev.map((course) =>
+            course.id === courseId ? { ...course, progress } : course
+          )
+        );
+      }
+    } catch (err) {}
   };
 
   const isEnrolled = (courseId) => {
-    return enrolledCourses.some((c) => c.id === courseId);
+    return enrolledCourses.some((c) => c.course_id === courseId || c.id === courseId);
   };
 
   const value = {

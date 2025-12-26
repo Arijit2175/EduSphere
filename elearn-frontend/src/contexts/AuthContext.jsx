@@ -28,22 +28,27 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (email, password, role = "student") => {
-    // Mock login - in real app, this would call your backend
-    const mockUser = buildUser({
-      id: 1,
-      email: email,
-      firstName: email.split("@")[0],
-      lastName: "User",
-      avatar: "👤",
-      joinedDate: new Date().toISOString(),
-      role,
-    });
-
-    setUser(mockUser);
-    localStorage.setItem("user", JSON.stringify(mockUser));
-    return mockUser;
-  };
+    const login = async (email, password, role = "student") => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, role }),
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || "Login failed");
+        }
+        const data = await response.json();
+        // Adjust this based on your backend's response structure
+        const userData = data.user || data;
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        return userData;
+      } catch (err) {
+        throw err;
+      }
+    };
 
   const register = (formData) => {
     // Mock registration
@@ -61,6 +66,27 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("user", JSON.stringify(mockUser));
     return mockUser;
   };
+    const register = async (formData) => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || "Registration failed");
+        }
+        const data = await response.json();
+        // Adjust this based on your backend's response structure
+        const userData = data.user || data;
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        return userData;
+      } catch (err) {
+        throw err;
+      }
+    };
 
   const logout = () => {
     setUser(null);

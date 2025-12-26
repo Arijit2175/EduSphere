@@ -15,76 +15,65 @@ export const FormalEducationProvider = ({ children }) => {
   const [enrollments, setEnrollments] = useState([]);
   const [submissions, setSubmissions] = useState([]);
 
-  // Load data from localStorage
+  // Fetch courses and enrollments from backend on mount
   useEffect(() => {
-    // Demo-friendly: reset formal data on fresh server run
-    localStorage.removeItem("formalCourses");
-    localStorage.removeItem("formalEnrollments");
-    localStorage.removeItem("formalSubmissions");
-    const storedCourses = localStorage.getItem("formalCourses");
-    const storedEnrollments = localStorage.getItem("formalEnrollments");
-    const storedSubmissions = localStorage.getItem("formalSubmissions");
-
-    if (storedCourses) setCourses(JSON.parse(storedCourses));
-    if (storedEnrollments) setEnrollments(JSON.parse(storedEnrollments));
-    if (storedSubmissions) setSubmissions(JSON.parse(storedSubmissions));
+    const fetchData = async () => {
+      try {
+        const coursesRes = await fetch("http://127.0.0.1:8000/courses/");
+        if (coursesRes.ok) {
+          const coursesData = await coursesRes.json();
+          setCourses(coursesData);
+        }
+        const enrollmentsRes = await fetch("http://127.0.0.1:8000/enrollments/");
+        if (enrollmentsRes.ok) {
+          const enrollmentsData = await enrollmentsRes.json();
+          setEnrollments(enrollmentsData);
+        }
+      } catch (err) {
+        // handle error
+      }
+    };
+    fetchData();
   }, []);
 
-  // Save courses
-  useEffect(() => {
-    localStorage.setItem("formalCourses", JSON.stringify(courses));
-  }, [courses]);
-
-  // Save enrollments
-  useEffect(() => {
-    localStorage.setItem("formalEnrollments", JSON.stringify(enrollments));
-  }, [enrollments]);
-
-  // Save submissions
-  useEffect(() => {
-    localStorage.setItem("formalSubmissions", JSON.stringify(submissions));
-  }, [submissions]);
-
   // Teacher: Create course
-  const createCourse = (courseData) => {
-    const newCourse = {
-      id: `course-${Date.now()}`,
-      ...courseData,
-      createdAt: new Date().toISOString(),
-      students: [],
-      materials: [],
-      assignments: [],
-      quizzes: [],
-      schedules: [],
-    };
-    setCourses([...courses, newCourse]);
-    return newCourse;
+  const createCourse = async (courseData) => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/courses/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(courseData),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, message: errorData.detail || "Course creation failed" };
+      }
+      const newCourse = await res.json();
+      setCourses((prev) => [...prev, newCourse]);
+      return { success: true, course: newCourse };
+    } catch (err) {
+      return { success: false, message: "Course creation failed" };
+    }
   };
 
   // Student: Enroll in course
-  const enrollStudent = (studentId, courseId, studentName) => {
-    const existing = enrollments.find(e => e.studentId === studentId && e.courseId === courseId);
-    if (existing) return { success: false, message: "Already enrolled" };
-
-    const enrollment = {
-      id: `enrollment-${Date.now()}`,
-      studentId,
-      courseId,
-      studentName,
-      enrolledDate: new Date().toISOString(),
-      attendance: 0,
-      progress: 0,
-      completedAssignments: [],
-      quizScores: [],
-    };
-
-    setEnrollments([...enrollments, enrollment]);
-    setCourses(courses.map(c => c.id === courseId 
-      ? { ...c, students: [...c.students, studentId] }
-      : c
-    ));
-
-    return { success: true, message: "Successfully enrolled", enrollment };
+  const enrollStudent = async (studentId, courseId, studentName) => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/enrollments/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_id: studentId, course_id: courseId, student_name: studentName }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, message: errorData.detail || "Enrollment failed" };
+      }
+      const enrollment = await res.json();
+      setEnrollments((prev) => [...prev, enrollment]);
+      return { success: true, message: "Successfully enrolled", enrollment };
+    } catch (err) {
+      return { success: false, message: "Enrollment failed" };
+    }
   };
 
   // Teacher: Upload material
@@ -104,82 +93,83 @@ export const FormalEducationProvider = ({ children }) => {
   };
 
   // Teacher: Create assignment
-  const createAssignment = (courseId, assignment) => {
-    const newAssignment = {
-      id: `assignment-${Date.now()}`,
-      ...assignment,
-      createdAt: new Date().toISOString(),
-      submissions: [],
-    };
-
-    setCourses(courses.map(c => c.id === courseId
-      ? { ...c, assignments: [...c.assignments, newAssignment] }
-      : c
-    ));
-
-    return newAssignment;
+  const createAssignment = async (courseId, assignment) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/assignments/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...assignment, course_id: courseId }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, message: errorData.detail || "Assignment creation failed" };
+      }
+      const newAssignment = await res.json();
+      setCourses((prev) => prev.map(c => c.id === courseId ? { ...c, assignments: [...(c.assignments || []), newAssignment] } : c));
+      return { success: true, assignment: newAssignment };
+    } catch (err) {
+      return { success: false, message: "Assignment creation failed" };
+    }
   };
 
   // Student: Submit assignment
-  const submitAssignment = (enrollmentId, assignmentId, submission) => {
-    const newSubmission = {
-      id: `submission-${Date.now()}`,
-      enrollmentId,
-      assignmentId,
-      ...submission,
-      submittedAt: new Date().toISOString(),
-      status: "submitted",
-      grade: null,
-      feedback: "",
-    };
-
-    setSubmissions([...submissions, newSubmission]);
-
-    // Update enrollment
-    setEnrollments(enrollments.map(e => e.id === enrollmentId
-      ? { ...e, completedAssignments: [...e.completedAssignments, assignmentId] }
-      : e
-    ));
-
-    return newSubmission;
+  const submitAssignment = async (enrollmentId, assignmentId, submission) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/assignment_submissions/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enrollment_id: enrollmentId, assignment_id: assignmentId, ...submission }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, message: errorData.detail || "Assignment submission failed" };
+      }
+      const newSubmission = await res.json();
+      setSubmissions((prev) => [...prev, newSubmission]);
+      return { success: true, submission: newSubmission };
+    } catch (err) {
+      return { success: false, message: "Assignment submission failed" };
+    }
   };
 
   // Teacher: Create quiz
-  const createQuiz = (courseId, quiz) => {
-    const newQuiz = {
-      id: `quiz-${Date.now()}`,
-      ...quiz,
-      createdAt: new Date().toISOString(),
-      questions: [],
-      submissions: [],
-    };
-
-    setCourses(courses.map(c => c.id === courseId
-      ? { ...c, quizzes: [...c.quizzes, newQuiz] }
-      : c
-    ));
-
-    return newQuiz;
+  const createQuiz = async (courseId, quiz) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/quizzes/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...quiz, course_id: courseId }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, message: errorData.detail || "Quiz creation failed" };
+      }
+      const newQuiz = await res.json();
+      setCourses((prev) => prev.map(c => c.id === courseId ? { ...c, quizzes: [...(c.quizzes || []), newQuiz] } : c));
+      return { success: true, quiz: newQuiz };
+    } catch (err) {
+      return { success: false, message: "Quiz creation failed" };
+    }
   };
 
   // Student: Submit quiz
-  const submitQuiz = (enrollmentId, quizId, answers, score) => {
-    const quizSubmission = {
-      id: `quiz-submission-${Date.now()}`,
-      enrollmentId,
-      quizId,
-      answers,
-      score,
-      submittedAt: new Date().toISOString(),
-    };
-
-    // Update enrollment
-    setEnrollments(enrollments.map(e => e.id === enrollmentId
-      ? { ...e, quizScores: [...e.quizScores, { quizId, score }] }
-      : e
-    ));
-
-    return quizSubmission;
+  const submitQuiz = async (enrollmentId, quizId, answers, score) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/quiz_submissions/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enrollment_id: enrollmentId, quiz_id: quizId, answers, score }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, message: errorData.detail || "Quiz submission failed" };
+      }
+      const quizSubmission = await res.json();
+      setEnrollments((prev) => prev.map(e => e.id === enrollmentId ? { ...e, quizScores: [...(e.quizScores || []), { quizId, score }] } : e));
+      return { success: true, submission: quizSubmission };
+    } catch (err) {
+      return { success: false, message: "Quiz submission failed" };
+    }
   };
 
   // Teacher: Schedule class
@@ -228,11 +218,17 @@ export const FormalEducationProvider = ({ children }) => {
   };
 
   // Mark attendance
-  const markAttendance = (enrollmentId) => {
-    setEnrollments(enrollments.map(e => e.id === enrollmentId
-      ? { ...e, attendance: e.attendance + 1 }
-      : e
-    ));
+  const markAttendance = async (enrollmentId) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/attendance/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enrollment_id: enrollmentId }),
+      });
+      if (res.ok) {
+        setEnrollments((prev) => prev.map(e => e.id === enrollmentId ? { ...e, attendance: (e.attendance || 0) + 1 } : e));
+      }
+    } catch (err) {}
   };
 
   // Update progress
@@ -244,20 +240,22 @@ export const FormalEducationProvider = ({ children }) => {
   };
 
   // Generate certificate (when progress = 100)
-  const generateCertificate = (enrollmentId) => {
-    const enrollment = enrollments.find(e => e.id === enrollmentId);
-    if (!enrollment || enrollment.progress < 100) {
-      return { success: false, message: "Course not completed" };
+  const generateCertificate = async (enrollmentId) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/certificates/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enrollment_id: enrollmentId }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, message: errorData.detail || "Certificate generation failed" };
+      }
+      const certificate = await res.json();
+      return { success: true, message: "Certificate issued", certificate };
+    } catch (err) {
+      return { success: false, message: "Certificate generation failed" };
     }
-
-    const certificate = {
-      id: `cert-${Date.now()}`,
-      enrollmentId,
-      issuedAt: new Date().toISOString(),
-      certificateNumber: `CERT-${Date.now().toString().slice(-8)}`,
-    };
-
-    return { success: true, message: "Certificate issued", certificate };
   };
 
   // Get student's enrollments
