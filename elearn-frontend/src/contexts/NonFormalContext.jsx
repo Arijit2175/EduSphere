@@ -312,7 +312,7 @@ export const NonFormalProvider = ({ children }) => {
   useEffect(() => {
     const fetchData = async () => {
       if (!user || !user.access_token) {
-        setCourses([]);
+        setCourses(DEFAULT_COURSES);
         setEnrollments([]);
         setProgress({});
         setCertificates([]);
@@ -323,7 +323,14 @@ export const NonFormalProvider = ({ children }) => {
         const authHeader = { Authorization: `Bearer ${token}` };
         const coursesRes = await fetch("http://127.0.0.1:8000/nonformal/courses/", { headers: authHeader });
         if (coursesRes.ok) {
-          setCourses(await coursesRes.json());
+          const fetchedCourses = await coursesRes.json();
+          if (Array.isArray(fetchedCourses) && fetchedCourses.length > 0) {
+            setCourses(fetchedCourses);
+          } else {
+            setCourses(DEFAULT_COURSES);
+          }
+        } else {
+          setCourses(DEFAULT_COURSES);
         }
         const enrollmentsRes = await fetch("http://127.0.0.1:8000/nonformal/enrollments/", { headers: authHeader });
         if (enrollmentsRes.ok) {
@@ -337,7 +344,9 @@ export const NonFormalProvider = ({ children }) => {
         if (certsRes.ok) {
           setCertificates(await certsRes.json());
         }
-      } catch (err) {}
+      } catch (err) {
+        setCourses(DEFAULT_COURSES);
+      }
     };
     fetchData();
   }, [user]);

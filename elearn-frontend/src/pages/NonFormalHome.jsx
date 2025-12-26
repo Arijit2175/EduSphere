@@ -66,6 +66,9 @@ export default function NonFormalHome() {
     });
   }, [searchQuery, selectedCategory, courses]);
 
+  // Debug: Log courses and filtered
+  console.log("[NonFormalHome] courses:", courses);
+  // recommended courses
   const recommended = useMemo(() => {
     return [...courses].sort(() => Math.random() - 0.5).slice(0, 4);
   }, [courses]);
@@ -247,6 +250,8 @@ export default function NonFormalHome() {
                 <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
                   All Courses {selectedCategory && `in ${categoryMap[selectedCategory]}`}
                 </Typography>
+                {/* Debug: Log filtered array */}
+                {console.log("[NonFormalHome] filtered:", filtered)}
                 {filtered.length === 0 ? (
                   <Card sx={{ p: 4, textAlign: "center" }}>
                     <Typography variant="body1" sx={{ color: "#999" }}>
