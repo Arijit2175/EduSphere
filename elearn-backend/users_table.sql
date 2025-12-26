@@ -125,7 +125,6 @@ CREATE TABLE IF NOT EXISTS teachers (
     avatar TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 -- Unified Users Table for Authentication
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
