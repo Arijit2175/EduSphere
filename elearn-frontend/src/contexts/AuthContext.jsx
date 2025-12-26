@@ -28,43 +28,25 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-    const login = async (email, password, role = "student") => {
-      try {
-        const response = await fetch("http://127.0.0.1:8000/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, role }),
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.detail || "Login failed");
-        }
-        const data = await response.json();
-        // Adjust this based on your backend's response structure
-        const userData = data.user || data;
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
-        return userData;
-      } catch (err) {
-        throw err;
+  const login = async (email, password, role = "student") => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, role }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Login failed");
       }
-    };
-
-  const register = (formData) => {
-    // Mock registration
-    const mockUser = buildUser({
-      id: Date.now(),
-      email: formData.email,
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      avatar: "👤",
-      joinedDate: new Date().toISOString(),
-      role: formData.role || "student",
-    });
-
-    setUser(mockUser);
-    localStorage.setItem("user", JSON.stringify(mockUser));
-    return mockUser;
+      const data = await response.json();
+      const userData = data.user || data;
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      return userData;
+    } catch (err) {
+      throw err;
+    }
   };
     const register = async (formData) => {
       try {
