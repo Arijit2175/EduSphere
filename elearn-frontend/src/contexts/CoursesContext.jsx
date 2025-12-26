@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { useAuth } from "./AuthContext";
 
 const CoursesContext = createContext();
 
@@ -12,13 +13,17 @@ export const useCourses = () => {
 
 export const CoursesProvider = ({ children }) => {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
-  // Fetch enrolled courses from backend on mount
+  const { user } = useAuth();
   useEffect(() => {
     const fetchEnrolledCourses = async () => {
+      if (!user || !user.access_token) {
+        setEnrolledCourses([]);
+        return;
+      }
       try {
-        const token = JSON.parse(localStorage.getItem("user"))?.access_token;
+        const token = user.access_token;
         const res = await fetch("http://127.0.0.1:8000/enrollments/me", {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
           const data = await res.json();
@@ -29,11 +34,11 @@ export const CoursesProvider = ({ children }) => {
       }
     };
     fetchEnrolledCourses();
-  }, []);
+  }, [user]);
 
   const enrollCourse = async (courseId) => {
     try {
-      const token = JSON.parse(localStorage.getItem("user"))?.access_token;
+      const token = user?.access_token;
       const res = await fetch("http://127.0.0.1:8000/enrollments/", {
         method: "POST",
         headers: {
@@ -56,7 +61,7 @@ export const CoursesProvider = ({ children }) => {
 
   const unenrollCourse = async (courseId) => {
     try {
-      const token = JSON.parse(localStorage.getItem("user"))?.access_token;
+      const token = user?.access_token;
       const res = await fetch(`http://127.0.0.1:8000/enrollments/${courseId}`, {
         method: "DELETE",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -69,7 +74,7 @@ export const CoursesProvider = ({ children }) => {
 
   const updateProgress = async (courseId, progress) => {
     try {
-      const token = JSON.parse(localStorage.getItem("user"))?.access_token;
+      const token = user?.access_token;
       const res = await fetch(`http://127.0.0.1:8000/enrollments/${courseId}/progress`, {
         method: "PUT",
         headers: {
