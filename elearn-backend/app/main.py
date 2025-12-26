@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api import auth, courses, enrollments, assignments, lessons, attendance, quizzes, resources, certificates
+from app.api import auth, courses, enrollments, assignments, lessons, attendance, quizzes, resources, certificates, ai_tutor_chats, class_schedules, contact_messages
 
 app = FastAPI()
 
@@ -12,6 +12,9 @@ app.include_router(attendance.router)
 app.include_router(quizzes.router)
 app.include_router(resources.router)
 app.include_router(certificates.router)
+app.include_router(ai_tutor_chats.router)
+app.include_router(class_schedules.router)
+app.include_router(contact_messages.router)
 
 @app.get("/")
 def read_root():
