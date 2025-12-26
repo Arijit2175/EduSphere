@@ -16,13 +16,13 @@ export default function Profile() {
   // Avatar state is synced with user context
   const [avatar, setAvatar] = React.useState(user?.avatar || null);
   const { isOpen } = useSidebar();
-  const displayName = user?.name || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Learner";
+  const displayName = user?.name || `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || "Learner";
 
   // Form state is only updated when Save is clicked
   const [editOpen, setEditOpen] = React.useState(false);
   const [form, setForm] = React.useState({
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "",
+    first_name: user?.first_name || "",
+    last_name: user?.last_name || "",
     email: user?.email || "",
     phone: user?.phone || "",
     gender: user?.gender || "",
@@ -62,7 +62,11 @@ export default function Profile() {
   };
   const handleEditClose = () => setEditOpen(false);
   const handleEditFormChange = (e) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+    // Map camelCase to snake_case for first_name and last_name
+    let { name, value } = e.target;
+    if (name === "firstName") name = "first_name";
+    if (name === "lastName") name = "last_name";
+    setEditForm({ ...editForm, [name]: value });
   };
   const handleFormSubmit = () => {
     setForm(editForm);
@@ -213,8 +217,8 @@ export default function Profile() {
             <DialogTitle>Edit Profile</DialogTitle>
             <DialogContent sx={{ minHeight: 400, mt: 3 }}>
               <Grid container spacing={3} sx={{ mt: 2 }}>
-                <Grid item xs={12} sm={6}><TextField label="First Name" name="firstName" value={editForm.firstName} onChange={handleEditFormChange} fullWidth /></Grid>
-                <Grid item xs={12} sm={6}><TextField label="Last Name" name="lastName" value={editForm.lastName} onChange={handleEditFormChange} fullWidth /></Grid>
+                <Grid item xs={12} sm={6}><TextField label="First Name" name="firstName" value={editForm.first_name} onChange={handleEditFormChange} fullWidth /></Grid>
+                <Grid item xs={12} sm={6}><TextField label="Last Name" name="lastName" value={editForm.last_name} onChange={handleEditFormChange} fullWidth /></Grid>
                 <Grid item xs={12} sm={6}><TextField label="Email" name="email" value={editForm.email} onChange={handleEditFormChange} fullWidth /></Grid>
                 <Grid item xs={6} sm={3}>
                   <TextField

@@ -40,9 +40,15 @@ export const AuthProvider = ({ children }) => {
         throw new Error(errorData.detail || "Login failed");
       }
       const data = await response.json();
-      // data: { access_token, token_type }
-      // Optionally, fetch user profile here if needed
-      const userObj = { email, access_token: data.access_token, token_type: data.token_type };
+      // Fetch full user profile after login
+      const profileRes = await fetch("http://127.0.0.1:8000/users/me", {
+        headers: { Authorization: `Bearer ${data.access_token}` },
+      });
+      let profile = {};
+      if (profileRes.ok) {
+        profile = await profileRes.json();
+      }
+      const userObj = { ...profile, email, access_token: data.access_token, token_type: data.token_type };
       setUser(userObj);
       localStorage.setItem("user", JSON.stringify(userObj));
       return userObj;
