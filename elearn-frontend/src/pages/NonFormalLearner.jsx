@@ -36,12 +36,18 @@ export default function NonFormalLearner() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
   const { courseId } = useParams();
-  const { courses, getCourseProgress, updateLessonProgress, updateAssessmentScore, resetCourseProgress, earnCertificate } = useNonFormal();
+  const { courses, getCourseProgress, updateLessonProgress, updateAssessmentScore, resetCourseProgress, earnCertificate, enrollments, progress } = useNonFormal();
   const navigate = useNavigate();
 
-  const course = courses.find((c) => c.id === courseId);
-  const progress = getCourseProgress(user?.id, courseId);
-  const [currentLessonIdx, setCurrentLessonIdx] = useState(progress?.currentLessonIndex || 0);
+  // Debug logging after all hooks/vars
+  console.log('DEBUG: courseId param:', courseId);
+  console.log('DEBUG: courses array:', courses);
+  console.log('DEBUG: enrollments:', enrollments);
+  console.log('DEBUG: progress:', progress);
+
+  const course = courses.find((c) => String(c.id) === String(courseId));
+  const userProgress = getCourseProgress(user?.id, courseId);
+  const [currentLessonIdx, setCurrentLessonIdx] = useState(userProgress?.currentLessonIndex || 0);
   const [openQuiz, setOpenQuiz] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -51,7 +57,7 @@ export default function NonFormalLearner() {
     ? course.assessmentQuestions
     : [];
 
-  if (!course || !progress) {
+  if (!course || !userProgress) {
     return (
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
         <Sidebar />
@@ -59,7 +65,7 @@ export default function NonFormalLearner() {
           <Navbar />
           <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, transition: "margin-left 0.3s ease", p: 4 }}>
             <Typography variant="h5">Course not found or not enrolled</Typography>
-            <Button onClick={() => navigate("/nonformal")} sx={{ mt: 2 }}>
+            <Button onClick={() => navigate("/nonformal") } sx={{ mt: 2 }}>
               Back to Courses
             </Button>
           </Box>
@@ -69,7 +75,7 @@ export default function NonFormalLearner() {
   }
 
   const currentLesson = course.lessons[currentLessonIdx];
-  const progressPercentage = ((progress.completedLessons?.length || 0) / (course.lessons?.length || 1)) * 100;
+  const progressPercentage = ((userProgress.completedLessons?.length || 0) / (course.lessons?.length || 1)) * 100;
   const isLastLesson = currentLessonIdx === course.lessons.length - 1;
 
   const handleNextLesson = () => {
@@ -263,7 +269,7 @@ export default function NonFormalLearner() {
                         variant={currentLessonIdx === idx ? "contained" : "outlined"}
                         onClick={() => setCurrentLessonIdx(idx)}
                         startIcon={
-                          progress.completedLessons?.includes(idx) ? (
+                          userProgress.completedLessons?.includes(idx) ? (
                             <CheckCircleIcon />
                           ) : (
                             <RadioButtonUncheckedIcon />

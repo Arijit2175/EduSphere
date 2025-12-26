@@ -10,8 +10,8 @@ def get_my_enrollments(user=Depends(get_current_user)):
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor(dictionary=True)
-    # Assume user is a student; adjust if you support teacher enrollments
-    cursor.execute("SELECT * FROM enrollments WHERE student_id=%s", (user["id"],))
+    # Use user_id instead of student_id
+    cursor.execute("SELECT * FROM enrollments WHERE user_id=%s", (user["id"],))
     enrollments = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -36,20 +36,20 @@ def enroll_student(student_id: int, course_id: int):
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
     # Check if already enrolled
-    cursor.execute("SELECT id FROM enrollments WHERE student_id=%s AND course_id=%s", (student_id, course_id))
+    cursor.execute("SELECT id FROM enrollments WHERE user_id=%s AND course_id=%s", (student_id, course_id))
     if cursor.fetchone():
         cursor.close()
         conn.close()
         raise HTTPException(status_code=400, detail="Already enrolled")
     cursor.execute(
-        "INSERT INTO enrollments (student_id, course_id) VALUES (%s, %s)",
+        "INSERT INTO enrollments (user_id, course_id) VALUES (%s, %s)",
         (student_id, course_id)
     )
     conn.commit()
     enrollment_id = cursor.lastrowid
     cursor.close()
     conn.close()
-    return {"id": enrollment_id, "student_id": student_id, "course_id": course_id}
+    return {"id": enrollment_id, "user_id": student_id, "course_id": course_id}
 
 @router.delete("/{enrollment_id}")
 def remove_enrollment(enrollment_id: int):

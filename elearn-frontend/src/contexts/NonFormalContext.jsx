@@ -328,8 +328,24 @@ export const NonFormalProvider = ({ children }) => {
             // Merge lessons and attachments from DEFAULT_COURSES by ID
             const courseMap = Object.fromEntries(DEFAULT_COURSES.map(c => [String(c.id), c]));
             const mergedCourses = fetchedCourses.map(c => {
-              const extra = courseMap[String(c.id)] || {};
-              return { ...c, lessons: extra.lessons || [], attachments: extra.attachments || [], outcomes: extra.outcomes || [] };
+              // Try to match by id or by title if id not found
+              let extra = courseMap[String(c.id)];
+              if (!extra) {
+                // Fallback: match by title (case-insensitive)
+                extra = DEFAULT_COURSES.find(dc => dc.title.toLowerCase() === (c.title || '').toLowerCase());
+              }
+              let merged = { ...c, lessons: extra?.lessons || [], attachments: extra?.attachments || [], outcomes: extra?.outcomes || [], assessmentQuestions: extra?.assessmentQuestions || [] };
+              // Final fallback: if no lessons, try to get from DEFAULT_COURSES by title
+              if ((!merged.lessons || merged.lessons.length === 0) && c.title) {
+                const fallback = DEFAULT_COURSES.find(dc => dc.title.toLowerCase() === c.title.toLowerCase());
+                if (fallback) {
+                  merged.lessons = fallback.lessons || [];
+                  merged.attachments = fallback.attachments || [];
+                  merged.outcomes = fallback.outcomes || [];
+                  merged.assessmentQuestions = fallback.assessmentQuestions || [];
+                }
+              }
+              return merged;
             });
             setCourses(mergedCourses);
           } else {
@@ -344,7 +360,13 @@ export const NonFormalProvider = ({ children }) => {
         }
         const progressRes = await fetch("http://127.0.0.1:8000/nonformal/progress/", { headers: authHeader });
         if (progressRes.ok) {
-          setProgress(await progressRes.json());
+          const progressArr = await progressRes.json();
+          // Convert array to object keyed by userId-courseId
+          const progressObj = {};
+          for (const p of progressArr) {
+            progressObj[`${p.user_id || user.id}-${p.course_id}`] = p;
+          }
+          setProgress(progressObj);
         }
         const certsRes = await fetch("http://127.0.0.1:8000/nonformal/certificates/", { headers: authHeader });
         if (certsRes.ok) {

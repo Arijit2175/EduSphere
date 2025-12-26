@@ -62,8 +62,8 @@ export default function NonFormalCourseDetail() {
     );
   }
 
-  const handleEnroll = () => {
-    const result = enrollCourse(user?.id, courseId);
+  const handleEnroll = async () => {
+    const result = await enrollCourse(user?.id, courseId);
     if (result?.success) {
       navigate(`/nonformal/learn/${courseId}`);
     } else {
