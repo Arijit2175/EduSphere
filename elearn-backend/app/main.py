@@ -1,11 +1,12 @@
 from fastapi import FastAPI
-from app.api import auth, courses, enrollments
+from app.api import auth, courses, enrollments, assignments
 
 app = FastAPI()
 
 app.include_router(auth.router)
 app.include_router(courses.router)
 app.include_router(enrollments.router)
+app.include_router(assignments.router)
 
 @app.get("/")
 def read_root():
