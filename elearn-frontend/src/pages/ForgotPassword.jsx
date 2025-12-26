@@ -1,3 +1,4 @@
+
 import { Box, Container, Button, Typography, Card, CardContent, Link, Alert } from "@mui/material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -25,8 +26,19 @@ export default function ForgotPassword() {
     }
   }, [isAuthenticated, navigate]);
 
+  // Redirect to login page after successful reset
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        navigate("/login");
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("handleSubmit called", { email, newPassword, confirmPassword });
     setError("");
     setSuccess(false);
     setLoading(true);
@@ -191,6 +203,7 @@ export default function ForgotPassword() {
                   />
 
                   <Button
+                    type="submit"
                     fullWidth
                     variant="contained"
                     sx={{
@@ -259,6 +272,8 @@ export default function ForgotPassword() {
                   <Button
                     fullWidth
                     variant="outlined"
+                    component={Link}
+                    to="/login"
                     sx={{
                       color: "#4facfe",
                       borderColor: "#4facfe",
@@ -273,7 +288,6 @@ export default function ForgotPassword() {
                         borderColor: "#4facfe",
                       },
                     }}
-                    onClick={() => navigate("/login")}
                   >
                     Back to Login
                   </Button>
