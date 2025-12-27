@@ -102,13 +102,15 @@ async def register(request: Request):
 # Login endpoint
 from fastapi import Request
 
+
 @router.post("/login")
 async def login(request: Request):
     data = await request.json()
     email = data.get("email")
     password = data.get("password")
-    if not email or not password:
-        raise HTTPException(status_code=400, detail="Email and password required")
+    role = data.get("role")
+    if not email or not password or not role:
+        raise HTTPException(status_code=400, detail="Email, password, and role required")
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
@@ -119,5 +121,7 @@ async def login(request: Request):
     conn.close()
     if not user or not verify_password(password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    if user["role"] != role:
+        raise HTTPException(status_code=403, detail=f"No {role} account found with these credentials.")
     access_token = create_access_token({"sub": str(user["id"]), "role": user["role"]})
     return {"access_token": access_token, "token_type": "bearer"}
