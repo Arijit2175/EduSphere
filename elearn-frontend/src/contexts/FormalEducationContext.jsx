@@ -126,10 +126,16 @@ export const FormalEducationProvider = ({ children }) => {
   // Teacher: Create assignment
   const createAssignment = async (courseId, assignment) => {
     try {
+      // Map dueDate (camelCase) to due_date (snake_case) for backend
+      const assignmentData = { ...assignment, course_id: courseId };
+      if (assignment.dueDate) {
+        assignmentData.due_date = assignment.dueDate;
+        delete assignmentData.dueDate;
+      }
       const res = await fetch(`http://127.0.0.1:8000/assignments/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...assignment, course_id: courseId }),
+        body: JSON.stringify(assignmentData),
       });
       if (!res.ok) {
         const errorData = await res.json();

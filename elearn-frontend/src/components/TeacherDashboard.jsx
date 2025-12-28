@@ -39,7 +39,24 @@ const getGradeColor = (grade) => {
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
-  const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass, getAssignmentSubmissions, reviewSubmission, deleteMaterial, addMaterial } = useFormalEducation();
+  const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass, getAssignmentSubmissions, reviewSubmission, deleteMaterial, addMaterial, createAssignment } = useFormalEducation();
+  // Delete assignment helper
+  async function handleDeleteAssignment(courseId, assignmentId) {
+    if (!window.confirm('Are you sure you want to delete this assignment?')) return;
+    const res = await fetch(`http://127.0.0.1:8000/assignments/${assignmentId}`, { method: 'DELETE' });
+    if (res.ok) {
+      // Fetch latest assignments from backend and update dialog
+      try {
+        const res2 = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${courseId}`);
+        if (res2.ok) {
+          const assignments = await res2.json();
+          setManageDialog(prev => ({ open: true, course: { ...prev.course, assignments } }));
+        }
+      } catch {}
+    } else {
+      alert('Failed to delete assignment.');
+    }
+  }
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState({ title: "", description: "", duration: "", schedule: "" });
   const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
@@ -637,185 +654,67 @@ export default function TeacherDashboard() {
             {/* Materials Section */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>📄 Course Materials ({manageDialog.course.materials?.length || 0})</Typography>
-              {manageDialog.course.materials?.length > 0 && (
-                <Stack spacing={1} sx={{ mb: 2 }}>
-                  {manageDialog.course.materials.map((material, idx) => {
-                    // If material.type is 'pdf' and url is base64, use it as a download link
-                    let downloadUrl = material.url;
-                    let isPdf = material.type === 'pdf' && material.url && material.url.startsWith('data:application/pdf');
-                    let isLink = material.type === 'link' && material.url && !material.url.startsWith('data:');
-                    return (
-                      <Paper key={idx} sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Stack direction="row" spacing={1} alignItems="center" sx={{ flex: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{material.name}</Typography>
-                          {isPdf && (
-                            <Typography variant="caption" sx={{ color: "#6b7280" }}>(PDF)</Typography>
-                          )}
-                          {isLink && (
-                            <Typography variant="caption" sx={{ color: "#6b7280" }}>(Link)</Typography>
-                          )}
-                        </Stack>
-                        <Stack direction="row" spacing={1}>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            href={downloadUrl}
-                            download={isPdf ? material.name : undefined}
-                            target={isLink ? "_blank" : undefined}
-                          >
-                            Download
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            color="error"
-                            onClick={async () => {
-                              if (window.confirm('Are you sure you want to delete this material?')) {
-                                const result = await deleteMaterial(manageDialog.course.id, material.id);
-                                if (result && result.success) {
-                                  // Fetch latest materials from backend and update dialog
-                                  try {
-                                    const res = await fetch(`http://127.0.0.1:8000/resources/?course_id=${manageDialog.course.id}`);
-                                    if (res.ok) {
-                                      const materials = await res.json();
-                                      setManageDialog(prev => ({ open: true, course: { ...prev.course, materials } }));
-                                    }
-                                  } catch {}
-                                } else {
-                                  alert(result && result.message ? result.message : 'Failed to delete material.');
-                                }
-                              }
-                            }}
-                          >
-                            Delete
-                          </Button>
-                        </Stack>
+                {manageDialog.course.materials?.length > 0 && (
+                  <Stack spacing={1} sx={{ mb: 2 }}>
+                    {manageDialog.course.materials.map((material, idx) => (
+                      <Paper key={material.id || idx} sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span>{material.name}</span>
                       </Paper>
-                    );
-                  })}
-                </Stack>
-              )}
-              <Card sx={{ background: "#f0fdf4", border: "1px solid #10b981" }}>
-                <CardContent>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>Add New Material</Typography>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Material Name"
-                    value={materialForm.name}
-                    onChange={(e) => setMaterialForm({ ...materialForm, name: e.target.value })}
-                    sx={{ mb: 2 }}
-                  />
-                  {/* URL input removed, only PDF upload allowed */}
-                  <input
-                    type="file"
-                    accept="application/pdf"
-                    style={{ display: "block", marginBottom: 16 }}
-                    onChange={e => {
-                      const file = e.target.files[0];
-                      setMaterialForm(f => ({ ...f, file }));
-                    }}
-                  />
-                  <Button
-                    variant="contained"
-                    size="small"
-                    fullWidth
-                    onClick={async () => {
-                      if (materialForm.name && materialForm.file) {
-                        await addMaterial(manageDialog.course.id, {
-                          name: materialForm.name,
-                          file: materialForm.file,
-                          type: "pdf"
-                        });
-                        setMaterialForm({ name: "", file: null });
-                        // Fetch latest materials from backend and update dialog
-                        try {
-                          const res = await fetch(`http://127.0.0.1:8000/resources/?course_id=${manageDialog.course.id}`);
-                          if (res.ok) {
-                            const materials = await res.json();
-                            setManageDialog(prev => ({ open: true, course: { ...prev.course, materials } }));
-                          }
-                        } catch {}
-                      } else {
-                        alert("Please provide a name and a PDF file.");
-                      }
-                    }}
-                  >
-                    Add Material
-                  </Button>
-                </CardContent>
-              </Card>
+                    ))}
+                  </Stack>
+                )}
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  style={{ display: "block", marginBottom: 16 }}
+                  onChange={e => {
+                    const file = e.target.files[0];
+                    setMaterialForm(f => ({ ...f, file }));
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  size="small"
+                  fullWidth
+                  onClick={async () => {
+                    if (manageDialog.course?.id && materialForm.name && materialForm.file) {
+                      await addMaterial(manageDialog.course.id, {
+                        name: materialForm.name,
+                        file: materialForm.file,
+                        type: "pdf"
+                      });
+                      setMaterialForm({ name: "", file: null });
+                      // Fetch latest materials from backend and update dialog
+                      try {
+                        const res = await fetch(`http://127.0.0.1:8000/resources/?course_id=${manageDialog.course.id}`);
+                        if (res.ok) {
+                          const materials = await res.json();
+                          setManageDialog(prev => ({ open: true, course: { ...prev.course, materials } }));
+                        }
+                      } catch {}
+                    } else {
+                      alert("Please provide a name and a PDF file.");
+                    }
+                  }}
+                >
+                  Add Material
+                </Button>
+              </Box>
             </Box>
 
             {/* Assignments Section */}
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>📝 Assignments ({manageDialog.course.assignments?.length || 0})</Typography>
               {manageDialog.course.assignments?.length > 0 && (
-                <Stack spacing={2} sx={{ mb: 2 }}>
-                  {manageDialog.course.assignments.map((assignment) => {
-                    const submissions = getAssignmentSubmissions(assignment.id);
-                    return (
-                      <Paper key={assignment.id} sx={{ p: 2 }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>{assignment.title}</Typography>
-                        <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 1 }}>{assignment.description}</Typography>
-                        <Typography variant="caption" sx={{ display: "block", mb: 2, color: "#ef4444" }}>Due: {assignment.dueDate}</Typography>
-                        
-                        {/* Submissions */}
-                        {submissions.length > 0 ? (
-                          <Box sx={{ mt: 2, background: "#f9fafb", p: 2, borderRadius: 1 }}>
-                            <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>
-                              📬 Submissions ({submissions.length})
-                            </Typography>
-                            <Stack spacing={1}>
-                              {submissions.map((submission) => {
-                                const enrollment = manageDialog.course.students?.find(s => s.id === submission.enrollmentId);
-                                const studentEnrollment = getCourseStudents(manageDialog.course.id).find(e => e.id === submission.enrollmentId);
-                                return (
-                                  <Box key={submission.id} sx={{ p: 1.5, background: "white", borderRadius: 1, border: "1px solid #e5e7eb" }}>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                      <Box sx={{ flex: 1 }}>
-                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                          {studentEnrollment?.studentName || "Student"}
-                                        </Typography>
-                                        <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                                          Submitted: {new Date(submission.submittedAt).toLocaleString()}
-                                        </Typography>
-                                        {submission.status === "graded" && (() => {
-                                          const gradeColors = getGradeColor(submission.grade);
-                                          return (
-                                            <Typography variant="caption" sx={{ display: "block", color: gradeColors.color, fontWeight: 600 }}>
-                                              Grade: {submission.grade} | {submission.feedback}
-                                            </Typography>
-                                          );
-                                        })()}
-                                      </Box>
-                                      <Stack direction="row" spacing={1}>
-                                        <Button
-                                          size="small"
-                                          variant="outlined"
-                                          onClick={() => {
-                                            setGradeDialog({ open: true, submission });
-                                            setGradeForm({ grade: submission.grade || "", feedback: submission.feedback || "" });
-                                          }}
-                                        >
-                                          {submission.status === "graded" ? "Edit Grade" : "Grade"}
-                                        </Button>
-                                      </Stack>
-                                    </Stack>
-                                    <Typography variant="body2" sx={{ mt: 1, p: 1, background: "#f3f4f6", borderRadius: 1, fontSize: "0.85rem" }}>
-                                      {submission.content}
-                                    </Typography>
-                                  </Box>
-                                );
-                              })}
-                            </Stack>
-                          </Box>
-                        ) : (
-                          <Typography variant="caption" sx={{ color: "#9ca3af", fontStyle: "italic" }}>No submissions yet</Typography>
-                        )}
-                      </Paper>
-                    );
-                  })}
+                <Stack spacing={1} sx={{ mb: 2 }}>
+                  {manageDialog.course.assignments.map((assignment, idx) => (
+                    <Paper key={assignment.id || idx} sx={{ p: 2, mb: 2 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>{assignment.title}</Typography>
+                      <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 1 }}>{assignment.description}</Typography>
+                      <Typography variant="caption" sx={{ display: "block", mb: 2, color: "#ef4444" }}>Due: {assignment.dueDate || assignment.due_date}</Typography>
+                      {/* You can add submissions and actions here if needed */}
+                    </Paper>
+                  ))}
                 </Stack>
               )}
               <Card sx={{ background: "#fef3c7", border: "1px solid #f59e0b" }}>
@@ -852,10 +751,22 @@ export default function TeacherDashboard() {
                   <Button 
                     variant="contained" 
                     size="small"
-                    onClick={() => {
+                    onClick={async () => {
                       if (assignmentForm.title && assignmentForm.dueDate) {
-                        manageDialog.course.assignments.push({ id: Date.now(), ...assignmentForm });
-                        setAssignmentForm({ title: "", description: "", dueDate: "" });
+                        const result = await createAssignment(manageDialog.course.id, assignmentForm);
+                        if (result && result.success) {
+                          // Fetch latest assignments from backend and update dialog
+                          try {
+                            const res = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${manageDialog.course.id}`);
+                            if (res.ok) {
+                              const assignments = await res.json();
+                              setManageDialog(prev => ({ open: true, course: { ...prev.course, assignments } }));
+                            }
+                          } catch {}
+                          setAssignmentForm({ title: "", description: "", dueDate: "" });
+                        } else {
+                          alert(result && result.message ? result.message : "Failed to create assignment.");
+                        }
                       }
                     }}
                   >
