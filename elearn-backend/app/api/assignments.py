@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
 from app.db import get_db_connection
 
 router = APIRouter(prefix="/assignments", tags=["assignments"])
@@ -19,20 +19,29 @@ def list_assignments(course_id: int = None):
     return assignments
 
 @router.post("/")
-def create_assignment(course_id: int, title: str, description: str = "", due_date: str = None):
+@router.post("/")
+def create_assignment(data: dict = Body(...)):
+    course_id = data.get("course_id")
+    title = data.get("title")
+    description = data.get("description", "")
+    due_date = data.get("due_date")
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     cursor.execute(
         "INSERT INTO assignments (course_id, title, description, due_date) VALUES (%s, %s, %s, %s)",
         (course_id, title, description, due_date)
     )
     conn.commit()
     assignment_id = cursor.lastrowid
+    cursor.execute("SELECT * FROM assignments WHERE id=%s", (assignment_id,))
+    new_assignment = cursor.fetchone()
     cursor.close()
     conn.close()
-    return {"id": assignment_id, "course_id": course_id, "title": title}
+    if not new_assignment:
+        raise HTTPException(status_code=500, detail="Failed to fetch new assignment after insert")
+    return new_assignment
 
 @router.put("/{assignment_id}")
 def update_assignment(assignment_id: int, title: str = None, description: str = None, due_date: str = None):

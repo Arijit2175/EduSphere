@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
+from pydantic import BaseModel
 from app.db import get_db_connection
 
 router = APIRouter(prefix="/resources", tags=["resources"])
@@ -18,21 +19,33 @@ def list_resources(course_id: int = None):
     conn.close()
     return resources
 
+
+# Pydantic model for resource creation
+class ResourceCreate(BaseModel):
+    course_id: int
+    name: str
+    url: str
+    type: str = None
+
 @router.post("/")
-def create_resource(course_id: int, name: str, url: str, type: str = None):
+def create_resource(resource: ResourceCreate = Body(...)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     cursor.execute(
         "INSERT INTO resources (course_id, name, url, type) VALUES (%s, %s, %s, %s)",
-        (course_id, name, url, type)
+        (resource.course_id, resource.name, resource.url, resource.type)
     )
     conn.commit()
     resource_id = cursor.lastrowid
+    cursor.execute("SELECT * FROM resources WHERE id=%s", (resource_id,))
+    new_resource = cursor.fetchone()
     cursor.close()
     conn.close()
-    return {"id": resource_id, "course_id": course_id, "name": name}
+    if not new_resource:
+        raise HTTPException(status_code=500, detail="Failed to fetch new resource after insert")
+    return new_resource
 
 @router.put("/{resource_id}")
 def update_resource(resource_id: int, name: str = None, url: str = None, type: str = None):

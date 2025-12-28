@@ -20,9 +20,23 @@ export const FormalEducationProvider = ({ children }) => {
     const fetchData = async () => {
       try {
         const coursesRes = await fetch("http://127.0.0.1:8000/courses/");
+        let coursesData = [];
         if (coursesRes.ok) {
-          const coursesData = await coursesRes.json();
-          setCourses(coursesData);
+          coursesData = await coursesRes.json();
+          // For each course, fetch its materials
+          const coursesWithMaterials = await Promise.all(
+            coursesData.map(async (course) => {
+              try {
+                const res = await fetch(`http://127.0.0.1:8000/resources/?course_id=${course.id}`);
+                if (res.ok) {
+                  const materials = await res.json();
+                  return { ...course, materials };
+                }
+              } catch {}
+              return { ...course, materials: [] };
+            })
+          );
+          setCourses(coursesWithMaterials);
         }
         const enrollmentsRes = await fetch("http://127.0.0.1:8000/enrollments/");
         if (enrollmentsRes.ok) {
@@ -76,20 +90,37 @@ export const FormalEducationProvider = ({ children }) => {
     }
   };
 
-  // Teacher: Upload material
-  const uploadMaterial = (courseId, material) => {
-    const newMaterial = {
-      id: `material-${Date.now()}`,
-      ...material,
-      uploadedAt: new Date().toISOString(),
-    };
 
-    setCourses(courses.map(c => c.id === courseId
-      ? { ...c, materials: [...c.materials, newMaterial] }
+  // Teacher: Add material (save to backend)
+  const addMaterial = async (courseId, material) => {
+    // For now, only support PDFs and simple uploads as base64 or links
+    // If material.file is present, convert to base64 and send as url
+    let url = material.url || "";
+    let type = material.type || "pdf";
+    if (material.file) {
+      // Convert file to base64 string
+      url = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(material.file);
+      });
+    }
+    const res = await fetch("http://127.0.0.1:8000/resources/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ course_id: courseId, name: material.name, url, type }),
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      return { success: false, message: errorData.detail || "Material upload failed" };
+    }
+    const newMaterial = await res.json();
+    setCourses((prev) => prev.map(c => c.id === courseId
+      ? { ...c, materials: [...(c.materials || []), newMaterial] }
       : c
     ));
-
-    return newMaterial;
+    return { success: true, material: newMaterial };
   };
 
   // Teacher: Create assignment
@@ -275,7 +306,7 @@ export const FormalEducationProvider = ({ children }) => {
 
   // Get teacher's courses
   const getTeacherCourses = (teacherId) => {
-    return courses.filter(c => c.teacherId === teacherId);
+    return courses.filter(c => c.instructor_id === teacherId);
   };
 
   // Review submission
@@ -297,11 +328,23 @@ export const FormalEducationProvider = ({ children }) => {
   };
 
   // Delete material
-  const deleteMaterial = (courseId, materialId) => {
-    setCourses(courses.map(c => c.id === courseId
-      ? { ...c, materials: c.materials.filter(m => m.id !== materialId) }
-      : c
-    ));
+  const deleteMaterial = async (courseId, materialId) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/resources/${materialId}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        setCourses(courses => courses.map(c => c.id === courseId
+          ? { ...c, materials: c.materials.filter(m => m.id !== materialId) }
+          : c
+        ));
+        return { success: true };
+      } else {
+        return { success: false, message: "Failed to delete material from backend." };
+      }
+    } catch (err) {
+      return { success: false, message: "Network error while deleting material." };
+    }
   };
 
   const value = {
@@ -310,7 +353,7 @@ export const FormalEducationProvider = ({ children }) => {
     submissions,
     createCourse,
     enrollStudent,
-    uploadMaterial,
+    addMaterial,
     createAssignment,
     submitAssignment,
     createQuiz,

@@ -39,7 +39,7 @@ const getGradeColor = (grade) => {
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
-  const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass, getAssignmentSubmissions, reviewSubmission, deleteMaterial } = useFormalEducation();
+  const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass, getAssignmentSubmissions, reviewSubmission, deleteMaterial, addMaterial } = useFormalEducation();
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState({ title: "", description: "", duration: "", schedule: "" });
   const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
@@ -180,7 +180,7 @@ export default function TeacherDashboard() {
             <Card sx={{ background: "#f093fb20", border: "1px solid #f093fb" }}>
               <CardContent sx={{ textAlign: "center" }}>
                 <Typography variant="h4" sx={{ fontWeight: 700, color: "#f093fb" }}>
-                  {teacherCourses.reduce((acc, c) => acc + c.students.length, 0)}
+                  {teacherCourses.reduce((acc, c) => acc + (Array.isArray(c.students) ? c.students.length : 0), 0)}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#666" }}>
                   Total Students
@@ -192,7 +192,7 @@ export default function TeacherDashboard() {
             <Card sx={{ background: "#4facfe20", border: "1px solid #4facfe" }}>
               <CardContent sx={{ textAlign: "center" }}>
                 <Typography variant="h4" sx={{ fontWeight: 700, color: "#4facfe" }}>
-                  {teacherCourses.reduce((acc, c) => acc + c.materials.length, 0)}
+                  {teacherCourses.reduce((acc, c) => acc + (Array.isArray(c.materials) ? c.materials.length : 0), 0)}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#666" }}>
                   Materials Uploaded
@@ -204,7 +204,7 @@ export default function TeacherDashboard() {
             <Card sx={{ background: "#10b98120", border: "1px solid #10b981" }}>
               <CardContent sx={{ textAlign: "center" }}>
                 <Typography variant="h4" sx={{ fontWeight: 700, color: "#10b981" }}>
-                  {teacherCourses.reduce((acc, c) => acc + c.assignments.length, 0)}
+                  {teacherCourses.reduce((acc, c) => acc + (Array.isArray(c.assignments) ? c.assignments.length : 0), 0)}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#666" }}>
                   Assignments Created
@@ -244,9 +244,9 @@ export default function TeacherDashboard() {
                   <TableRow key={course.id} sx={{ "&:hover": { background: "#f9f9f9" } }}>
                     <TableCell sx={{ fontWeight: 600 }}>{course.title}</TableCell>
                     <TableCell>{course.description.substring(0, 30)}...</TableCell>
-                    <TableCell>{course.students.length}</TableCell>
-                    <TableCell>{course.materials.length}</TableCell>
-                    <TableCell>{course.assignments.length}</TableCell>
+                    <TableCell>{Array.isArray(course.students) ? course.students.length : 0}</TableCell>
+                    <TableCell>{Array.isArray(course.materials) ? course.materials.length : 0}</TableCell>
+                    <TableCell>{Array.isArray(course.assignments) ? course.assignments.length : 0}</TableCell>
                     <TableCell>
                       <Button 
                         size="small" 
@@ -639,43 +639,60 @@ export default function TeacherDashboard() {
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>📄 Course Materials ({manageDialog.course.materials?.length || 0})</Typography>
               {manageDialog.course.materials?.length > 0 && (
                 <Stack spacing={1} sx={{ mb: 2 }}>
-                  {manageDialog.course.materials.map((material, idx) => (
-                    <Paper key={idx} sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <Stack direction="row" spacing={1} alignItems="center" sx={{ flex: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>{material.name}</Typography>
-                        {material.file && (
-                          <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                            ({(material.file.size / 1024).toFixed(2)} KB)
-                          </Typography>
-                        )}
-                      </Stack>
-                      <Stack direction="row" spacing={1}>
-                        <Button 
-                          size="small" 
-                          variant="outlined"
-                          href={material.fileUrl}
-                          download={material.name}
-                        >
-                          Download
-                        </Button>
-                        <Button 
-                          size="small" 
-                          variant="outlined"
-                          color="error"
-                          onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this material?')) {
-                              deleteMaterial(manageDialog.course.id, material.id);
-                              // Update the dialog course to reflect the deletion
-                              const updatedCourse = courses.find(c => c.id === manageDialog.course.id);
-                              setManageDialog({ open: true, course: updatedCourse });
-                            }
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </Stack>
-                    </Paper>
-                  ))}
+                  {manageDialog.course.materials.map((material, idx) => {
+                    // If material.type is 'pdf' and url is base64, use it as a download link
+                    let downloadUrl = material.url;
+                    let isPdf = material.type === 'pdf' && material.url && material.url.startsWith('data:application/pdf');
+                    let isLink = material.type === 'link' && material.url && !material.url.startsWith('data:');
+                    return (
+                      <Paper key={idx} sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ flex: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{material.name}</Typography>
+                          {isPdf && (
+                            <Typography variant="caption" sx={{ color: "#6b7280" }}>(PDF)</Typography>
+                          )}
+                          {isLink && (
+                            <Typography variant="caption" sx={{ color: "#6b7280" }}>(Link)</Typography>
+                          )}
+                        </Stack>
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            href={downloadUrl}
+                            download={isPdf ? material.name : undefined}
+                            target={isLink ? "_blank" : undefined}
+                          >
+                            Download
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="error"
+                            onClick={async () => {
+                              if (window.confirm('Are you sure you want to delete this material?')) {
+                                const result = await deleteMaterial(manageDialog.course.id, material.id);
+                                if (result && result.success) {
+                                  // Fetch latest materials from backend and update dialog
+                                  try {
+                                    const res = await fetch(`http://127.0.0.1:8000/resources/?course_id=${manageDialog.course.id}`);
+                                    if (res.ok) {
+                                      const materials = await res.json();
+                                      setManageDialog(prev => ({ open: true, course: { ...prev.course, materials } }));
+                                    }
+                                  } catch {}
+                                } else {
+                                  alert(result && result.message ? result.message : 'Failed to delete material.');
+                                }
+                              }
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </Stack>
+                      </Paper>
+                    );
+                  })}
                 </Stack>
               )}
               <Card sx={{ background: "#f0fdf4", border: "1px solid #10b981" }}>
@@ -689,46 +706,38 @@ export default function TeacherDashboard() {
                     onChange={(e) => setMaterialForm({ ...materialForm, name: e.target.value })}
                     sx={{ mb: 2 }}
                   />
-                  <Box sx={{ mb: 2 }}>
-                    <input
-                      type="file"
-                      id="material-upload"
-                      hidden
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setMaterialForm({ ...materialForm, file });
-                        }
-                      }}
-                    />
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      component="label"
-                      htmlFor="material-upload"
-                    >
-                      {materialForm.file ? `✓ ${materialForm.file.name}` : "Choose File"}
-                    </Button>
-                  </Box>
-                  <Button 
-                    variant="contained" 
+                  {/* URL input removed, only PDF upload allowed */}
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    style={{ display: "block", marginBottom: 16 }}
+                    onChange={e => {
+                      const file = e.target.files[0];
+                      setMaterialForm(f => ({ ...f, file }));
+                    }}
+                  />
+                  <Button
+                    variant="contained"
                     size="small"
                     fullWidth
-                    onClick={() => {
+                    onClick={async () => {
                       if (materialForm.name && materialForm.file) {
-                        // Create a file URL using FileReader
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                          manageDialog.course.materials.push({
-                            id: Date.now(),
-                            name: materialForm.name,
-                            file: materialForm.file,
-                            fileUrl: e.target?.result,
-                            fileSize: materialForm.file.size
-                          });
-                          setMaterialForm({ name: "", file: null });
-                        };
-                        reader.readAsDataURL(materialForm.file);
+                        await addMaterial(manageDialog.course.id, {
+                          name: materialForm.name,
+                          file: materialForm.file,
+                          type: "pdf"
+                        });
+                        setMaterialForm({ name: "", file: null });
+                        // Fetch latest materials from backend and update dialog
+                        try {
+                          const res = await fetch(`http://127.0.0.1:8000/resources/?course_id=${manageDialog.course.id}`);
+                          if (res.ok) {
+                            const materials = await res.json();
+                            setManageDialog(prev => ({ open: true, course: { ...prev.course, materials } }));
+                          }
+                        } catch {}
+                      } else {
+                        alert("Please provide a name and a PDF file.");
                       }
                     }}
                   >
