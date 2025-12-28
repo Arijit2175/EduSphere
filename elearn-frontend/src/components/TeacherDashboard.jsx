@@ -829,10 +829,15 @@ export default function TeacherDashboard() {
                     variant="contained" 
                     size="small"
                     disabled={assignmentForm.submitting}
-                    onClick={async () => {
+                    onClick={async (e) => {
                       if (assignmentForm.submitting) return;
-                      if (!assignmentForm.title || !assignmentForm.dueDate) return;
+                      // Set submitting flag immediately to prevent double submit
                       setAssignmentForm(f => ({ ...f, submitting: true }));
+                      e.preventDefault();
+                      if (!assignmentForm.title || !assignmentForm.dueDate) {
+                        setAssignmentForm(f => ({ ...f, submitting: false }));
+                        return;
+                      }
                       const result = await createAssignment(manageDialog.course.id, assignmentForm);
                       if (result && result.success) {
                         // Fetch latest assignments from backend and update dialog
