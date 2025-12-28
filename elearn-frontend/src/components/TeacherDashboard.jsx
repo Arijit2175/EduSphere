@@ -700,7 +700,6 @@ export default function TeacherDashboard() {
                   Add Material
                 </Button>
               </Box>
-            </Box>
 
             {/* Assignments Section */}
             <Box>
