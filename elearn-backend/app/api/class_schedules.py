@@ -1,8 +1,16 @@
 from fastapi import APIRouter, HTTPException
+from fastapi import Body
+from pydantic import BaseModel
 from app.db import get_db_connection
 
 router = APIRouter(prefix="/class-schedules", tags=["class_schedules"])
 
+class ScheduleCreate(BaseModel):
+    course_id: int
+    title: str
+    start_time: str
+    duration: int = 60
+    meet_link: str = None
 @router.get("/")
 def list_schedules(course_id: int = None):
     conn = get_db_connection()
@@ -19,20 +27,34 @@ def list_schedules(course_id: int = None):
     return schedules
 
 @router.post("/")
-def create_schedule(course_id: int, title: str, start_time: str, duration: int = 60, meet_link: str = None):
+def create_schedule(data: ScheduleCreate = Body(...)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
+    # Convert ISO datetime to MySQL format
+    from datetime import datetime
+    def iso_to_mysql(dt_str):
+        try:
+            # Remove 'Z' if present
+            if dt_str.endswith('Z'):
+                dt_str = dt_str[:-1]
+            # Parse ISO string
+            dt = datetime.fromisoformat(dt_str)
+            return dt.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            return dt_str  # fallback, may error in DB
+
+    start_time_mysql = iso_to_mysql(data.start_time)
     cursor.execute(
         "INSERT INTO class_schedules (course_id, title, start_time, duration, meet_link) VALUES (%s, %s, %s, %s, %s)",
-        (course_id, title, start_time, duration, meet_link)
+        (data.course_id, data.title, start_time_mysql, data.duration, data.meet_link)
     )
     conn.commit()
     schedule_id = cursor.lastrowid
     cursor.close()
     conn.close()
-    return {"id": schedule_id, "course_id": course_id, "title": title}
+    return {"id": schedule_id, "course_id": data.course_id, "title": data.title}
 
 @router.put("/{schedule_id}")
 def update_schedule(schedule_id: int, title: str = None, start_time: str = None, duration: int = None, meet_link: str = None):

@@ -23,20 +23,27 @@ export const FormalEducationProvider = ({ children }) => {
         let coursesData = [];
         if (coursesRes.ok) {
           coursesData = await coursesRes.json();
-          // For each course, fetch its materials
-          const coursesWithMaterials = await Promise.all(
+          // For each course, fetch its materials and assignments
+          const coursesWithDetails = await Promise.all(
             coursesData.map(async (course) => {
+              let materials = [];
+              let assignments = [];
               try {
-                const res = await fetch(`http://127.0.0.1:8000/resources/?course_id=${course.id}`);
-                if (res.ok) {
-                  const materials = await res.json();
-                  return { ...course, materials };
+                const matRes = await fetch(`http://127.0.0.1:8000/resources/?course_id=${course.id}`);
+                if (matRes.ok) {
+                  materials = await matRes.json();
                 }
               } catch {}
-              return { ...course, materials: [] };
+              try {
+                const assignRes = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${course.id}`);
+                if (assignRes.ok) {
+                  assignments = await assignRes.json();
+                }
+              } catch {}
+              return { ...course, materials, assignments };
             })
           );
-          setCourses(coursesWithMaterials);
+          setCourses(coursesWithDetails);
         }
         const enrollmentsRes = await fetch("http://127.0.0.1:8000/enrollments/");
         if (enrollmentsRes.ok) {
