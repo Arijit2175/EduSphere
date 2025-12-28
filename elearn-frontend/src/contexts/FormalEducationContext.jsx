@@ -210,23 +210,33 @@ export const FormalEducationProvider = ({ children }) => {
   };
 
   // Teacher: Schedule class
-  const scheduleClass = (courseId, schedule) => {
-    const newSchedule = {
-      id: `schedule-${Date.now()}`,
-      title: schedule.title || "Live Class",
-      startTime: schedule.startTime,
-      duration: schedule.duration || 60,
-      meetLink: schedule.meetLink || "",
-      createdAt: new Date().toISOString(),
-      attendees: [],
-    };
-
-    setCourses(courses.map(c => c.id === courseId
-      ? { ...c, schedules: [...c.schedules, newSchedule] }
-      : c
-    ));
-
-    return newSchedule;
+  const scheduleClass = async (courseId, schedule) => {
+    // POST to backend
+    try {
+      const res = await fetch("http://127.0.0.1:8000/class-schedules/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          course_id: courseId,
+          title: schedule.title || "Live Class",
+          start_time: schedule.startTime,
+          duration: schedule.duration || 60,
+          meet_link: schedule.meetLink || ""
+        })
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, message: errorData.detail || "Schedule creation failed" };
+      }
+      const newSchedule = await res.json();
+      setCourses(prev => prev.map(c => c.id === courseId
+        ? { ...c, schedules: [...(c.schedules || []), newSchedule] }
+        : c
+      ));
+      return { success: true, schedule: newSchedule };
+    } catch (err) {
+      return { success: false, message: "Schedule creation failed" };
+    }
   };
 
   const markAttendanceForClass = (courseId, scheduleId, studentId) => {

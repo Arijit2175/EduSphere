@@ -324,6 +324,8 @@ export default function TeacherDashboard() {
               </TableHead>
               <TableBody>
                 {liveClasses.map((session) => {
+                  // Defensive: ensure schedules is always an array
+                  const schedules = Array.isArray(session.schedules) ? session.schedules : [];
                   const presentCount = session.attendees?.filter(a => a.status === "present")?.length || 0;
                   const absentCount = session.attendees?.filter(a => a.status === "absent")?.length || 0;
                   const presentStudents = session.attendees?.filter(a => a.status === "present") || [];
@@ -659,10 +661,59 @@ export default function TeacherDashboard() {
                     {manageDialog.course.materials.map((material, idx) => (
                       <Paper key={material.id || idx} sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span>{material.name}</span>
+                        <Stack direction="row" spacing={0.5}>
+                          <Button
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                            onClick={() => {
+                              const url = material.fileUrl || material.url;
+                              if (url) {
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.download = material.name || 'material.pdf';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              } else {
+                                alert('No file URL available for download.');
+                              }
+                            }}
+                          >
+                            Download
+                          </Button>
+                          <Button
+                            size="small"
+                            color="error"
+                            variant="outlined"
+                            onClick={async () => {
+                              await deleteMaterial(manageDialog.course.id, material.id);
+                              // Optionally refresh materials list after deletion
+                              const res = await fetch(`http://127.0.0.1:8000/resources/?course_id=${manageDialog.course.id}`);
+                              if (res.ok) {
+                                const materials = await res.json();
+                                setManageDialog((prev) => ({
+                                  ...prev,
+                                  course: { ...prev.course, materials },
+                                }));
+                              }
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </Stack>
                       </Paper>
                     ))}
                   </Stack>
                 )}
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Material Name"
+                  value={materialForm.name}
+                  onChange={e => setMaterialForm(f => ({ ...f, name: e.target.value }))}
+                  sx={{ mb: 2 }}
+                />
                 <input
                   type="file"
                   accept="application/pdf"
@@ -706,14 +757,41 @@ export default function TeacherDashboard() {
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>📝 Assignments ({manageDialog.course.assignments?.length || 0})</Typography>
               {manageDialog.course.assignments?.length > 0 && (
                 <Stack spacing={1} sx={{ mb: 2 }}>
-                  {manageDialog.course.assignments.map((assignment, idx) => (
-                    <Paper key={assignment.id || idx} sx={{ p: 2, mb: 2 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>{assignment.title}</Typography>
-                      <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 1 }}>{assignment.description}</Typography>
-                      <Typography variant="caption" sx={{ display: "block", mb: 2, color: "#ef4444" }}>Due: {assignment.dueDate || assignment.due_date}</Typography>
-                      {/* You can add submissions and actions here if needed */}
-                    </Paper>
-                  ))}
+                  {manageDialog.course.assignments.map((assignment, idx) => {
+                    // Get submissions count for this assignment
+                    const submissions = getAssignmentSubmissions(manageDialog.course.id, assignment.id) || [];
+                    return (
+                      <Paper key={assignment.id || idx} sx={{ p: 2, mb: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Box>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>{assignment.title}</Typography>
+                            <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 1 }}>{assignment.description}</Typography>
+                            <Typography variant="caption" sx={{ display: "block", mb: 2, color: "#ef4444" }}>Due: {assignment.dueDate || assignment.due_date}</Typography>
+                            <Typography variant="caption" sx={{ color: "#6366f1", display: "block", mt: 1 }}>
+                              Submissions: {submissions.length}
+                            </Typography>
+                          </Box>
+                          <Button
+                            size="small"
+                            color="error"
+                            variant="outlined"
+                            onClick={async () => {
+                              await handleDeleteAssignment(manageDialog.course.id, assignment.id);
+                              // Optionally refresh assignments list after deletion
+                              const res = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${manageDialog.course.id}`);
+                              if (res.ok) {
+                                const assignments = await res.json();
+                                setManageDialog(prev => ({ open: true, course: { ...prev.course, assignments } }));
+                              }
+                            }}
+                            sx={{ ml: 2 }}
+                          >
+                            Delete
+                          </Button>
+                        </Box>
+                      </Paper>
+                    );
+                  })}
                 </Stack>
               )}
               <Card sx={{ background: "#fef3c7", border: "1px solid #f59e0b" }}>
@@ -750,26 +828,29 @@ export default function TeacherDashboard() {
                   <Button 
                     variant="contained" 
                     size="small"
+                    disabled={assignmentForm.submitting}
                     onClick={async () => {
-                      if (assignmentForm.title && assignmentForm.dueDate) {
-                        const result = await createAssignment(manageDialog.course.id, assignmentForm);
-                        if (result && result.success) {
-                          // Fetch latest assignments from backend and update dialog
-                          try {
-                            const res = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${manageDialog.course.id}`);
-                            if (res.ok) {
-                              const assignments = await res.json();
-                              setManageDialog(prev => ({ open: true, course: { ...prev.course, assignments } }));
-                            }
-                          } catch {}
-                          setAssignmentForm({ title: "", description: "", dueDate: "" });
-                        } else {
-                          alert(result && result.message ? result.message : "Failed to create assignment.");
-                        }
+                      if (assignmentForm.submitting) return;
+                      if (!assignmentForm.title || !assignmentForm.dueDate) return;
+                      setAssignmentForm(f => ({ ...f, submitting: true }));
+                      const result = await createAssignment(manageDialog.course.id, assignmentForm);
+                      if (result && result.success) {
+                        // Fetch latest assignments from backend and update dialog
+                        try {
+                          const res = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${manageDialog.course.id}`);
+                          if (res.ok) {
+                            const assignments = await res.json();
+                            setManageDialog(prev => ({ open: true, course: { ...prev.course, assignments } }));
+                          }
+                        } catch {}
+                        setAssignmentForm({ title: "", description: "", dueDate: "", submitting: false });
+                      } else {
+                        setAssignmentForm(f => ({ ...f, submitting: false }));
+                        alert(result && result.message ? result.message : "Failed to create assignment.");
                       }
                     }}
                   >
-                    Create Assignment
+                    {assignmentForm.submitting ? "Creating..." : "Create Assignment"}
                   </Button>
                 </CardContent>
               </Card>
