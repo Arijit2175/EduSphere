@@ -48,13 +48,12 @@ export default function FormalLearning() {
     );
   }
 
-  // Only show teacher-created courses; no fallback demo content
-  // Only include formal (teacher-assigned) courses
-  const catalogCourses = courses.filter(course => !!course.teacherId);
+  // Only show formal courses with an instructor_id
+  const catalogCourses = courses.filter(course => course.type === 'formal' && !!course.instructor_id);
   const studentEnrollments = getStudentEnrollments(user?.id);
 
   const handleEnroll = (course) => {
-    const result = enrollStudent(user?.id, course.id, `${user?.firstName || ""} ${user?.lastName || ""}`.trim());
+    const result = enrollStudent(user?.id, course.id);
     return result;
   };
 

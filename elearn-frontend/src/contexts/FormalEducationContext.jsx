@@ -85,12 +85,15 @@ export const FormalEducationProvider = ({ children }) => {
   };
 
   // Student: Enroll in course
-  const enrollStudent = async (studentId, courseId, studentName) => {
+  const enrollStudent = async (userId, courseId) => {
     try {
+      const formData = new URLSearchParams();
+      formData.append("student_id", userId);
+      formData.append("course_id", courseId);
       const res = await fetch("http://127.0.0.1:8000/enrollments/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ student_id: studentId, course_id: courseId, student_name: studentName }),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString(),
       });
       if (!res.ok) {
         const errorData = await res.json();
