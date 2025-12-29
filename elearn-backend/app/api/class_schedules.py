@@ -52,9 +52,13 @@ def create_schedule(data: ScheduleCreate = Body(...)):
     )
     conn.commit()
     schedule_id = cursor.lastrowid
-    cursor.close()
+    # Fetch the full schedule row
+    cursor2 = conn.cursor(dictionary=True)
+    cursor2.execute("SELECT * FROM class_schedules WHERE id=%s", (schedule_id,))
+    schedule = cursor2.fetchone()
+    cursor2.close()
     conn.close()
-    return {"id": schedule_id, "course_id": data.course_id, "title": data.title}
+    return schedule
 
 @router.put("/{schedule_id}")
 def update_schedule(schedule_id: int, title: str = None, start_time: str = None, duration: int = None, meet_link: str = None):

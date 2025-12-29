@@ -331,53 +331,49 @@ export default function TeacherDashboard() {
                   const presentStudents = session.attendees?.filter(a => a.status === "present") || [];
                   const absentStudents = session.attendees?.filter(a => a.status === "absent") || [];
                   return (
-                  <TableRow key={session.id} sx={{ "&:hover": { background: "#f9f9f9" } }}>
-                    <TableCell sx={{ fontWeight: 600 }}>{session.title}</TableCell>
-                    <TableCell>{session.courseTitle}</TableCell>
-                    <TableCell>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <CalendarMonth fontSize="small" />
-                        <Typography variant="body2">
-                          {session.startTime ? new Date(session.startTime).toLocaleString() : "TBD"}
-                        </Typography>
-                      </Stack>
+                  <TableRow key={session.id} sx={{ "&:hover": { background: "#f9f9f9" }, height: 72 }}>
+                    <TableCell sx={{ fontWeight: 600, fontSize: 16 }}>{session.title}</TableCell>
+                    <TableCell sx={{ fontSize: 15 }}>{session.courseTitle}</TableCell>
+                    <TableCell sx={{ fontSize: 15 }}>
+                      {(() => {
+                        // Try both start_time and startTime for compatibility
+                        const rawDate = session.start_time || session.startTime;
+                        if (!rawDate) return "N/A";
+                        const d = new Date(rawDate);
+                        return isNaN(d.getTime()) ? "N/A" : d.toLocaleString();
+                      })()}
                     </TableCell>
-                    <TableCell>
-                      {session.meetLink ? (
-                        <Button href={session.meetLink} target="_blank" size="small" startIcon={<Link />}>
-                          Join
-                        </Button>
-                      ) : (
-                        <Typography variant="caption" sx={{ color: "#999" }}>No link</Typography>
-                      )}
+                    <TableCell sx={{ fontSize: 15 }}>
+                      {session.meet_link || session.meetLink || "-"}
                     </TableCell>
                     <TableCell>
                       <Chip
                         icon={<Check />}
                         label={presentCount}
-                        size="small"
+                        size="medium"
                         color="success"
                         variant="outlined"
                         onClick={() => setAttendanceDetailsDialog({ open: true, students: presentStudents, type: "Present" })}
-                        sx={{ cursor: "pointer" }}
+                        sx={{ cursor: "pointer", fontSize: 15, height: 32 }}
                       />
                     </TableCell>
                     <TableCell>
                       <Chip
                         icon={<Close />}
                         label={absentCount}
-                        size="small"
+                        size="medium"
                         color="error"
                         variant="outlined"
                         onClick={() => setAttendanceDetailsDialog({ open: true, students: absentStudents, type: "Absent" })}
-                        sx={{ cursor: "pointer" }}
+                        sx={{ cursor: "pointer", fontSize: 15, height: 32 }}
                       />
                     </TableCell>
                     <TableCell>
                       <Button
-                        size="small"
+                        size="medium"
                         variant="outlined"
                         onClick={() => setAttendanceDialog({ open: true, courseId: session.courseId, scheduleId: session.id })}
+                        sx={{ fontSize: 15, height: 36 }}
                       >
                         Mark Attendance
                       </Button>
