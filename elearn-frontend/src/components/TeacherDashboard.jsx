@@ -375,7 +375,7 @@ export default function TeacherDashboard() {
                         onClick={() => setAttendanceDialog({ open: true, courseId: session.courseId, scheduleId: session.id })}
                         sx={{ fontSize: 15, height: 36 }}
                       >
-                        Mark Attendance
+                        Attendance
                       </Button>
                     </TableCell>
                   </TableRow>

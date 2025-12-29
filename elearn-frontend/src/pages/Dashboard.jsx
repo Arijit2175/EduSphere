@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import StarIcon from "@mui/icons-material/Star";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import VideocamIcon from "@mui/icons-material/Videocam";
+import EditIcon from "@mui/icons-material/Edit";
 
 export default function Dashboard() {
   const { enrolledCourses } = useCourses();
@@ -248,7 +249,7 @@ export default function Dashboard() {
             subtitle="Keep track of your learning journey"
             centered
           />
-          <StatsGrid stats={statsData} />
+          <StatsGrid stats={statsData.filter(stat => stat.label !== "Upcoming Classes")} />
         </Section>
 
         {/* Teacher Dashboard override */}
@@ -288,23 +289,19 @@ export default function Dashboard() {
                     <Grid key={course.id}>
                       <Card>
                         <CardContent>
-                          <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                            <Box>
+                          <Stack direction="row" alignItems="flex-start">
+                            <Box sx={{ flex: 1 }}>
                               <Typography variant="h6" sx={{ fontWeight: 700 }}>{course.title}</Typography>
                               <Typography variant="caption" sx={{ color: "#6b7280" }}>
                                 {course.students?.length || getCourseStudents(course.id)?.length || 0} students
                               </Typography>
                             </Box>
-                            <Stack direction="row" spacing={1}>
+                            <Stack direction="row" spacing={2} sx={{ ml: 2 }}>
                               <Button 
                                 size="small" 
                                 variant="outlined"
-                                startIcon={<VideocamIcon />}
-                                onClick={() => {
-                                  setScheduleCourseId(course.id);
-                                  setScheduleForm({ title: "Live Class", startTime: "", duration: 60, meetLink: "" });
-                                  setScheduleOpen(true);
-                                }}
+                                startIcon={<EditIcon />}
+                                onClick={() => navigate("/formal")}
                               >
                                 Manage
                               </Button>
@@ -313,19 +310,14 @@ export default function Dashboard() {
 
                           {(course.schedules && course.schedules.length > 0) && (
                             <Box sx={{ mt: 2 }}>
-                              <Typography variant="subtitle2" sx={{ mb: 1 }}>Scheduled Classes</Typography>
+                              <Typography variant="subtitle2" sx={{ mb: 1 }}>Scheduled Class</Typography>
                               <Stack spacing={1}>
-                                {course.schedules.map(s => (
-                                  <Stack key={s.id} direction="row" spacing={1} alignItems="center">
-                                    <Chip icon={<VideocamIcon />} label={s.title} size="small" />
-                                    <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                                      {new Date(s.startTime).toLocaleString()}
-                                    </Typography>
-                                    {s.meetLink && (
-                                      <Button size="small" href={s.meetLink} target="_blank" rel="noopener noreferrer">Open</Button>
-                                    )}
-                                  </Stack>
-                                ))}
+                                <Stack key={course.schedules[0].id} direction="row" spacing={1} alignItems="center">
+                                  <Chip icon={<VideocamIcon />} label={course.schedules[0].title} size="small" />
+                                  {course.schedules[0].meetLink && (
+                                    <Button size="small" href={course.schedules[0].meetLink} target="_blank" rel="noopener noreferrer">Open</Button>
+                                  )}
+                                </Stack>
                               </Stack>
                             </Box>
                           )}
