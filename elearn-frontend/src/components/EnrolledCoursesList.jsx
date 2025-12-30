@@ -127,9 +127,7 @@ export default function EnrolledCoursesList({ courses = [] }) {
                             <Typography variant="caption" sx={{ fontWeight: 700, color: "#1f2937" }}>
                               {schedule.title || "Live Class"}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: "#6b7280", fontSize: "0.7rem" }}>
-                              {new Date(schedule.startTime).toLocaleString()}
-                            </Typography>
+                            
                             {schedule.meetLink && (
                               <Button
                                 fullWidth
