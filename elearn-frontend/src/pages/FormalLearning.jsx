@@ -126,9 +126,9 @@ export default function FormalLearning() {
                         </Typography>
                       </Box>
                     ) : (
-                      catalogCourses
-                        .filter(course => !studentEnrollments.some((e) => e.courseId === course.id))
-                        .map((course, i) => (
+                      catalogCourses.map((course, i) => {
+                        const alreadyEnrolled = studentEnrollments.some((e) => e.courseId === course.id);
+                        return (
                           <Box key={i}>
                             <CourseCardAdvanced
                               id={course.id}
@@ -142,11 +142,17 @@ export default function FormalLearning() {
                               students={course.students}
                               instructor={course.instructor}
                               actionText={"Enroll"}
-                              enrolledOverride={false}
-                              onEnroll={handleEnroll}
+                              enrolledOverride={alreadyEnrolled}
+                              onEnroll={() => {
+                                if (alreadyEnrolled) {
+                                  return { success: false, message: "Already enrolled" };
+                                }
+                                return handleEnroll(course);
+                              }}
                             />
                           </Box>
-                        ))
+                        );
+                      })
                     )}
                   </Box>
                 </Container>

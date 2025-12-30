@@ -37,6 +37,7 @@ export const CoursesProvider = ({ children }) => {
   }, [user]);
 
   const enrollCourse = async (courseId) => {
+    console.log("ENROLL POST BODY", { student_id: user?.id, course_id: courseId });
     try {
       const token = user?.access_token;
       const res = await fetch("http://127.0.0.1:8000/enrollments/", {
@@ -45,7 +46,7 @@ export const CoursesProvider = ({ children }) => {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ course_id: courseId }),
+        body: JSON.stringify({ student_id: user?.id, course_id: courseId }),
       });
       if (!res.ok) {
         const errorData = await res.json();

@@ -37,6 +37,7 @@ const getGradeColor = (grade) => {
   return { color: "#6b7280", background: "#f3f4f6", border: "#e5e7eb" };
 };
 
+
 export default function StudentFormalDashboard({ onExploreCourses }) {
   const { user } = useAuth();
   const { enrollments, courses, getStudentEnrollments, getCourseById, submitAssignment, uploadMaterial, getSubmission } = useFormalEducation();
@@ -44,8 +45,12 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [submission, setSubmission] = useState("");
   const [gradeViewDialog, setGradeViewDialog] = useState({ open: false, submission: null });
-  
-  const studentEnrollments = getStudentEnrollments(user?.id);
+
+  // Only include enrollments for formal courses
+  const studentEnrollments = getStudentEnrollments(user?.id).filter(e => {
+    const course = getCourseById(e.courseId);
+    return course && course.type === "formal";
+  });
 
   const handleSubmitAssignment = () => {
     if (submission.trim() && selectedAssignment) {
@@ -162,7 +167,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                               ASSIGNMENTS
                             </Typography>
                             <Typography variant="h6" sx={{ fontWeight: 800, color: "#1f2937" }}>
-                              {enrollment.completedAssignments.length}/{course.assignments?.length || 0}
+                              {(enrollment.completedAssignments ? enrollment.completedAssignments.length : 0)}/{course.assignments?.length || 0}
                             </Typography>
                           </Box>
                         </Grid>
@@ -182,7 +187,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                 variant="outlined"
                                 size="small"
                                 startIcon={<Download />}
-                                href={material.fileUrl}
+                                href={material.url}
                                 download={material.name}
                                 sx={{
                                   justifyContent: "flex-start",
@@ -217,17 +222,17 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                 variant="contained"
                                 size="small"
                                 startIcon={<VideoCall />}
-                                href={session.meetLink}
+                                href={session.meet_link || session.meetLink}
                                 target="_blank"
-                                disabled={!session.meetLink}
+                                disabled={!(session.meet_link || session.meetLink) || (session.meet_link || session.meetLink) === ""}
                                 sx={{
                                   justifyContent: "flex-start",
                                   textTransform: "none",
-                                  background: session.meetLink ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" : "#e5e7eb",
+                                  background: (session.meet_link || session.meetLink) ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" : "#e5e7eb",
                                   color: "white",
                                   fontWeight: 600,
                                   "&:hover": {
-                                    background: session.meetLink ? "linear-gradient(135deg, #5568d3 0%, #63398e 100%)" : "#e5e7eb"
+                                    background: (session.meet_link || session.meetLink) ? "linear-gradient(135deg, #5568d3 0%, #63398e 100%)" : "#e5e7eb"
                                   }
                                 }}
                               >
@@ -250,17 +255,18 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                               textAlign: "center",
                             }}>
                               <Typography variant="h5" sx={{ fontWeight: 800, color: "#667eea" }}>
-                                {enrollment.completedAssignments.length}
+                                {(enrollment.completedAssignments ? enrollment.completedAssignments.length : 0)}
                               </Typography>
                               <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 600, display: "block" }}>
-                                /{course.assignments.length} Done
+                                /{course.assignments?.length || 0} Done
                               </Typography>
                               <Typography variant="caption" sx={{ color: "#667eea", fontWeight: 700, fontSize: "0.65rem", display: "block", mb: 1 }}>
                                 📝 ASSIGNMENTS
                               </Typography>
                               <Grid container spacing={0.5}>
                                 {(() => {
-                                  const pending = course.assignments.find(a => !enrollment.completedAssignments.includes(a.id));
+                                  const completed = enrollment.completedAssignments ? enrollment.completedAssignments : [];
+                                  const pending = course.assignments.find(a => !completed.includes(a.id));
                                   return pending ? (
                                     <Grid item xs={12}>
                                       <Button
@@ -278,7 +284,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                     </Grid>
                                   ) : null;
                                 })()}
-                                {enrollment.completedAssignments.length > 0 && (
+                                {Array.isArray(enrollment.completedAssignments) && enrollment.completedAssignments.length > 0 && (
                                   <Grid item xs={12}>
                                     <Button
                                       fullWidth

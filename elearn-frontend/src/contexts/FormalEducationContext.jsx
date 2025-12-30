@@ -55,7 +55,17 @@ export const FormalEducationProvider = ({ children }) => {
         const enrollmentsRes = await fetch("http://127.0.0.1:8000/enrollments/");
         if (enrollmentsRes.ok) {
           const enrollmentsData = await enrollmentsRes.json();
-          setEnrollments(enrollmentsData);
+          // Map backend fields to camelCase for consistency
+          const mapped = enrollmentsData.map(e => ({
+            id: e.id,
+            studentId: e.user_id,
+            courseId: e.course_id,
+            enrolledAt: e.enrolled_at,
+            progress: e.progress,
+            status: e.status,
+            ...e
+          }));
+          setEnrollments(mapped);
         }
       } catch (err) {
         // handle error
@@ -87,21 +97,45 @@ export const FormalEducationProvider = ({ children }) => {
   // Student: Enroll in course
   const enrollStudent = async (userId, courseId) => {
     try {
-      const formData = new URLSearchParams();
-      formData.append("student_id", userId);
-      formData.append("course_id", courseId);
       const res = await fetch("http://127.0.0.1:8000/enrollments/", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formData.toString(),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_id: userId, course_id: courseId }),
       });
       if (!res.ok) {
         const errorData = await res.json();
         return { success: false, message: errorData.detail || "Enrollment failed" };
       }
       const enrollment = await res.json();
-      setEnrollments((prev) => [...prev, enrollment]);
-      return { success: true, message: "Successfully enrolled", enrollment };
+      // Map backend fields to camelCase for consistency
+      const mappedEnrollment = {
+        id: enrollment.id,
+        studentId: enrollment.user_id,
+        courseId: enrollment.course_id,
+        enrolledAt: enrollment.enrolled_at,
+        progress: enrollment.progress,
+        status: enrollment.status,
+        ...enrollment
+      };
+      setEnrollments((prev) => [...prev, mappedEnrollment]);
+      // Refresh enrollments from backend so UI updates
+      try {
+        const enrollmentsRes = await fetch("http://127.0.0.1:8000/enrollments/");
+        if (enrollmentsRes.ok) {
+          const enrollmentsData = await enrollmentsRes.json();
+          const mapped = enrollmentsData.map(e => ({
+            id: e.id,
+            studentId: e.user_id,
+            courseId: e.course_id,
+            enrolledAt: e.enrolled_at,
+            progress: e.progress,
+            status: e.status,
+            ...e
+          }));
+          setEnrollments(mapped);
+        }
+      } catch (refreshErr) {}
+      return { success: true, message: "Successfully enrolled", enrollment: mappedEnrollment };
     } catch (err) {
       return { success: false, message: "Enrollment failed" };
     }

@@ -1,8 +1,16 @@
+
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 from app.api.auth import get_current_user
 from app.db import get_db_connection
 
+
 router = APIRouter(prefix="/enrollments", tags=["enrollments"])
+
+# Request model for enrollment
+class EnrollRequest(BaseModel):
+    student_id: int
+    course_id: int
 
 @router.get("/me")
 def get_my_enrollments(user=Depends(get_current_user)):
@@ -10,8 +18,13 @@ def get_my_enrollments(user=Depends(get_current_user)):
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor(dictionary=True)
-    # Use user_id instead of student_id
-    cursor.execute("SELECT * FROM enrollments WHERE user_id=%s", (user["id"],))
+    # Join enrollments with courses to get course details
+    cursor.execute("""
+        SELECT e.*, c.title, c.description, c.duration, c.instructor_id
+        FROM enrollments e
+        JOIN courses c ON e.course_id = c.id
+        WHERE e.user_id=%s
+    """, (user["id"],))
     enrollments = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -30,7 +43,9 @@ def list_enrollments():
     return enrollments
 
 @router.post("/")
-def enroll_student(student_id: int, course_id: int):
+def enroll_student(data: EnrollRequest):
+    student_id = data.student_id
+    course_id = data.course_id
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
@@ -47,9 +62,13 @@ def enroll_student(student_id: int, course_id: int):
     )
     conn.commit()
     enrollment_id = cursor.lastrowid
+    # Fetch the full enrollment row
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM enrollments WHERE id=%s", (enrollment_id,))
+    enrollment = cursor.fetchone()
     cursor.close()
     conn.close()
-    return {"id": enrollment_id, "user_id": student_id, "course_id": course_id}
+    return enrollment
 
 @router.delete("/{enrollment_id}")
 def remove_enrollment(enrollment_id: int):

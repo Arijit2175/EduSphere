@@ -39,6 +39,7 @@ export default function Dashboard() {
   const displayName = user?.name || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Learner";
   // Only show formal courses assigned by a teacher (from enrollments)
   const studentFormalEnrollments = user?.id ? getStudentEnrollments(user.id) : [];
+  // Only show formal courses assigned by a teacher (from enrollments) and with at least one live class
   const formalCourses = studentFormalEnrollments
     .map((enr) => {
       const course = getCourseById(enr.courseId) || {};
@@ -52,7 +53,7 @@ export default function Dashboard() {
         schedules,
       };
     })
-    .filter((c) => c.id && c.title && c.instructor); // Only show if assigned by teacher
+    .filter((c) => c.id && c.title && c.instructor && Array.isArray(c.schedules) && c.schedules.length > 0); // Only show if assigned by teacher and has live class
   // Map backend certificate fields to camelCase for display, and add courseName/instructor
   let userCertificates = (certificates || []).map((c) => {
     const course = (nonFormalCoursesList || []).find(course => String(course.id) === String(c.course_id));
@@ -158,7 +159,7 @@ export default function Dashboard() {
     : [
         { icon: "📚", value: (formalCourses.length + nonFormalCourses.length).toString(), label: "Courses Enrolled", color: "#667eea", actionText: "Browse More", onAction: handleBrowseMore },
         { icon: "⏱️", value: `${totalHours}h+`, label: "Learning Hours", color: "#f093fb", actionText: "View Stats", onAction: handleViewStats },
-        { icon: "🏆", value: (completedCourses + userCertificates.length).toString(), label: "Certificates Earned", color: "#4facfe", actionText: "Share", onAction: handleShareCertificates },
+        { icon: "🏆", value: userCertificates.length.toString(), label: "Certificates Earned", color: "#4facfe", actionText: "Share", onAction: handleShareCertificates },
       ];
 
   return (
@@ -598,7 +599,7 @@ export default function Dashboard() {
                 <Box sx={{ p: 2, background: "#f5f7fa", borderRadius: 2 }}>
                   <Typography variant="body2" sx={{ color: "#666", mb: 0.5 }}>Certificates Earned</Typography>
                   <Typography variant="h5" sx={{ fontWeight: 700, color: "#4facfe" }}>
-                    {completedCourses + userCertificates.length}
+                    {userCertificates.length}
                   </Typography>
                 </Box>
               </Grid>
