@@ -292,23 +292,39 @@ export const FormalEducationProvider = ({ children }) => {
 
   const markAttendanceForClass = (courseId, scheduleId, studentId) => {
     // Update schedule attendee list and enrollment attendance count
-    setCourses(courses.map(c => {
-      if (c.id !== courseId) return c;
-      return {
-        ...c,
-        schedules: c.schedules.map(s =>
-          s.id === scheduleId
-            ? { ...s, attendees: s.attendees?.includes(studentId) ? s.attendees : [...(s.attendees || []), studentId] }
-            : s
-        ),
-      };
-    }));
-
-    setEnrollments(enrollments.map(e =>
-      e.courseId === courseId && e.studentId === studentId
-        ? { ...e, attendance: e.attendance + 1 }
-        : e
-    ));
+    const markAttendanceForClass = async (courseId, scheduleId, studentId, status = "present") => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/attendance/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ schedule_id: scheduleId, student_id: studentId, status }),
+        });
+        if (res.ok) {
+          // Optionally update local state for UI feedback
+          setCourses(courses.map(c => {
+            if (c.id !== courseId) return c;
+            return {
+              ...c,
+              schedules: c.schedules.map(s =>
+                s.id === scheduleId
+                  ? { ...s, attendees: s.attendees?.includes(studentId) ? s.attendees : [...(s.attendees || []), studentId] }
+                  : s
+              ),
+            };
+          }));
+          setEnrollments(enrollments.map(e =>
+            e.courseId === courseId && e.studentId === studentId
+              ? { ...e, attendance: e.attendance + 1 }
+              : e
+          ));
+        } else {
+          // Handle error (optional)
+          console.error("Failed to mark attendance");
+        }
+      } catch (err) {
+        console.error("Error marking attendance:", err);
+      }
+    };
   };
 
   const getCourseSchedules = (courseId) => {

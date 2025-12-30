@@ -7,6 +7,24 @@ from app.db import get_db_connection
 
 router = APIRouter(prefix="/enrollments", tags=["enrollments"])
 
+# Endpoint to get all students enrolled in a course, including their full names
+@router.get("/course/{course_id}/students")
+def get_course_students(course_id: int):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB connection error")
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('''
+        SELECT e.*, u.first_name, u.last_name
+        FROM enrollments e
+        JOIN users u ON e.user_id = u.id
+        WHERE e.course_id = %s
+    ''', (course_id,))
+    students = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return students
+
 # Request model for enrollment
 class EnrollRequest(BaseModel):
     student_id: int

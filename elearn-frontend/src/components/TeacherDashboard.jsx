@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, Button, TextField, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid, Chip, Stack, MenuItem } from "@mui/material";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useFormalEducation } from "../contexts/FormalEducationContext";
 import { useAuth } from "../contexts/AuthContext";
 import Section from "./Section";
@@ -38,8 +38,35 @@ const getGradeColor = (grade) => {
 };
 
 export default function TeacherDashboard() {
+  // All useState declarations at the top
+  const [openDialog, setOpenDialog] = useState(false);
+  const [formData, setFormData] = useState({ title: "", description: "", duration: "", schedule: "" });
+  const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
+  const [scheduleForm, setScheduleForm] = useState({ title: "", startTime: "", duration: 60, meetLink: "", courseId: "" });
+  const [attendanceDialog, setAttendanceDialog] = useState({ open: false, courseId: "", scheduleId: "" });
+  const [attendanceDetailsDialog, setAttendanceDetailsDialog] = useState({ open: false, students: [], type: "" });
+  const [manageDialog, setManageDialog] = useState({ open: false, course: null });
+  const [enrolledStudents, setEnrolledStudents] = useState([]);
+  const [materialForm, setMaterialForm] = useState({ name: "", file: null });
+  const [assignmentForm, setAssignmentForm] = useState({ title: "", description: "", dueDate: "" });
+  const [gradeDialog, setGradeDialog] = useState({ open: false, submission: null });
+  const [gradeForm, setGradeForm] = useState({ grade: "", feedback: "" });
+
+  // Now all logic and hooks
   const { user } = useAuth();
   const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass, getAssignmentSubmissions, reviewSubmission, deleteMaterial, addMaterial, createAssignment } = useFormalEducation();
+
+  useEffect(() => {
+    if (attendanceDialog.open && attendanceDialog.courseId) {
+      fetch(`http://127.0.0.1:8000/enrollments/course/${attendanceDialog.courseId}/students`)
+        .then(res => res.ok ? res.json() : [])
+        .then(data => setEnrolledStudents(Array.isArray(data) ? data : []))
+        .catch(() => setEnrolledStudents([]));
+    } else {
+      setEnrolledStudents([]);
+    }
+  }, [attendanceDialog.open, attendanceDialog.courseId]);
+
   // Delete assignment helper
   async function handleDeleteAssignment(courseId, assignmentId) {
     if (!window.confirm('Are you sure you want to delete this assignment?')) return;
@@ -57,17 +84,28 @@ export default function TeacherDashboard() {
       alert('Failed to delete assignment.');
     }
   }
-  const [openDialog, setOpenDialog] = useState(false);
-  const [formData, setFormData] = useState({ title: "", description: "", duration: "", schedule: "" });
-  const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
-  const [scheduleForm, setScheduleForm] = useState({ title: "", startTime: "", duration: 60, meetLink: "", courseId: "" });
-  const [attendanceDialog, setAttendanceDialog] = useState({ open: false, courseId: "", scheduleId: "" });
-  const [attendanceDetailsDialog, setAttendanceDetailsDialog] = useState({ open: false, students: [], type: "" });
-  const [manageDialog, setManageDialog] = useState({ open: false, course: null });
-  const [materialForm, setMaterialForm] = useState({ name: "", file: null });
-  const [assignmentForm, setAssignmentForm] = useState({ title: "", description: "", dueDate: "" });
-  const [gradeDialog, setGradeDialog] = useState({ open: false, submission: null });
-  const [gradeForm, setGradeForm] = useState({ grade: "", feedback: "" });
+
+  useEffect(() => {
+    const fetchEnrolledStudents = async () => {
+      if (manageDialog.open && manageDialog.course?.id) {
+        try {
+          const res = await fetch(`http://127.0.0.1:8000/enrollments/course/${manageDialog.course.id}/students`);
+          if (res.ok) {
+            const students = await res.json();
+            setEnrolledStudents(students);
+          } else {
+            setEnrolledStudents([]);
+          }
+        } catch {
+          setEnrolledStudents([]);
+        }
+      } else {
+        setEnrolledStudents([]);
+      }
+    };
+    fetchEnrolledStudents();
+  }, [manageDialog.open, manageDialog.course?.id]);
+
   const teacherCourses = getTeacherCourses(user?.id);
 
   const liveClasses = useMemo(() => {
@@ -161,7 +199,7 @@ export default function TeacherDashboard() {
       <Section background="transparent">
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Box>
-            <SectionTitle title="Teacher Dashboard" subtitle={`Welcome, ${user?.firstName}!`} centered={false} 
+            <SectionTitle title="Teacher Dashboard" subtitle={`Welcome, ${user?.first_name || "Teacher"}!`} centered={false} 
             titleColor="gradient"
             subtitleColor="#7f8c8d"
             />
@@ -193,18 +231,7 @@ export default function TeacherDashboard() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ background: "#f093fb20", border: "1px solid #f093fb" }}>
-              <CardContent sx={{ textAlign: "center" }}>
-                <Typography variant="h4" sx={{ fontWeight: 700, color: "#f093fb" }}>
-                  {teacherCourses.reduce((acc, c) => acc + (Array.isArray(c.students) ? c.students.length : 0), 0)}
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#666" }}>
-                  Total Students
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+          
           <Grid item xs={12} sm={6} md={3}>
             <Card sx={{ background: "#4facfe20", border: "1px solid #4facfe" }}>
               <CardContent sx={{ textAlign: "center" }}>
@@ -250,9 +277,6 @@ export default function TeacherDashboard() {
                 <TableRow sx={{ background: "#f0f2f5" }}>
                   <TableCell sx={{ fontWeight: 700 }}>Course Name</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Description</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Students</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Materials</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Assignments</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -261,9 +285,6 @@ export default function TeacherDashboard() {
                   <TableRow key={course.id} sx={{ "&:hover": { background: "#f9f9f9" } }}>
                     <TableCell sx={{ fontWeight: 600 }}>{course.title}</TableCell>
                     <TableCell>{course.description.substring(0, 30)}...</TableCell>
-                    <TableCell>{Array.isArray(course.students) ? course.students.length : 0}</TableCell>
-                    <TableCell>{Array.isArray(course.materials) ? course.materials.length : 0}</TableCell>
-                    <TableCell>{Array.isArray(course.assignments) ? course.assignments.length : 0}</TableCell>
                     <TableCell>
                       <Button 
                         size="small" 
@@ -540,35 +561,41 @@ export default function TeacherDashboard() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {getCourseStudents(attendanceDialog.courseId).map((student) => (
-                <TableRow key={student.id}>
-                  <TableCell>{student.studentName || student.name || student.email}</TableCell>
-                  <TableCell align="right">
-                    <Stack direction="row" spacing={1} justifyContent="flex-end">
-                      <Button 
-                        size="small" 
-                        variant="contained" 
-                        color="success"
-                        startIcon={<Check />}
-                        onClick={() => handleMarkAttendance(student.studentId || student.id, "present")}
-                        sx={{ minWidth: 100 }}
-                      >
-                        Present
-                      </Button>
-                      <Button 
-                        size="small" 
-                        variant="contained" 
-                        color="error"
-                        startIcon={<Close />}
-                        onClick={() => handleMarkAttendance(student.studentId || student.id, "absent")}
-                        sx={{ minWidth: 100 }}
-                      >
-                        Absent
-                      </Button>
-                    </Stack>
-                  </TableCell>
+              {enrolledStudents.length > 0 ? (
+                enrolledStudents.map((student) => (
+                  <TableRow key={student.id}>
+                    <TableCell>{(student.first_name && student.last_name) ? `${student.first_name} ${student.last_name}` : (student.name || student.studentName || student.email || "Student")}</TableCell>
+                    <TableCell align="right">
+                      <Stack direction="row" spacing={1} justifyContent="flex-end">
+                        <Button 
+                          size="small" 
+                          variant="contained" 
+                          color="success"
+                          startIcon={<Check />}
+                          onClick={() => handleMarkAttendance(student.user_id || student.id, "present")}
+                          sx={{ minWidth: 100 }}
+                        >
+                          Present
+                        </Button>
+                        <Button 
+                          size="small" 
+                          variant="contained" 
+                          color="error"
+                          startIcon={<Close />}
+                          onClick={() => handleMarkAttendance(student.user_id || student.id, "absent")}
+                          sx={{ minWidth: 100 }}
+                        >
+                          Absent
+                        </Button>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={2} align="center">No students enrolled.</TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         ) : (
@@ -603,13 +630,9 @@ export default function TeacherDashboard() {
                 <Typography variant="subtitle2" sx={{ color: "#6b7280", mb: 1 }}>Description</Typography>
                 <Typography variant="body2" sx={{ mb: 2 }}>{manageDialog.course.description}</Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid item xs={12}>
                     <Typography variant="caption" sx={{ color: "#6b7280" }}>Duration</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>{manageDialog.course.duration} weeks</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="caption" sx={{ color: "#6b7280" }}>Schedule</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{manageDialog.course.schedule}</Typography>
                   </Grid>
                 </Grid>
               </CardContent>
@@ -618,24 +641,27 @@ export default function TeacherDashboard() {
             {/* Enrolled Students */}
             <Box sx={{ mb: 3 }}>
               {(() => {
-                const courseEnrollments = getCourseStudents(manageDialog.course.id);
                 return (
                   <>
-                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>📚 Enrolled Students ({courseEnrollments?.length || 0})</Typography>
-                    {courseEnrollments && courseEnrollments.length > 0 ? (
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>📚 Enrolled Students ({enrolledStudents?.length || 0})</Typography>
+                    {enrolledStudents && enrolledStudents.length > 0 ? (
                       <TableContainer component={Paper} sx={{ maxHeight: 200 }}>
                         <Table size="small">
                           <TableHead>
                             <TableRow sx={{ background: "#f3f4f6" }}>
                               <TableCell sx={{ fontWeight: 700 }}>Student Name</TableCell>
-                              <TableCell sx={{ fontWeight: 700 }}>Enrolled Date</TableCell>
+                              <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {courseEnrollments.map((enrollment, idx) => (
+                            {enrolledStudents.map((student, idx) => (
                               <TableRow key={idx}>
-                                <TableCell>{enrollment.studentName || "Student"}</TableCell>
-                                <TableCell>{enrollment.enrolledDate ? new Date(enrollment.enrolledDate).toLocaleDateString() : "N/A"}</TableCell>
+                                <TableCell>{
+                                  (student.first_name && student.last_name)
+                                    ? `${student.first_name} ${student.last_name}`
+                                    : (student.name ? student.name : (student.studentName || student.email || "Student"))
+                                }</TableCell>
+                                <TableCell>{student.status || "-"}</TableCell>
                               </TableRow>
                             ))}
                           </TableBody>
