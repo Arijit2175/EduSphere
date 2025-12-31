@@ -1,4 +1,9 @@
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+class AttendanceRequest(BaseModel):
+    schedule_id: int
+    student_id: int
+    status: str
 from app.db import get_db_connection
 
 router = APIRouter(prefix="/attendance", tags=["attendance"])
@@ -23,7 +28,10 @@ def list_attendance(schedule_id: int = None, student_id: int = None):
     return records
 
 @router.post("/")
-def mark_attendance(schedule_id: int, student_id: int, status: str):
+def mark_attendance(data: AttendanceRequest):
+    schedule_id = data.schedule_id
+    student_id = data.student_id
+    status = data.status
     if status not in ("present", "absent"):
         raise HTTPException(status_code=400, detail="Invalid status")
     conn = get_db_connection()

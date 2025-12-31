@@ -38,6 +38,8 @@ const getGradeColor = (grade) => {
 };
 
 export default function TeacherDashboard() {
+  // For attendance confirmation dialog
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, student: null, status: "" });
   // All useState declarations at the top
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState({ title: "", description: "", duration: "", schedule: "" });
@@ -45,16 +47,45 @@ export default function TeacherDashboard() {
   const [scheduleForm, setScheduleForm] = useState({ title: "", startTime: "", duration: 60, meetLink: "", courseId: "" });
   const [attendanceDialog, setAttendanceDialog] = useState({ open: false, courseId: "", scheduleId: "" });
   const [attendanceDetailsDialog, setAttendanceDetailsDialog] = useState({ open: false, students: [], type: "" });
+  const [attendanceDetailsEnrolledStudents, setAttendanceDetailsEnrolledStudents] = useState([]); // For present/absent dialog
   const [manageDialog, setManageDialog] = useState({ open: false, course: null });
   const [enrolledStudents, setEnrolledStudents] = useState([]);
   const [materialForm, setMaterialForm] = useState({ name: "", file: null });
   const [assignmentForm, setAssignmentForm] = useState({ title: "", description: "", dueDate: "" });
   const [gradeDialog, setGradeDialog] = useState({ open: false, submission: null });
   const [gradeForm, setGradeForm] = useState({ grade: "", feedback: "" });
+  // Fetch enrolled students for present/absent dialog when it opens
+  useEffect(() => {
+    const fetchEnrolled = async () => {
+      if (attendanceDetailsDialog.open && attendanceDetailsDialog.students?.length > 0) {
+        // Try to get courseId from the first student (they have schedule/course info)
+        const first = attendanceDetailsDialog.students[0];
+        const courseId = first?.courseId || first?.course_id;
+        if (courseId) {
+          try {
+            const res = await fetch(`http://127.0.0.1:8000/enrollments/course/${courseId}/students`);
+            if (res.ok) {
+              const students = await res.json();
+              setAttendanceDetailsEnrolledStudents(Array.isArray(students) ? students : []);
+            } else {
+              setAttendanceDetailsEnrolledStudents([]);
+            }
+          } catch {
+            setAttendanceDetailsEnrolledStudents([]);
+          }
+        } else {
+          setAttendanceDetailsEnrolledStudents([]);
+        }
+      } else {
+        setAttendanceDetailsEnrolledStudents([]);
+      }
+    };
+    fetchEnrolled();
+  }, [attendanceDetailsDialog.open, attendanceDetailsDialog.students]);
 
   // Now all logic and hooks
   const { user } = useAuth();
-  const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass, getAssignmentSubmissions, reviewSubmission, deleteMaterial, addMaterial, createAssignment } = useFormalEducation();
+  const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass, updateAttendanceForClass, getAssignmentSubmissions, reviewSubmission, deleteMaterial, addMaterial, createAssignment } = useFormalEducation();
 
   useEffect(() => {
     if (attendanceDialog.open && attendanceDialog.courseId) {
@@ -108,14 +139,36 @@ export default function TeacherDashboard() {
 
   const teacherCourses = getTeacherCourses(user?.id);
 
-  const liveClasses = useMemo(() => {
-    return teacherCourses.flatMap((course) =>
-      (course.schedules || []).map((s) => ({
-        ...s,
-        courseTitle: course.title,
-        courseId: course.id,
-      }))
-    ).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  const [liveClasses, setLiveClasses] = useState([]);
+
+  // Fetch live classes and attendance records on mount or when teacherCourses change
+  useEffect(() => {
+    const fetchAttendanceForSessions = async () => {
+      // Build sessions from teacherCourses
+      const sessions = teacherCourses.flatMap((course) =>
+        (course.schedules || []).map((s) => ({
+          ...s,
+          courseTitle: course.title,
+          courseId: course.id,
+        }))
+      ).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+      // For each session, fetch attendance from backend
+      const sessionsWithAttendance = await Promise.all(
+        sessions.map(async (session) => {
+          try {
+            const res = await fetch(`http://127.0.0.1:8000/attendance/?schedule_id=${session.id}`);
+            if (res.ok) {
+              const attendees = await res.json();
+              return { ...session, attendees };
+            }
+          } catch {}
+          return { ...session, attendees: [] };
+        })
+      );
+      setLiveClasses(sessionsWithAttendance);
+    };
+    fetchAttendanceForSessions();
   }, [teacherCourses]);
 
   const handleCreate = () => {
@@ -154,42 +207,31 @@ export default function TeacherDashboard() {
     setOpenScheduleDialog(false);
   };
 
+  // Show confirmation dialog before marking attendance
   const handleMarkAttendance = (studentId, status) => {
+    setConfirmDialog({ open: true, student: studentId, status });
+  };
+
+  // Actually mark attendance after confirmation
+  const confirmMarkAttendance = () => {
+    const { student, status } = confirmDialog;
     const { courseId, scheduleId } = attendanceDialog;
-    if (!courseId || !scheduleId) return;
-    
-    // Find and update the session's attendees
-    const course = teacherCourses.find(c => c.id === courseId);
-    if (course && course.schedules) {
-      const schedule = course.schedules.find(s => s.id === scheduleId);
-      if (schedule) {
-        // Initialize attendees array if it doesn't exist
-        if (!schedule.attendees) {
-          schedule.attendees = [];
-        }
-        
-        // Check if student is already marked
-        const existingAttendance = schedule.attendees.find(a => a.studentId === studentId || a.id === studentId);
-        
-        if (existingAttendance) {
-          // Update existing attendance
-          existingAttendance.status = status;
-        } else {
-          // Add new attendance record
-          schedule.attendees.push({
-            id: studentId,
-            studentId: studentId,
-            studentName: getCourseStudents(courseId).find(s => (s.studentId || s.id) === studentId)?.studentName || 
-                         getCourseStudents(courseId).find(s => (s.studentId || s.id) === studentId)?.name || 
-                         "Student",
-            status: status
-          });
-        }
+    if (!courseId || !scheduleId || !student) return;
+    // Find the session in liveClasses
+    const session = liveClasses.find(s => s.id === scheduleId);
+    let attendanceId = null;
+    let alreadyMarked = false;
+    if (session && Array.isArray(session.attendees)) {
+      const existing = session.attendees.find(a => (a.student_id || a.studentId || a.id) === student);
+      if (existing) {
+        attendanceId = existing.id;
+        alreadyMarked = true;
       }
     }
-    
-    markAttendanceForClass(courseId, scheduleId, studentId);
-    // Trigger re-render by updating state
+    if (!alreadyMarked) {
+      markAttendanceForClass(courseId, scheduleId, student, status);
+    }
+    setConfirmDialog({ open: false, student: null, status: "" });
     setAttendanceDialog({ ...attendanceDialog });
   };
 
@@ -349,8 +391,15 @@ export default function TeacherDashboard() {
                   const schedules = Array.isArray(session.schedules) ? session.schedules : [];
                   const presentCount = session.attendees?.filter(a => a.status === "present")?.length || 0;
                   const absentCount = session.attendees?.filter(a => a.status === "absent")?.length || 0;
-                  const presentStudents = session.attendees?.filter(a => a.status === "present") || [];
-                  const absentStudents = session.attendees?.filter(a => a.status === "absent") || [];
+                  // Helper to get student name from enrolled students for this course
+                  const getStudentName = (studentId) => {
+                    // Use attendanceDetailsEnrolledStudents if dialog is open for this course, else fallback
+                    const stu = attendanceDetailsEnrolledStudents.find(s => s.id === studentId || s.studentId === studentId || s.user_id === studentId);
+                    return stu ? (stu.first_name && stu.last_name ? `${stu.first_name} ${stu.last_name}` : (stu.name || stu.email || "Student")) : "Student";
+                  };
+                  // For present/absent dialogs, only show names if dialog is open for this course
+                  const presentStudents = (session.attendees?.filter(a => a.status === "present") || []).map(a => ({ ...a, displayName: getStudentName(a.student_id || a.studentId || a.id), courseId: session.courseId }));
+                  const absentStudents = (session.attendees?.filter(a => a.status === "absent") || []).map(a => ({ ...a, displayName: getStudentName(a.student_id || a.studentId || a.id), courseId: session.courseId }));
                   return (
                   <TableRow key={session.id} sx={{ "&:hover": { background: "#f9f9f9" }, height: 72 }}>
                     <TableCell sx={{ fontWeight: 600, fontSize: 16 }}>{session.title}</TableCell>
@@ -530,11 +579,26 @@ export default function TeacherDashboard() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {attendanceDetailsDialog.students.map((student, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{student.studentName || student.name || "Student"}</TableCell>
-                </TableRow>
-              ))}
+              {attendanceDetailsDialog.students.map((student, idx) => {
+                // Robustly join with enrolled students to get name fields
+                const match = attendanceDetailsEnrolledStudents.find(s =>
+                  s.id === student.student_id ||
+                  s.user_id === student.student_id ||
+                  s.studentId === student.student_id ||
+                  s.id === student.studentId ||
+                  s.user_id === student.studentId ||
+                  s.studentId === student.studentId
+                );
+                const first_name = match?.first_name || student.first_name;
+                const last_name = match?.last_name || student.last_name;
+                const name = match?.name || student.name;
+                const email = match?.email || student.email;
+                return (
+                  <TableRow key={idx}>
+                    <TableCell>{(first_name && last_name) ? `${first_name} ${last_name}` : (name || email || "Student")}</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         ) : (
@@ -562,40 +626,66 @@ export default function TeacherDashboard() {
             </TableHead>
             <TableBody>
               {enrolledStudents.length > 0 ? (
-                enrolledStudents.map((student) => (
-                  <TableRow key={student.id}>
-                    <TableCell>{(student.first_name && student.last_name) ? `${student.first_name} ${student.last_name}` : (student.name || student.studentName || student.email || "Student")}</TableCell>
-                    <TableCell align="right">
-                      <Stack direction="row" spacing={1} justifyContent="flex-end">
-                        <Button 
-                          size="small" 
-                          variant="contained" 
-                          color="success"
-                          startIcon={<Check />}
-                          onClick={() => handleMarkAttendance(student.user_id || student.id, "present")}
-                          sx={{ minWidth: 100 }}
-                        >
-                          Present
-                        </Button>
-                        <Button 
-                          size="small" 
-                          variant="contained" 
-                          color="error"
-                          startIcon={<Close />}
-                          onClick={() => handleMarkAttendance(student.user_id || student.id, "absent")}
-                          sx={{ minWidth: 100 }}
-                        >
-                          Absent
-                        </Button>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                ))
+                enrolledStudents.map((student) => {
+                  // Check if already marked in liveClasses for this session
+                  let alreadyMarked = false;
+                  const session = liveClasses.find(s => s.id === attendanceDialog.scheduleId);
+                  if (session && Array.isArray(session.attendees)) {
+                    const existing = session.attendees.find(a => (a.student_id || a.studentId || a.id) === (student.user_id || student.id));
+                    if (existing) alreadyMarked = true;
+                  }
+                  return (
+                    <TableRow key={student.id}>
+                      <TableCell>{(student.first_name && student.last_name) ? `${student.first_name} ${student.last_name}` : (student.name || student.studentName || student.email || "Student")}</TableCell>
+                      <TableCell align="right">
+                        <Stack direction="row" spacing={1} justifyContent="flex-end">
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="success"
+                            startIcon={<Check />}
+                            onClick={() => handleMarkAttendance(student.user_id || student.id, "present")}
+                            sx={{ minWidth: 100 }}
+                            disabled={alreadyMarked}
+                          >
+                            Present
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="error"
+                            startIcon={<Close />}
+                            onClick={() => handleMarkAttendance(student.user_id || student.id, "absent")}
+                            sx={{ minWidth: 100 }}
+                            disabled={alreadyMarked}
+                          >
+                            Absent
+                          </Button>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
                   <TableCell colSpan={2} align="center">No students enrolled.</TableCell>
                 </TableRow>
               )}
+                  {/* Attendance Confirmation Dialog */}
+                  <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({ open: false, student: null, status: "" })}>
+                    <DialogTitle>Confirm Attendance</DialogTitle>
+                    <DialogContent>
+                      <Typography>
+                        Are you sure you want to mark this student as <b>{confirmDialog.status === "present" ? "Present" : "Absent"}</b>? This cannot be changed.
+                      </Typography>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={() => setConfirmDialog({ open: false, student: null, status: "" })}>Cancel</Button>
+                      <Button onClick={confirmMarkAttendance} color={confirmDialog.status === "present" ? "success" : "error"} variant="contained">
+                        Confirm
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
             </TableBody>
           </Table>
         ) : (
