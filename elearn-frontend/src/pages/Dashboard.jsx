@@ -29,6 +29,8 @@ export default function Dashboard() {
   const [statsModalOpen, setStatsModalOpen] = useState(false);
   const [certModalOpen, setCertModalOpen] = useState(false);
   const [studentsModalOpen, setStudentsModalOpen] = useState(false);
+  // Store enrolled students for each course (id -> array of students)
+  const [enrolledStudentsByCourse, setEnrolledStudentsByCourse] = useState({});
   // Teacher: schedule dialog state
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [scheduleCourseId, setScheduleCourseId] = useState("");
@@ -128,8 +130,26 @@ export default function Dashboard() {
     navigate("/formal");
   };
 
-  const handleViewStudents = () => {
+  // When opening students modal, fetch enrolled students for each course
+  const handleViewStudents = async () => {
     if (user?.role === "teacher") {
+      const newEnrolled = {};
+      await Promise.all(
+        teacherCourses.map(async (course) => {
+          try {
+            const res = await fetch(`http://127.0.0.1:8000/enrollments/course/${course.id}/students`);
+            if (res.ok) {
+              const students = await res.json();
+              newEnrolled[course.id] = students;
+            } else {
+              newEnrolled[course.id] = [];
+            }
+          } catch {
+            newEnrolled[course.id] = [];
+          }
+        })
+      );
+      setEnrolledStudentsByCourse(newEnrolled);
       setStudentsModalOpen(true);
     } else {
       setTabValue(1); // Switch to view students for regular users
@@ -719,41 +739,39 @@ export default function Dashboard() {
             ) : (
               <Box>
                 {teacherCourses.map((course) => {
-                  const courseEnrollments = getCourseStudents(course.id);
+                  const students = enrolledStudentsByCourse[course.id] || [];
                   return (
-                  <Box key={course.id} sx={{ mb: 3 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: "#667eea" }}>
-                      {course.title}
-                    </Typography>
-                    {courseEnrollments && courseEnrollments.length > 0 ? (
-                      <TableContainer component={Paper} sx={{ mb: 2 }}>
-                        <Table size="small">
-                          <TableHead>
-                            <TableRow sx={{ background: "#f3f4f6" }}>
-                              <TableCell sx={{ fontWeight: 700 }}>Student Name</TableCell>
-                              <TableCell sx={{ fontWeight: 700 }}>Enrolled Date</TableCell>
-                              <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {courseEnrollments.map((enrollment, idx) => (
-                              <TableRow key={idx} sx={{ "&:hover": { background: "#f9fafb" } }}>
-                                <TableCell>{enrollment.studentName || "Student"}</TableCell>
-                                <TableCell>{enrollment.enrolledDate ? new Date(enrollment.enrolledDate).toLocaleDateString() : "N/A"}</TableCell>
-                                <TableCell>
-                                  <Chip label="Enrolled" size="small" color="success" variant="outlined" />
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    ) : (
-                      <Typography variant="body2" sx={{ color: "#9ca3af", fontStyle: "italic", mb: 2 }}>
-                        No students enrolled in this course yet.
+                    <Box key={course.id} sx={{ mb: 3 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: "#667eea" }}>
+                        {course.title}
                       </Typography>
-                    )}
-                  </Box>
+                      {students.length > 0 ? (
+                        <TableContainer component={Paper} sx={{ mb: 2 }}>
+                          <Table size="small">
+                            <TableHead>
+                              <TableRow sx={{ background: "#f3f4f6" }}>
+                                <TableCell sx={{ fontWeight: 700 }}>Student Name</TableCell>
+                                <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {students.map((student, idx) => (
+                                <TableRow key={student.id || idx} sx={{ "&:hover": { background: "#f9fafb" } }}>
+                                  <TableCell>{(student.first_name && student.last_name) ? `${student.first_name} ${student.last_name}` : (student.name || student.studentName || student.email || "Student")}</TableCell>
+                                  <TableCell>
+                                    <Chip label="Enrolled" size="small" color="success" variant="outlined" />
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      ) : (
+                        <Typography variant="body2" sx={{ color: "#9ca3af", fontStyle: "italic", mb: 2 }}>
+                          No students enrolled in this course yet.
+                        </Typography>
+                      )}
+                    </Box>
                   );
                 })}
               </Box>

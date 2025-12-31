@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from app.api.auth import get_current_user
