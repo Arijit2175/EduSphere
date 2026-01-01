@@ -21,10 +21,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Enforce login-first entry: do not auto-restore sessions
+  // Restore user from localStorage on app load for persistent login
   useEffect(() => {
-    localStorage.removeItem("user");
-    setUser(null);
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
     setLoading(false);
   }, []);
 
