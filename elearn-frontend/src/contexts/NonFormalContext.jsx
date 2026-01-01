@@ -392,6 +392,60 @@ export const NonFormalProvider = ({ children }) => {
       });
       const enrollment = await res.json();
       setEnrollments((prev) => [...prev, enrollment]);
+      // Refresh all non-formal data after enrollment
+      if (token) {
+        const authHeader = { Authorization: `Bearer ${token}` };
+        // Fetch courses
+        const coursesRes = await fetch("http://127.0.0.1:8000/nonformal/courses/", { headers: authHeader });
+        if (coursesRes.ok) {
+          const fetchedCourses = await coursesRes.json();
+          if (Array.isArray(fetchedCourses) && fetchedCourses.length > 0) {
+            const courseMap = Object.fromEntries(DEFAULT_COURSES.map(c => [String(c.id), c]));
+            const mergedCourses = fetchedCourses.map(c => {
+              let extra = courseMap[String(c.id)];
+              if (!extra) {
+                extra = DEFAULT_COURSES.find(dc => dc.title.toLowerCase() === (c.title || '').toLowerCase());
+              }
+              let merged = { ...c, lessons: extra?.lessons || [], attachments: extra?.attachments || [], outcomes: extra?.outcomes || [], assessmentQuestions: extra?.assessmentQuestions || [] };
+              if ((!merged.lessons || merged.lessons.length === 0) && c.title) {
+                const fallback = DEFAULT_COURSES.find(dc => dc.title.toLowerCase() === c.title.toLowerCase());
+                if (fallback) {
+                  merged.lessons = fallback.lessons || [];
+                  merged.attachments = fallback.attachments || [];
+                  merged.outcomes = fallback.outcomes || [];
+                  merged.assessmentQuestions = fallback.assessmentQuestions || [];
+                }
+              }
+              return merged;
+            });
+            setCourses(mergedCourses);
+          } else {
+            setCourses(DEFAULT_COURSES);
+          }
+        } else {
+          setCourses(DEFAULT_COURSES);
+        }
+        // Fetch enrollments
+        const enrollmentsRes = await fetch("http://127.0.0.1:8000/nonformal/enrollments/", { headers: authHeader });
+        if (enrollmentsRes.ok) {
+          setEnrollments(await enrollmentsRes.json());
+        }
+        // Fetch progress
+        const progressRes = await fetch("http://127.0.0.1:8000/nonformal/progress/", { headers: authHeader });
+        if (progressRes.ok) {
+          const progressArr = await progressRes.json();
+          const progressObj = {};
+          for (const p of progressArr) {
+            progressObj[`${p.user_id || userId}-${p.course_id}`] = p;
+          }
+          setProgress(progressObj);
+        }
+        // Fetch certificates
+        const certsRes = await fetch("http://127.0.0.1:8000/nonformal/certificates/", { headers: authHeader });
+        if (certsRes.ok) {
+          setCertificates(await certsRes.json());
+        }
+      }
       return { success: true, message: "Enrolled" };
     } catch (err) {
       return { success: false, message: "Enrollment failed" };
