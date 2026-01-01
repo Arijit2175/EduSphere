@@ -1,7 +1,22 @@
+
 from fastapi import APIRouter, HTTPException, Body
+from pydantic import BaseModel
 from app.db import get_db_connection
 
 router = APIRouter(prefix="/assignments", tags=["assignments"])
+
+# List all assignment submissions (for dashboard count)
+@router.get("/assignment_submissions/")
+def list_all_assignment_submissions():
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB connection error")
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM assignment_submissions")
+    submissions = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return submissions
 
 @router.get("/")
 def list_assignments(course_id: int = None):
@@ -76,7 +91,7 @@ def update_assignment(assignment_id: int, title: str = None, description: str = 
     conn.close()
     return {"id": assignment_id, "updated": True}
 
-@router.delete("/{assignment_id}")
+# ReviewSubmissionRequest and review_submission are defined later in the file
 def delete_assignment(assignment_id: int):
     conn = get_db_connection()
     if not conn:
@@ -106,8 +121,14 @@ def list_submissions(assignment_id: int):
     conn.close()
     return submissions
 
+from fastapi import Request
+
 @router.post("/{assignment_id}/submit")
-def submit_assignment(assignment_id: int, enrollment_id: int, student_id: int, content: str):
+async def submit_assignment(assignment_id: int, request: Request):
+    data = await request.json()
+    enrollment_id = data.get("enrollment_id")
+    student_id = data.get("student_id")
+    content = data.get("content")
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
@@ -128,8 +149,15 @@ def submit_assignment(assignment_id: int, enrollment_id: int, student_id: int, c
     conn.close()
     return {"id": submission_id, "assignment_id": assignment_id, "enrollment_id": enrollment_id, "student_id": student_id}
 
+from pydantic import BaseModel
+
+class ReviewSubmissionRequest(BaseModel):
+    status: str = "graded"
+    grade: str = None
+    feedback: str = None
+
 @router.put("/submissions/{submission_id}/review")
-def review_submission(submission_id: int, status: str = "graded", grade: str = None, feedback: str = None):
+def review_submission(submission_id: int, review: ReviewSubmissionRequest):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
@@ -141,15 +169,15 @@ def review_submission(submission_id: int, status: str = "graded", grade: str = N
         raise HTTPException(status_code=404, detail="Submission not found")
     update_fields = []
     params = []
-    if status is not None:
+    if review.status is not None:
         update_fields.append("status=%s")
-        params.append(status)
-    if grade is not None:
+        params.append(review.status)
+    if review.grade is not None:
         update_fields.append("grade=%s")
-        params.append(grade)
-    if feedback is not None:
+        params.append(review.grade)
+    if review.feedback is not None:
         update_fields.append("feedback=%s")
-        params.append(feedback)
+        params.append(review.feedback)
     if not update_fields:
         cursor.close()
         conn.close()

@@ -870,8 +870,8 @@ export default function TeacherDashboard() {
               {manageDialog.course.assignments?.length > 0 && (
                 <Stack spacing={1} sx={{ mb: 2 }}>
                   {manageDialog.course.assignments.map((assignment, idx) => {
-                    // Get submissions count for this assignment
-                    const submissions = getAssignmentSubmissions(manageDialog.course.id, assignment.id) || [];
+                    // Get submissions for this assignment
+                    const submissions = getAssignmentSubmissions(assignment.id) || [];
                     return (
                       <Paper key={assignment.id || idx} sx={{ p: 2, mb: 2 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -879,19 +879,39 @@ export default function TeacherDashboard() {
                             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>{assignment.title}</Typography>
                             <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 1 }}>{assignment.description}</Typography>
                             <Typography variant="caption" sx={{ display: "block", mb: 2, color: "#ef4444" }}>Due: {assignment.dueDate || assignment.due_date}</Typography>
-                            <Typography variant="caption" sx={{ color: "#6366f1", display: "block", mt: 1 }}>
-                              Submissions: {submissions.length}
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#6366f1", display: "block", mt: 1, cursor: submissions.length > 0 ? 'pointer' : 'default', textDecoration: submissions.length > 0 ? 'underline' : 'none' }}
+                              onClick={() => {
+                                if (submissions.length > 0) setGradeDialog({ open: true, assignment, submissions });
+                              }}
+                            >
+                              Submissions: {Array.isArray(submissions) ? submissions.length : 0}
                             </Typography>
                           </Box>
-                          <Button
-                            size="small"
-                            color="error"
-                            variant="outlined"
-                            onClick={async () => {
-                              await handleDeleteAssignment(manageDialog.course.id, assignment.id);
-                              // Optionally refresh assignments list after deletion
-                              const res = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${manageDialog.course.id}`);
-                              if (res.ok) {
+                          {/* Add the missing closing tag for the left Box */}
+                          </Box>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Button
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                              onClick={() => {
+                                if (submissions.length > 0) setGradeDialog({ open: true, assignment, submissions });
+                              }}
+                              disabled={submissions.length === 0}
+                            >
+                              Grade
+                            </Button>
+                            <Button
+                              size="small"
+                              color="error"
+                              variant="outlined"
+                              onClick={async () => {
+                                await handleDeleteAssignment(manageDialog.course.id, assignment.id);
+                                // Optionally refresh assignments list after deletion
+                                const res = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${manageDialog.course.id}`);
+                                if (res.ok) {
                                 const assignments = await res.json();
                                 setManageDialog(prev => ({ open: true, course: { ...prev.course, assignments } }));
                               }
@@ -901,6 +921,7 @@ export default function TeacherDashboard() {
                             Delete
                           </Button>
                         </Box>
+                        {/* Submissions dialog is now opened by clicking the Submissions link */}
                       </Paper>
                     );
                   })}
@@ -984,17 +1005,59 @@ export default function TeacherDashboard() {
       </DialogActions>
     </Dialog>
 
-    {/* Grade Submission Dialog */}
-    <Dialog open={gradeDialog.open} onClose={() => setGradeDialog({ open: false, submission: null })} maxWidth="sm" fullWidth>
-      <DialogTitle>Grade Submission</DialogTitle>
-      <DialogContent sx={{ pt: 2 }}>
-        {gradeDialog.submission && (
-          <Box>
+    {/* Submissions List & Grade Dialog */}
+    <Dialog open={gradeDialog.open} onClose={() => setGradeDialog({ open: false, assignment: null, submissions: [] })} maxWidth="md" fullWidth>
+      <DialogTitle>Student Submissions</DialogTitle>
+      <DialogContent>
+        {gradeDialog.assignment && gradeDialog.submissions && gradeDialog.submissions.length > 0 ? (
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Student ID</TableCell>
+                  <TableCell>Content</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Grade</TableCell>
+                  <TableCell>Feedback</TableCell>
+                  <TableCell>Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {gradeDialog.submissions.map((sub) => (
+                  <TableRow key={sub.id}>
+                    <TableCell>{sub.student_id}</TableCell>
+                    <TableCell><pre style={{margin:0, fontFamily:'inherit', whiteSpace:'pre-wrap'}}>{sub.content}</pre></TableCell>
+                    <TableCell>{sub.status}</TableCell>
+                    <TableCell>{sub.grade || '-'}</TableCell>
+                    <TableCell>{sub.feedback || '-'}</TableCell>
+                    <TableCell>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="primary"
+                        onClick={() => setGradeDialog(gd => ({ ...gd, gradeSub: sub }))}
+                        disabled={sub.status === 'graded'}
+                      >
+                        {sub.status === 'graded' ? 'Graded' : 'Grade'}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Typography>No submissions found.</Typography>
+        )}
+        {/* Grade form for selected submission */}
+        {gradeDialog.gradeSub && (
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>Grade Submission for Student ID: {gradeDialog.gradeSub.student_id}</Typography>
             <Typography variant="body2" sx={{ mb: 2, color: "#6b7280" }}>
-              <strong>Submission:</strong> {gradeDialog.submission.content}
+              <strong>Submission:</strong> {gradeDialog.gradeSub.content}
             </Typography>
             <Typography variant="caption" sx={{ display: "block", mb: 2, color: "#9ca3af" }}>
-              Submitted: {new Date(gradeDialog.submission.submittedAt).toLocaleString()}
+              Submitted: {gradeDialog.gradeSub.submittedAt && !isNaN(Date.parse(gradeDialog.gradeSub.submittedAt.replace(' ', 'T'))) ? new Date(gradeDialog.gradeSub.submittedAt.replace(' ', 'T')).toLocaleString() : 'N/A'}
             </Typography>
             <TextField
               fullWidth
@@ -1012,24 +1075,44 @@ export default function TeacherDashboard() {
               onChange={(e) => setGradeForm({ ...gradeForm, feedback: e.target.value })}
               placeholder="Provide feedback to the student..."
             />
+            <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+              <Button onClick={() => setGradeDialog(gd => ({ ...gd, gradeSub: null }))}>Cancel</Button>
+              <Button
+                variant="contained"
+                onClick={async () => {
+                  if (gradeDialog.gradeSub && gradeForm.grade) {
+                    const res = await fetch(`http://127.0.0.1:8000/assignments/submissions/${gradeDialog.gradeSub.id}/review`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        status: "graded",
+                        grade: gradeForm.grade,
+                        feedback: gradeForm.feedback
+                      })
+                    });
+                    if (res.ok) {
+                      // Update local submissions in dialog instantly
+                      const updatedSubmissions = gradeDialog.submissions.map(sub =>
+                        sub.id === gradeDialog.gradeSub.id
+                          ? { ...sub, status: "graded", grade: gradeForm.grade, feedback: gradeForm.feedback }
+                          : sub
+                      );
+                      setGradeDialog(gd => ({ ...gd, submissions: updatedSubmissions, gradeSub: null }));
+                      reviewSubmission(gradeDialog.gradeSub.id, gradeForm.grade, gradeForm.feedback);
+                      setGradeForm({ grade: "", feedback: "" });
+                    }
+                  }
+                }}
+                sx={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)" }}
+              >
+                Save Grade
+              </Button>
+            </Box>
           </Box>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setGradeDialog({ open: false, submission: null })}>Cancel</Button>
-        <Button 
-          variant="contained" 
-          onClick={() => {
-            if (gradeDialog.submission && gradeForm.grade) {
-              reviewSubmission(gradeDialog.submission.id, gradeForm.grade, gradeForm.feedback);
-              setGradeDialog({ open: false, submission: null });
-              setGradeForm({ grade: "", feedback: "" });
-            }
-          }}
-          sx={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)" }}
-        >
-          Save Grade
-        </Button>
+        <Button onClick={() => setGradeDialog({ open: false, assignment: null, submissions: [], gradeSub: null })}>Close</Button>
       </DialogActions>
     </Dialog>
 

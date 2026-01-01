@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, Button, Grid, Typography, LinearProgress, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormalEducation } from "../contexts/FormalEducationContext";
 import { useAuth } from "../contexts/AuthContext";
 import Section from "./Section";
@@ -38,19 +38,51 @@ const getGradeColor = (grade) => {
 };
 
 
+
 export default function StudentFormalDashboard({ onExploreCourses }) {
   const { user } = useAuth();
-  const { enrollments, courses, getStudentEnrollments, getCourseById, submitAssignment, uploadMaterial, getSubmission } = useFormalEducation();
+  const { enrollments, courses, submissions, getStudentEnrollments, getCourseById, submitAssignment, uploadMaterial, getSubmission, getAssignmentsForEnrollment } = useFormalEducation();
   const [openAssignment, setOpenAssignment] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [submission, setSubmission] = useState("");
-  const [gradeViewDialog, setGradeViewDialog] = useState({ open: false, submission: null });
+  const [openGradesDialog, setOpenGradesDialog] = useState({ open: false, course: null, enrollment: null });
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
 
-  // Only include enrollments for formal courses
-  const studentEnrollments = getStudentEnrollments(user?.id).filter(e => {
-    const course = getCourseById(e.courseId);
-    return course && course.type === "formal";
-  });
+  useEffect(() => {
+    async function fetchAttendance() {
+      if (!user?.id) return;
+      try {
+        const token = JSON.parse(localStorage.getItem("user"))?.access_token;
+        const res = await fetch(`http://127.0.0.1:8000/attendance/?student_id=${user.id}`, {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          }
+        });
+        if (res.ok) {
+          setAttendanceRecords(await res.json());
+        }
+      } catch (e) {
+        setAttendanceRecords([]);
+      }
+    }
+    fetchAttendance();
+  }, [user?.id]);
+
+  // Only include enrollments for formal courses, and attach attendance
+  const studentEnrollments = getStudentEnrollments(user?.id)
+    .filter(e => {
+      const course = getCourseById(e.courseId);
+      return course && course.type === "formal";
+    })
+    .map(e => {
+      const course = getCourseById(e.courseId);
+      if (!course) return e;
+      // Attach attendance records for this enrollment/course
+      return {
+        ...e,
+        attendance: attendanceRecords.filter(a => course.schedules?.some(s => s.id === a.schedule_id)),
+      };
+    });
 
   const handleSubmitAssignment = () => {
     if (submission.trim() && selectedAssignment) {
@@ -152,7 +184,10 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                               ATTENDANCE
                             </Typography>
                             <Typography variant="h6" sx={{ fontWeight: 800, color: "#1f2937" }}>
-                              {enrollment.attendance}/{course.schedules?.length || 0}
+                              {Array.isArray(enrollment.attendance)
+                                ? enrollment.attendance.filter(a => a.status === "present").length
+                                : (typeof enrollment.attendance === "number" ? enrollment.attendance : 0)}
+                              /{course.schedules?.length || 0}
                             </Typography>
                           </Box>
                         </Grid>
@@ -284,25 +319,82 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                     </Grid>
                                   ) : null;
                                 })()}
-                                {Array.isArray(enrollment.completedAssignments) && enrollment.completedAssignments.length > 0 && (
+                                {course.assignments && course.assignments.length > 0 && (
                                   <Grid item xs={12}>
                                     <Button
                                       fullWidth
                                       size="small"
                                       variant="text"
-                                      onClick={() => {
-                                        const submitted = course.assignments.find(a => enrollment.completedAssignments.includes(a.id));
-                                        if (submitted) {
-                                          setSelectedAssignment({ ...submitted, courseId: course.id, enrollmentId: enrollment.id });
-                                          setOpenAssignment(true);
-                                        }
-                                      }}
+                                      onClick={() => setOpenGradesDialog({ open: true, course, enrollment })}
                                       sx={{ fontSize: "0.65rem", py: 0.3, color: "#10b981" }}
                                     >
                                       View Grades
                                     </Button>
                                   </Grid>
                                 )}
+                                    {/* Grades Dialog: List all assignments with grades/feedback */}
+                                    <Dialog open={openGradesDialog.open} onClose={() => setOpenGradesDialog({ open: false, course: null, enrollment: null })} maxWidth="md" fullWidth>
+                                      <DialogTitle>Assignment Grades & Feedback</DialogTitle>
+                                      <DialogContent>
+                                        {openGradesDialog.course && openGradesDialog.enrollment ? (
+                                          <TableContainer component={Paper}>
+                                            <Table>
+                                              <TableHead>
+                                                <TableRow>
+                                                  <TableCell>Title</TableCell>
+                                                  <TableCell>Status</TableCell>
+                                                  <TableCell>Grade</TableCell>
+                                                  <TableCell>Feedback</TableCell>
+                                                </TableRow>
+                                              </TableHead>
+                                              <TableBody>
+                                                {openGradesDialog.course.assignments.map((assignment) => {
+                                                  // Find submission by assignment_id (DB field), not assignmentId (JS field)
+                                                  const submission = (openGradesDialog.enrollment && Array.isArray(submissions))
+                                                    ? submissions.find(s => s.enrollment_id === openGradesDialog.enrollment.id && s.assignment_id === assignment.id)
+                                                    : null;
+                                                  return (
+                                                    <TableRow key={assignment.id}>
+                                                      <TableCell>{assignment.title}</TableCell>
+                                                      <TableCell>
+                                                        {submission ? (
+                                                          submission.status === "graded" ? (
+                                                            <Chip label="Graded" color="success" size="small" />
+                                                          ) : (
+                                                            <Chip label="Submitted" color="warning" size="small" />
+                                                          )
+                                                        ) : (
+                                                          <Chip label="Not Submitted" color="default" size="small" />
+                                                        )}
+                                                      </TableCell>
+                                                      <TableCell>
+                                                        {submission && submission.status === "graded"
+                                                          ? submission.grade
+                                                          : submission && submission.status === "submitted"
+                                                            ? "Not yet graded"
+                                                            : "-"}
+                                                      </TableCell>
+                                                      <TableCell>
+                                                        {submission && submission.status === "graded"
+                                                          ? (submission.feedback || "No feedback")
+                                                          : submission && submission.status === "submitted"
+                                                            ? "No feedback yet"
+                                                            : "-"}
+                                                      </TableCell>
+                                                    </TableRow>
+                                                  );
+                                                })}
+                                              </TableBody>
+                                            </Table>
+                                          </TableContainer>
+                                        ) : (
+                                          <Typography>No assignments found.</Typography>
+                                        )}
+                                      </DialogContent>
+                                      <DialogActions>
+                                        <Button onClick={() => setOpenGradesDialog({ open: false, course: null, enrollment: null })}>Close</Button>
+                                      </DialogActions>
+                                    </Dialog>
                               </Grid>
                             </Box>
                           </Grid>
@@ -368,7 +460,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                     <strong>Your Answer:</strong> {existingSubmission.content}
                   </Typography>
                   <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 1 }}>
-                    Submitted: {new Date(existingSubmission.submittedAt).toLocaleString()}
+                    Submitted: {existingSubmission.submittedAt && !isNaN(Date.parse(existingSubmission.submittedAt.replace(' ', 'T'))) ? new Date(existingSubmission.submittedAt.replace(' ', 'T')).toLocaleString() : 'N/A'}
                   </Typography>
                   {existingSubmission.status === "graded" && (() => {
                     const gradeColors = getGradeColor(existingSubmission.grade);

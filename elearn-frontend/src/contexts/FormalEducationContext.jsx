@@ -53,10 +53,10 @@ export const FormalEducationProvider = ({ children }) => {
           setCourses(coursesWithDetails);
         }
         const enrollmentsRes = await fetch("http://127.0.0.1:8000/enrollments/");
+        let mapped = [];
         if (enrollmentsRes.ok) {
           const enrollmentsData = await enrollmentsRes.json();
-          // Map backend fields to camelCase for consistency
-          const mapped = enrollmentsData.map(e => ({
+          mapped = enrollmentsData.map(e => ({
             id: e.id,
             studentId: e.user_id,
             courseId: e.course_id,
@@ -65,14 +65,40 @@ export const FormalEducationProvider = ({ children }) => {
             status: e.status,
             ...e
           }));
-          setEnrollments(mapped);
         }
+        // Fetch all assignment submissions to set completedAssignments
+        const submissionsRes = await fetch("http://127.0.0.1:8000/assignments/assignment_submissions/");
+        let allSubmissions = [];
+        if (submissionsRes.ok) {
+          allSubmissions = await submissionsRes.json();
+          // Map submitted_at to submittedAt for frontend consistency
+          const mappedSubmissions = allSubmissions.map(s => ({
+            ...s,
+            submittedAt: s.submitted_at || s.submittedAt
+          }));
+          setSubmissions(mappedSubmissions);
+        }
+        // For each enrollment, set completedAssignments based on submissions
+        mapped = mapped.map(e => {
+          const completed = allSubmissions
+            .filter(s => s.enrollment_id === e.id)
+            .map(s => s.assignment_id);
+          return { ...e, completedAssignments: completed };
+        });
+        setEnrollments(mapped);
       } catch (err) {
         // handle error
       }
     };
     fetchData();
   }, []);
+  // Get all assignments for an enrollment (helper)
+  const getAssignmentsForEnrollment = (enrollmentId) => {
+    const enrollment = enrollments.find(e => e.id === enrollmentId);
+    if (!enrollment) return [];
+    const course = courses.find(c => c.id === enrollment.courseId);
+    return course?.assignments || [];
+  };
 
   // Teacher: Create course
   const createCourse = async (courseData) => {
@@ -203,17 +229,34 @@ export const FormalEducationProvider = ({ children }) => {
   // Student: Submit assignment
   const submitAssignment = async (enrollmentId, assignmentId, submission) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/assignment_submissions/`, {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const studentId = user?.id;
+      const res = await fetch(`http://127.0.0.1:8000/assignments/${assignmentId}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enrollment_id: enrollmentId, assignment_id: assignmentId, ...submission }),
+        body: JSON.stringify({
+          enrollment_id: enrollmentId,
+          student_id: studentId,
+          content: submission.content
+        }),
       });
       if (!res.ok) {
         const errorData = await res.json();
         return { success: false, message: errorData.detail || "Assignment submission failed" };
       }
       const newSubmission = await res.json();
-      setSubmissions((prev) => [...prev, newSubmission]);
+      // Map submitted_at to submittedAt for frontend consistency
+      const mappedSubmission = { ...newSubmission, submittedAt: newSubmission.submitted_at || newSubmission.submittedAt };
+      setSubmissions((prev) => [...prev, mappedSubmission]);
+      // Update completedAssignments for the relevant enrollment
+      setEnrollments((prev) => prev.map(e => {
+        if (e.id === enrollmentId) {
+          const completed = Array.isArray(e.completedAssignments) ? [...e.completedAssignments] : [];
+          if (!completed.includes(assignmentId)) completed.push(assignmentId);
+          return { ...e, completedAssignments: completed };
+        }
+        return e;
+      }));
       return { success: true, submission: newSubmission };
     } catch (err) {
       return { success: false, message: "Assignment submission failed" };
@@ -299,7 +342,17 @@ export const FormalEducationProvider = ({ children }) => {
         body: JSON.stringify({ schedule_id: scheduleId, student_id: studentId, status }),
       });
       if (res.ok) {
-        // Optionally update local state for UI feedback
+        // After marking, fetch all attendance for this student in this course
+        const attendanceRes = await fetch(`http://127.0.0.1:8000/attendance/?student_id=${studentId}`);
+        let presentCount = 0;
+        if (attendanceRes.ok) {
+          const attendanceRecords = await attendanceRes.json();
+          // Only count 'present' for this course's schedules
+          const courseScheduleIds = (courses.find(c => c.id === courseId)?.schedules || []).map(s => s.id);
+          presentCount = attendanceRecords.filter(
+            a => a.status === "present" && courseScheduleIds.includes(a.schedule_id)
+          ).length;
+        }
         setCourses(courses.map(c => {
           if (c.id !== courseId) return c;
           return {
@@ -313,7 +366,7 @@ export const FormalEducationProvider = ({ children }) => {
         }));
         setEnrollments(enrollments.map(e =>
           e.courseId === courseId && e.studentId === studentId
-            ? { ...e, attendance: e.attendance + 1 }
+            ? { ...e, attendance: presentCount }
             : e
         ));
       } else {
@@ -400,7 +453,7 @@ export const FormalEducationProvider = ({ children }) => {
 
   // Get submissions for an assignment
   const getAssignmentSubmissions = (assignmentId) => {
-    return submissions.filter(s => s.assignmentId === assignmentId);
+    return submissions.filter(s => s.assignment_id === assignmentId);
   };
 
   // Get submission by enrollment and assignment
@@ -452,6 +505,7 @@ export const FormalEducationProvider = ({ children }) => {
     reviewSubmission,
     getAssignmentSubmissions,
     getSubmission,
+    getAssignmentsForEnrollment,
     deleteMaterial,
   };
 
