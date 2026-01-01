@@ -349,18 +349,7 @@ export default function InformalLearning() {
 
   const formatDate = (iso) => new Date(iso).toLocaleString();
 
-  const aiActions = ["Summarize", "Explain simply", "Related concepts", "Make flashcards"];
 
-  const handleAiAction = (post, action) => {
-    const clean = (post.body || "").slice(0, 320);
-    const tags = post.tags && post.tags.length ? post.tags.join(", ") : "the main ideas";
-    let text = "";
-    if (action === "Summarize") text = `Quick summary: ${clean}`;
-    if (action === "Explain simply") text = `In plain words: ${clean}`;
-    if (action === "Related concepts") text = `Look into: ${tags}.`;
-    if (action === "Make flashcards") text = `Flashcards\nQ: Key idea?\nA: ${clean.slice(0, 120)}...\nQ: Related terms?\nA: ${tags}`;
-    setAiResponses((prev) => ({ ...prev, [post.id]: { action, text } }));
-  };
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
@@ -684,32 +673,10 @@ export default function InformalLearning() {
 
                           <Box sx={{ flexGrow: 1 }} />
 
-                          {/* AI Actions */}
-                          <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                            {aiActions.map((a) => (
-                              <Chip
-                                key={a}
-                                label={a}
-                                size="small"
-                                variant="outlined"
-                                onClick={() => handleAiAction(post, a)}
-                                sx={{ fontSize: "0.75rem" }}
-                              />
-                            ))}
-                          </Stack>
+
                         </Stack>
 
-                        {/* AI Response */}
-                        {aiResponses[post.id] && (
-                          <Box sx={{ mb: 1.5, p: 1.5, borderRadius: 1, background: "#f8fafc", border: "1px solid #e5e7eb" }}>
-                            <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 0.5, color: "#0066cc" }}>
-                              {aiResponses[post.id].action}
-                            </Typography>
-                            <Typography variant="body2" sx={{ whiteSpace: "pre-line", color: "#334155", fontSize: "0.85rem" }}>
-                              {aiResponses[post.id].text}
-                            </Typography>
-                          </Box>
-                        )}
+
 
                         {/* Comments Section */}
                         <Stack spacing={1.5}>
@@ -904,28 +871,7 @@ export default function InformalLearning() {
                     </CardContent>
                   </Card>
 
-                  {/* AI Smart Companion */}
-                  <Card sx={{ boxShadow: "0 1px 3px rgba(0,0,0,0.1)", backgroundColor: "#f0f9ff", borderLeft: "4px solid #0066cc" }}>
-                    <CardContent>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, fontSize: "0.9rem", color: "#0066cc" }}>
-                        ⚡ AI COMPANION
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: "#475569", display: "block", mb: 1.5, lineHeight: 1.4 }}>
-                        Use quick actions on posts to summarize, simplify, or create flashcards.
-                      </Typography>
-                      <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
-                        {aiActions.map((a) => (
-                          <Chip
-                            key={a}
-                            label={a}
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontSize: "0.7rem" }}
-                          />
-                        ))}
-                      </Stack>
-                    </CardContent>
-                  </Card>
+
                 </Box>
               </Box>
             </Box>
