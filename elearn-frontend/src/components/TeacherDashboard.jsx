@@ -1006,15 +1006,16 @@ export default function TeacherDashboard() {
     </Dialog>
 
     {/* Submissions List & Grade Dialog */}
-    <Dialog open={gradeDialog.open} onClose={() => setGradeDialog({ open: false, assignment: null, submissions: [] })} maxWidth="md" fullWidth>
+    <Dialog open={gradeDialog.open} onClose={() => setGradeDialog({ open: false, assignment: null, submissions: [], gradeSub: null })} maxWidth="md" fullWidth>
       <DialogTitle>Student Submissions</DialogTitle>
       <DialogContent>
-        {gradeDialog.assignment && gradeDialog.submissions && gradeDialog.submissions.length > 0 ? (
+        {gradeDialog.assignment && enrolledStudents && (
           <TableContainer component={Paper}>
             <Table size="small">
               <TableHead>
                 <TableRow>
                   <TableCell>Student ID</TableCell>
+                  <TableCell>Name</TableCell>
                   <TableCell>Content</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Grade</TableCell>
@@ -1023,31 +1024,40 @@ export default function TeacherDashboard() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {gradeDialog.submissions.map((sub) => (
-                  <TableRow key={sub.id}>
-                    <TableCell>{sub.student_id}</TableCell>
-                    <TableCell><pre style={{margin:0, fontFamily:'inherit', whiteSpace:'pre-wrap'}}>{sub.content}</pre></TableCell>
-                    <TableCell>{sub.status}</TableCell>
-                    <TableCell>{sub.grade || '-'}</TableCell>
-                    <TableCell>{sub.feedback || '-'}</TableCell>
-                    <TableCell>
-                      <Button
-                        size="small"
-                        variant="contained"
-                        color="primary"
-                        onClick={() => setGradeDialog(gd => ({ ...gd, gradeSub: sub }))}
-                        disabled={sub.status === 'graded'}
-                      >
-                        {sub.status === 'graded' ? 'Graded' : 'Grade'}
-                      </Button>
-                    </TableCell>
+                {enrolledStudents.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">No students enrolled.</TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  enrolledStudents.map((student) => {
+                    // Find submission for this student
+                    const sub = (gradeDialog.submissions || []).find(s => s.student_id === student.user_id || s.student_id === student.id);
+                    return (
+                      <TableRow key={student.user_id || student.id}>
+                        <TableCell>{student.user_id || student.id}</TableCell>
+                        <TableCell>{(student.first_name && student.last_name) ? `${student.first_name} ${student.last_name}` : (student.name || student.email || "Student")}</TableCell>
+                        <TableCell><pre style={{margin:0, fontFamily:'inherit', whiteSpace:'pre-wrap'}}>{sub ? sub.content : '-'}</pre></TableCell>
+                        <TableCell>{sub ? sub.status : '-'}</TableCell>
+                        <TableCell>{sub && sub.grade ? sub.grade : '-'}</TableCell>
+                        <TableCell>{sub && sub.feedback ? sub.feedback : '-'}</TableCell>
+                        <TableCell>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="primary"
+                            onClick={() => sub && setGradeDialog(gd => ({ ...gd, gradeSub: sub }))}
+                            disabled={!sub || sub.status === 'graded'}
+                          >
+                            {!sub ? 'No Submission' : (sub.status === 'graded' ? 'Graded' : 'Grade')}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
             </Table>
           </TableContainer>
-        ) : (
-          <Typography>No submissions found.</Typography>
         )}
         {/* Grade form for selected submission */}
         {gradeDialog.gradeSub && (
@@ -1091,13 +1101,18 @@ export default function TeacherDashboard() {
                       })
                     });
                     if (res.ok) {
-                      // Update local submissions in dialog instantly
-                      const updatedSubmissions = gradeDialog.submissions.map(sub =>
-                        sub.id === gradeDialog.gradeSub.id
-                          ? { ...sub, status: "graded", grade: gradeForm.grade, feedback: gradeForm.feedback }
-                          : sub
-                      );
-                      setGradeDialog(gd => ({ ...gd, submissions: updatedSubmissions, gradeSub: null }));
+                      // Fetch latest submissions from backend to ensure up-to-date content/status
+                      const assignmentId = gradeDialog.assignment?.id;
+                      let latestSubmissions = [];
+                      if (assignmentId) {
+                        try {
+                          const resp = await fetch(`http://127.0.0.1:8000/assignments/${assignmentId}/submissions`);
+                          if (resp.ok) {
+                            latestSubmissions = await resp.json();
+                          }
+                        } catch {}
+                      }
+                      setGradeDialog(gd => ({ ...gd, submissions: latestSubmissions, gradeSub: null }));
                       reviewSubmission(gradeDialog.gradeSub.id, gradeForm.grade, gradeForm.feedback);
                       setGradeForm({ grade: "", feedback: "" });
                     }

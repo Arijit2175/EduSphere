@@ -47,6 +47,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   const [submission, setSubmission] = useState("");
   const [openGradesDialog, setOpenGradesDialog] = useState({ open: false, course: null, enrollment: null });
   const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [openClassesDialog, setOpenClassesDialog] = useState({ open: false, course: null });
 
   useEffect(() => {
     async function fetchAttendance() {
@@ -274,9 +275,64 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                 {session.title || "Join Session"}
                               </Button>
                             ))}
+                            <Button
+                              variant="text"
+                              size="small"
+                              sx={{ mt: 1, color: "#667eea", fontWeight: 700, textTransform: "none" }}
+                              onClick={() => setOpenClassesDialog({ open: true, course })}
+                            >
+                              View All Classes
+                            </Button>
                           </Box>
                         </Box>
                       )}
+      {/* All Classes Dialog */}
+      <Dialog open={openClassesDialog.open} onClose={() => setOpenClassesDialog({ open: false, course: null })} maxWidth="sm" fullWidth>
+        <DialogTitle>All Scheduled Classes</DialogTitle>
+        <DialogContent>
+          {openClassesDialog.course && openClassesDialog.course.schedules && openClassesDialog.course.schedules.length > 0 ? (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Title</TableCell>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Link</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {openClassesDialog.course.schedules.map((session) => (
+                    <TableRow key={session.id}>
+                      <TableCell>{session.title || "Session"}</TableCell>
+                      <TableCell>{session.start_time ? new Date(session.start_time).toLocaleString() : "-"}</TableCell>
+                      <TableCell>
+                        {session.meet_link || session.meetLink ? (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            href={session.meet_link || session.meetLink}
+                            target="_blank"
+                          >
+                            Join
+                          </Button>
+                        ) : (
+                          <span>No Link</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Typography>No classes scheduled.</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenClassesDialog({ open: false, course: null })}>Close</Button>
+        </DialogActions>
+      </Dialog>
 
                       {/* Assignments & Quizzes in Grid */}
                       <Grid container spacing={1.5}>
