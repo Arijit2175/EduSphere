@@ -16,10 +16,23 @@ export default function ContactUs() {
     message: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Thank you for contacting us! We'll get back to you soon.");
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    try {
+      const res = await fetch("http://127.0.0.1:8000/contact-messages/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        alert("Thank you for contacting us! We'll get back to you soon.");
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      } else {
+        alert("Failed to send message. Please try again.");
+      }
+    } catch (err) {
+      alert("Error sending message. Please try again.");
+    }
   };
 
   return (

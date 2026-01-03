@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.db import get_db_connection
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/contact-messages", tags=["contact_messages"])
 
@@ -15,18 +16,24 @@ def list_messages():
     conn.close()
     return messages
 
+class ContactMessageRequest(BaseModel):
+    name: str
+    email: str
+    subject: str = None
+    message: str = None
+
 @router.post("/")
-def create_message(name: str, email: str, subject: str = None, message: str = None):
+def create_message(data: ContactMessageRequest):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
     cursor.execute(
         "INSERT INTO contact_messages (name, email, subject, message) VALUES (%s, %s, %s, %s)",
-        (name, email, subject, message)
+        (data.name, data.email, data.subject, data.message)
     )
     conn.commit()
     msg_id = cursor.lastrowid
     cursor.close()
     conn.close()
-    return {"id": msg_id, "name": name, "email": email, "subject": subject}
+    return {"id": msg_id, "name": data.name, "email": data.email, "subject": data.subject}
