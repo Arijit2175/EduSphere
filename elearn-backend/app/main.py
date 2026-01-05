@@ -1,7 +1,8 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, courses, enrollments, assignments, lessons, attendance, quizzes, resources, certificates, ai_tutor_chats, ai_tutor, class_schedules, contact_messages, nonformal, user, forgot_password
+
+from app.api import auth, courses, enrollments, assignments, lessons, attendance, quizzes, resources, certificates, ai_tutor_chats, ai_tutor, class_schedules, contact_messages, nonformal, user, forgot_password, informal_posts, topics
 
 
 app = FastAPI()
@@ -36,6 +37,9 @@ app.include_router(ai_tutor.router)
 app.include_router(class_schedules.router)
 app.include_router(contact_messages.router)
 app.include_router(nonformal.router)
+app.include_router(informal_posts.router)
+
+app.include_router(topics.router)
 
 @app.get("/")
 def read_root():

@@ -9,7 +9,6 @@ from pydantic import BaseModel
 class EnrollRequest(BaseModel):
     course_id: str
 
-print("nonformal.py loaded")
 
 router = APIRouter(prefix="/nonformal", tags=["nonformal"])
 

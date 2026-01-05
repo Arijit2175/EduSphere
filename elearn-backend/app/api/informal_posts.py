@@ -1,0 +1,214 @@
+# REMOVE DUPLICATE IMPORTS AND ROUTER DEFINITIONS
+from fastapi import APIRouter, Depends, HTTPException, Body
+from typing import Optional
+from app.db import get_db_connection
+from app.api.auth import get_current_user
+
+router = APIRouter(prefix="/informal-posts", tags=["Informal Posts"])
+from fastapi import APIRouter, Depends, HTTPException, Body
+from typing import Optional
+from app.db import get_db_connection
+from app.api.auth import get_current_user
+
+router = APIRouter(prefix="/informal-posts", tags=["Informal Posts"])
+
+# Delete a comment from a post
+@router.delete("/{post_id}/comment/{comment_id}")
+def delete_comment(post_id: int, comment_id: str, user=Depends(get_current_user)):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB connection error")
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT comments FROM informal_posts WHERE id=%s", (post_id,))
+    post = cursor.fetchone()
+    if not post:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Post not found")
+    import json
+    comments = post.get("comments")
+    try:
+        comment_list = json.loads(comments) if comments else []
+    except Exception:
+        comment_list = []
+    # Only allow author to delete their own comment
+    new_comments = [c for c in comment_list if not (c["id"] == comment_id and c["author"] == user.get("email"))]
+    cursor.execute("UPDATE informal_posts SET comments=%s WHERE id=%s", (json.dumps(new_comments), post_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"success": True, "comments": new_comments}
+@router.post("/{post_id}/like")
+def like_informal_post(post_id: int, user=Depends(get_current_user)):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB connection error")
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT likers, likes FROM informal_posts WHERE id=%s", (post_id,))
+    post = cursor.fetchone()
+    if not post:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Post not found")
+    # Robustly handle NULLs and always treat as list/int
+    likers = post.get("likers") or ""
+    likes = post.get("likes")
+    liker_list = [int(x) for x in likers.split(",") if x.strip().isdigit()]
+    if user["id"] in liker_list:
+        liker_list.remove(user["id"])
+        likes = max(0, (likes or 1) - 1)
+    else:
+        liker_list.append(user["id"])
+        likes = (likes or 0) + 1
+    new_likers = ",".join(str(x) for x in liker_list)
+    cursor.execute("UPDATE informal_posts SET likers=%s, likes=%s WHERE id=%s", (new_likers, likes, post_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"success": True, "likes": likes, "likers": liker_list}
+
+@router.post("/{post_id}/comment")
+def comment_informal_post(post_id: int, text: str = Body(...), user=Depends(get_current_user)):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB connection error")
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT comments FROM informal_posts WHERE id=%s", (post_id,))
+    post = cursor.fetchone()
+    if not post:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Post not found")
+    import json
+    comments = post.get("comments")
+    try:
+        comment_list = json.loads(comments) if comments else []
+    except Exception:
+        comment_list = []
+    new_comment = {
+        "id": f"c-{user['id']}-{int(__import__('time').time())}",
+        "author": user.get("email", "Anonymous"),
+        "text": text
+    }
+    comment_list.append(new_comment)
+    cursor.execute("UPDATE informal_posts SET comments=%s WHERE id=%s", (json.dumps(comment_list), post_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"success": True, "comments": comment_list}
+
+@router.post("/{post_id}/save")
+def save_informal_post(post_id: int, user=Depends(get_current_user)):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB connection error")
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT savers FROM informal_posts WHERE id=%s", (post_id,))
+    post = cursor.fetchone()
+    if not post:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Post not found")
+    savers = post.get("savers") or ""
+    saver_list = [int(x) for x in savers.split(",") if x.strip().isdigit()]
+    if user["id"] in saver_list:
+        saver_list.remove(user["id"])
+    else:
+        saver_list.append(user["id"])
+    new_savers = ",".join(str(x) for x in saver_list)
+    cursor.execute("UPDATE informal_posts SET savers=%s WHERE id=%s", (new_savers, post_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"success": True, "savers": saver_list}
+
+
+
+@router.delete("/{post_id}")
+def delete_informal_post(post_id: int, user=Depends(get_current_user)):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB connection error")
+    cursor = conn.cursor(dictionary=True)
+    # Only allow delete if user is the author
+    cursor.execute("SELECT * FROM informal_posts WHERE id=%s", (post_id,))
+    post = cursor.fetchone()
+    if not post:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Post not found")
+    if post["author_id"] != user["id"]:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized to delete this post")
+    cursor.execute("DELETE FROM informal_posts WHERE id=%s", (post_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"success": True}
+
+@router.post("/")
+def create_informal_post(post: dict, user=Depends(get_current_user)):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB connection error")
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        INSERT INTO informal_posts
+        (title, body, tags, topic, type, media_url, creator, author_id, role)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    creator = user.get("username") or user.get("email") or str(user.get("id"))
+    values = (
+        post.get("title"),
+        post.get("body"),
+        post.get("tags"),
+        post.get("topic"),
+        post.get("type"),
+        post.get("media_url"),
+        creator,
+        user["id"],
+        user["role"]
+    )
+    cursor.execute(sql, values)
+    conn.commit()
+    post_id = cursor.lastrowid
+    cursor.execute("SELECT * FROM informal_posts WHERE id=%s", (post_id,))
+    new_post = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return new_post
+
+@router.get("/")
+def get_informal_posts():
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB connection error")
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+            """
+            SELECT p.*, u.email AS creator_email, u.role AS creator_role
+            FROM informal_posts p
+            JOIN users u ON p.author_id = u.id
+            ORDER BY p.created_at DESC
+            """
+        )
+    import json
+    posts = cursor.fetchall()
+    # Normalize savers to always be a list of ints
+    for post in posts:
+        savers = post.get("savers")
+        if savers is None or savers == "":
+            post["savers"] = []
+        else:
+            # Accept both comma-separated and JSON array strings
+            try:
+                if savers.startswith("["):
+                    post["savers"] = json.loads(savers)
+                else:
+                    post["savers"] = [int(x) for x in savers.split(",") if x.strip().isdigit()]
+            except Exception:
+                post["savers"] = []
+    cursor.close()
+    conn.close()
+    return posts

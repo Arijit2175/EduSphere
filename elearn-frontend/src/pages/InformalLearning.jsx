@@ -1,3 +1,8 @@
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import StarIcon from "@mui/icons-material/Star";
+import PersonIcon from "@mui/icons-material/Person";
+import axios from "axios";
+import ImageIcon from "@mui/icons-material/Image";
 import { useEffect, useMemo, useState } from "react";
 import {
   Box,
@@ -17,7 +22,16 @@ import {
   InputLabel,
   FormControl,
   Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
+
+
+
+
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
@@ -37,88 +51,9 @@ import BrushIcon from "@mui/icons-material/Brush";
 import ScienceIcon from "@mui/icons-material/Science";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
-import ImageIcon from "@mui/icons-material/Image";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
 
-const DEFAULT_POSTS = [
-  {
-    id: "post-1",
-    title: "AI prompt: turn requirements into UI wireframes in minutes",
-    body: "I pair Figma+GPT. Paste the problem, ask for flow, refine prompts, export components.",
-    topic: "Tech",
-    type: "post",
-    creator: "Anonymous",
-    creatorRole: "User",
-    likes: 42,
-    comments: [
-      { id: "c1", author: "Anonymous", text: "Tried this for a hackathon. Massive time saver." },
-      { id: "c2", author: "Anonymous", text: "Share your prompt template?" },
-    ],
-    saves: 12,
-    createdAt: "2025-01-05T10:00:00Z",
-    tags: ["AI", "UI", "productivity"],
-  },
-  {
-    id: "post-2",
-    title: "60s micro-tutorial: Flexbox mental model",
-    body: "Think rows/columns as axes. justify-content aligns on main axis, align-items on cross axis. Gap beats margins.",
-    topic: "Tech",
-    type: "video",
-    media: "shorts://flexbox",
-    creator: "Anonymous",
-    creatorRole: "User",
-    likes: 31,
-    comments: [],
-    saves: 9,
-    createdAt: "2025-01-06T08:00:00Z",
-    tags: ["CSS", "layout", "quick-tip"],
-  },
-  {
-    id: "post-3",
-    title: "Daily study hack: 25/5 rule",
-    body: "25 minutes deep work + 5 minute reset. Stack 3 rounds, then a longer break.",
-    topic: "Daily learning tips",
-    type: "note",
-    creator: "Anonymous",
-    creatorRole: "User",
-    likes: 18,
-    comments: [],
-    saves: 6,
-    createdAt: "2025-01-04T12:00:00Z",
-    tags: ["productivity", "habits"],
-  },
-  {
-    id: "post-4",
-    title: "Soft-skills quick tip: disagreeing with care",
-    body: "Lead with agreement, offer a why, invite them in: 'I like X. I wonder if Y helps because Z. What do you think?'",
-    topic: "Soft skills",
-    type: "post",
-    creator: "Anonymous",
-    creatorRole: "User",
-    likes: 22,
-    comments: [],
-    saves: 7,
-    createdAt: "2025-01-03T17:00:00Z",
-    tags: ["communication", "teams"],
-  },
-  {
-    id: "post-5",
-    title: "Beginner Python: list vs tuple cheat",
-    body: "If you need mutate: list. Need hashable/keys: tuple. Memory-light & safe: tuple.",
-    topic: "Tech",
-    type: "code",
-    creator: "Anonymous",
-    creatorRole: "User",
-    likes: 54,
-    comments: [{ id: "c5", author: "Anonymous", text: "Great mnemonic." }],
-    saves: 20,
-    createdAt: "2025-01-02T09:00:00Z",
-    tags: ["python", "basics", "cheatsheet"],
-  },
-];
-
-const TOPICS = ["All", "Tech", "Arts", "Science", "Soft skills", "Daily learning tips"];
+// Topics will be fetched from backend
+const DEFAULT_TOPICS = ["All"];
 const SORTS = [
   { value: "recent", label: "Most recent" },
   { value: "upvotes", label: "Most upvoted" },
@@ -134,21 +69,72 @@ const topicIcon = {
 };
 
 export default function InformalLearning() {
+    // State for delete dialog
+    const [deleteDialog, setDeleteDialog] = useState({ open: false, postId: null });
+
+    // Handler to delete post (frontend + backend)
+    const handleDeletePost = async (postId) => {
+      // Get access token from AuthContext or localStorage
+      let accessToken = null;
+      try {
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
+          const userObj = JSON.parse(userStr);
+          accessToken = userObj.access_token;
+        }
+      } catch {}
+      if (!accessToken) {
+        alert("You must be logged in to delete posts.");
+        setDeleteDialog({ open: false, postId: null });
+        return;
+      }
+      try {
+        await axios.delete(`http://localhost:8000/informal-posts/${postId}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          withCredentials: true,
+        });
+        setPosts((prev) => prev.filter((p) => p.id !== postId));
+      } catch (err) {
+        alert("Failed to delete post. Please try again.");
+      }
+      setDeleteDialog({ open: false, postId: null });
+    };
   const { isOpen } = useSidebar();
   const { user } = useAuth();
 
-  const [posts, setPosts] = useState(() => {
-    const stored = localStorage.getItem("informalPosts");
-    return stored ? JSON.parse(stored) : DEFAULT_POSTS;
-  });
-  const [saved, setSaved] = useState(() => {
-    const stored = localStorage.getItem("informalSaved");
-    return stored ? JSON.parse(stored) : [];
-  });
-  const [followingTopics, setFollowingTopics] = useState(() => {
-    const stored = localStorage.getItem("informalFollowTopics");
-    return stored ? JSON.parse(stored) : ["Tech", "Daily learning tips"];
-  });
+  const [posts, setPosts] = useState([]);
+
+  // Fetch posts from backend on mount and when user changes
+  useEffect(() => {
+    axios.get("http://localhost:8000/informal-posts/")
+      .then(res => {
+        const posts = (res.data || []).map(post => ({
+          ...post,
+          comments: typeof post.comments === 'string' ? (() => { try { return JSON.parse(post.comments); } catch { return []; } })() : (post.comments || []),
+          savers: Array.isArray(post.savers)
+            ? post.savers
+            : post.savers == null
+              ? []
+              : [post.savers]
+        }));
+        setPosts(posts);
+        // Debug log: posts and user
+        // Log each post's id, savers, and the user id for debugging
+        posts.forEach((p, i) => {
+          console.log(`Post[${i}] id:`, p.id, 'savers:', p.savers);
+        });
+        if (user) {
+          console.log('Current user id:', user.id, 'type:', typeof user.id);
+        } else {
+          console.log('No user logged in');
+        }
+      })
+      .catch(() => {
+        setPosts([]);
+      });
+  }, [user]);
+  const [topics, setTopics] = useState(DEFAULT_TOPICS);
+  const [followingTopics, setFollowingTopics] = useState([]);
   const [followingCreators, setFollowingCreators] = useState(() => {
     const stored = localStorage.getItem("informalFollowCreators");
     return stored ? JSON.parse(stored) : [];
@@ -164,13 +150,25 @@ export default function InformalLearning() {
     localStorage.setItem("informalPosts", JSON.stringify(posts));
   }, [posts]);
 
-  useEffect(() => {
-    localStorage.setItem("informalSaved", JSON.stringify(saved));
-  }, [saved]);
 
+
+  // Fetch topics and followed topics from backend
   useEffect(() => {
-    localStorage.setItem("informalFollowTopics", JSON.stringify(followingTopics));
-  }, [followingTopics]);
+    axios.get("http://localhost:8000/topics/")
+      .then(res => {
+        const backendTopics = res.data.map(t => t.name);
+        setTopics(["All", ...backendTopics]);
+      });
+    if (user && user.access_token) {
+      axios.get("http://localhost:8000/topics/followed", {
+        headers: { Authorization: `Bearer ${user.access_token}` }
+      }).then(res => {
+        setFollowingTopics(res.data.map(t => t.name));
+      });
+    } else {
+      setFollowingTopics([]);
+    }
+  }, [user]);
 
   useEffect(() => {
     localStorage.setItem("informalFollowCreators", JSON.stringify(followingCreators));
@@ -181,7 +179,16 @@ export default function InformalLearning() {
     if (filterTopic !== "All") data = data.filter((p) => p.topic === filterTopic);
     if (search.trim()) {
       const q = search.toLowerCase();
-      data = data.filter((p) => p.title.toLowerCase().includes(q) || p.body.toLowerCase().includes(q) || p.tags?.some((t) => t.toLowerCase().includes(q)));
+      data = data.filter((p) => {
+        const tagsArr = Array.isArray(p.tags)
+          ? p.tags
+          : typeof p.tags === 'string'
+            ? p.tags.split(',').map(t => t.trim())
+            : [];
+        return p.title.toLowerCase().includes(q)
+          || p.body.toLowerCase().includes(q)
+          || tagsArr.some((t) => t.toLowerCase().includes(q));
+      });
     }
     data.sort((a, b) => {
       if (sortBy === "upvotes") return (b.likes || 0) - (a.likes || 0);
@@ -213,30 +220,108 @@ export default function InformalLearning() {
     ].filter(Boolean);
   }, [posts, user?.id, commentDraft]);
 
-  const handleLike = (id) => {
-    setPosts((prev) =>
-      prev.map((p) => {
-        const liked = p.likers?.includes(user?.id);
-        const likers = liked ? p.likers.filter((x) => x !== user?.id) : [...(p.likers || []), user?.id];
-        return p.id === id ? { ...p, likes: liked ? p.likes - 1 : p.likes + 1, likers } : p;
-      })
-    );
+  const BACKEND_URL = "http://localhost:8000";
+  const handleLike = async (id) => {
+    try {
+      if (!user || !user.access_token) throw new Error("Not authenticated");
+      const res = await axios.post(
+        `${BACKEND_URL}/informal-posts/${id}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${user.access_token}` } }
+      );
+      if (res.data && res.data.success) {
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === id
+              ? { ...p, likes: res.data.likes, likers: res.data.likers }
+              : p
+          )
+        );
+      }
+    } catch (err) {
+      // Optionally show error
+    }
   };
 
-  const handleSave = (id) => {
-    setSaved((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const handleSave = async (id) => {
+    try {
+      if (!user || !user.access_token) throw new Error("Not authenticated");
+      const res = await axios.post(
+        `${BACKEND_URL}/informal-posts/${id}/save`,
+        {},
+        { headers: { Authorization: `Bearer ${user.access_token}` } }
+      );
+      if (res.data && res.data.success) {
+        // Re-fetch all posts to guarantee sync with DB
+        axios.get("http://localhost:8000/informal-posts/")
+          .then(res2 => {
+            const posts = (res2.data || []).map(post => ({
+              ...post,
+              comments: typeof post.comments === 'string' ? (() => { try { return JSON.parse(post.comments); } catch { return []; } })() : (post.comments || []),
+              savers: Array.isArray(post.savers)
+                ? post.savers
+                : post.savers == null
+                  ? []
+                  : [post.savers]
+            }));
+            setPosts(posts);
+          })
+          .catch(() => {
+            setPosts([]);
+          });
+      }
+    } catch (err) {
+      // Optionally show error
+    }
   };
 
-  const handleComment = (id) => {
+  const handleComment = async (id) => {
     const text = (commentDraft[id] || "").trim();
     if (!text) return;
-    const newComment = {
-      id: `c-${Date.now()}`,
-      author: "Anonymous",
-      text,
-    };
-    setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, comments: [...(p.comments || []), newComment] } : p)));
-    setCommentDraft((prev) => ({ ...prev, [id]: "" }));
+    try {
+      if (!user || !user.access_token) throw new Error("Not authenticated");
+      const res = await axios.post(
+        `${BACKEND_URL}/informal-posts/${id}/comment`,
+        text,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.access_token}`,
+          },
+        }
+      );
+      if (res.data && res.data.success) {
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === id
+              ? { ...p, comments: res.data.comments }
+              : p
+          )
+        );
+        setCommentDraft((prev) => ({ ...prev, [id]: "" }));
+      }
+    } catch (err) {
+      // Optionally show error
+    }
+  };
+
+  // Handler to delete a comment
+  const handleDeleteComment = async (postId, commentId) => {
+    try {
+      if (!user || !user.access_token) throw new Error("Not authenticated");
+      const res = await axios.delete(`${BACKEND_URL}/informal-posts/${postId}/comment/${commentId}`, {
+        headers: { Authorization: `Bearer ${user.access_token}` }
+      });
+      if (res.data && res.data.success) {
+        setPosts((prev) => prev.map((p) =>
+          p.id === postId
+            ? { ...p, comments: res.data.comments }
+            : p
+        ));
+      }
+    } catch (err) {
+      // Optionally show error
+    }
   };
 
   // Load persisted informal state on first render
@@ -250,13 +335,11 @@ export default function InformalLearning() {
       localStorage.removeItem("informalBadges");
 
       const storedPosts = JSON.parse(localStorage.getItem("informalPosts") || "null");
-      const storedSaved = JSON.parse(localStorage.getItem("informalSaved") || "null");
       const storedFollowingTopics = JSON.parse(localStorage.getItem("informalFollowingTopics") || "null");
       const storedFollowingCreators = JSON.parse(localStorage.getItem("informalFollowingCreators") || "null");
       const storedBadges = JSON.parse(localStorage.getItem("informalBadges") || "null");
 
       if (storedPosts) setPosts(storedPosts);
-      if (storedSaved) setSaved(storedSaved);
       if (storedFollowingTopics) setFollowingTopics(storedFollowingTopics);
       if (storedFollowingCreators) setFollowingCreators(storedFollowingCreators);
       if (storedBadges) setBadges(storedBadges);
@@ -272,11 +355,7 @@ export default function InformalLearning() {
     } catch {}
   }, [posts]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem("informalSaved", JSON.stringify(saved));
-    } catch {}
-  }, [saved]);
+
 
   useEffect(() => {
     try {
@@ -301,25 +380,60 @@ export default function InformalLearning() {
     const tags = composer.tagsInput
       .split(",")
       .map((t) => t.trim())
-      .filter(Boolean);
-    const newPost = {
-      id: `post-${Date.now()}`,
+      .filter(Boolean)
+      .join(",");
+    const postPayload = {
       title: composer.title,
       body: composer.body,
       topic: composer.topic,
       type: composer.type,
-      creator: "Anonymous",
-      creatorRole: "User",
-      likes: 0,
-      comments: [],
-      saves: 0,
-      createdAt: new Date().toISOString(),
-      tags,
-      authorId: user?.id,
-      media: composer.media,
+      tags: tags || null,
+      media_url: composer.media ? composer.media.src : null,
     };
-    setPosts((prev) => [newPost, ...prev]);
-    setComposer({ title: "", body: "", topic: composer.topic, type: "post", tagsInput: "", media: null });
+    // Get access token from AuthContext or localStorage
+    let accessToken = null;
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const userObj = JSON.parse(userStr);
+        accessToken = userObj.access_token;
+      }
+    } catch {}
+    if (!accessToken) {
+      alert("You must be logged in to post.");
+      return;
+    }
+    axios.post(
+      "http://localhost:8000/informal-posts/",
+      postPayload,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        withCredentials: true,
+      }
+    )
+      .then((res) => {
+        // After creating, re-fetch all posts for instant sync
+        axios.get("http://localhost:8000/informal-posts/")
+          .then(res2 => {
+            const posts = (res2.data || []).map(post => ({
+              ...post,
+              comments: typeof post.comments === 'string' ? (() => { try { return JSON.parse(post.comments); } catch { return []; } })() : (post.comments || []),
+              savers: Array.isArray(post.savers)
+                ? post.savers
+                : post.savers == null
+                  ? []
+                  : [post.savers]
+            }));
+            setPosts(posts);
+          })
+          .catch(() => {
+            setPosts([]);
+          });
+        setComposer({ title: "", body: "", topic: composer.topic, type: "post", tagsInput: "", media: null });
+      })
+      .catch((err) => {
+        alert("Failed to save post. Please try again.");
+      });
   };
 
   const handleMediaUpload = (file) => {
@@ -333,12 +447,30 @@ export default function InformalLearning() {
     reader.readAsDataURL(file);
   };
 
-  const handleFollowTopic = (topic) => {
-    if (topic === "All") return; // Can't follow "All"
+  const handleFollowTopic = async (topic) => {
+    if (topic === "All" || !user || !user.access_token) return;
+    const topicObj = topics.find(t => t === topic);
+    // Fetch topic id from backend topics endpoint
+    let topicId = null;
+    try {
+      const res = await axios.get("http://localhost:8000/topics/");
+      const found = res.data.find(t => t.name === topic);
+      if (found) topicId = found.id;
+    } catch {}
+    if (!topicId) return;
     if (followingTopics.includes(topic)) {
-      setFollowingTopics((prev) => prev.filter((t) => t !== topic));
+      // Unfollow
+      await axios.post("http://localhost:8000/topics/unfollow", topicId, {
+        headers: { Authorization: `Bearer ${user.access_token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.access_token}` }
+      });
+      setFollowingTopics(prev => prev.filter(t => t !== topic));
     } else {
-      setFollowingTopics((prev) => [...prev, topic]);
+      // Follow
+      await axios.post("http://localhost:8000/topics/follow", topicId, {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.access_token}` }
+      });
+      setFollowingTopics(prev => [...prev, topic]);
     }
   };
 
@@ -402,7 +534,7 @@ export default function InformalLearning() {
                         TOPICS
                       </Typography>
                       <Stack spacing={0.5}>
-                        {TOPICS.map((t) => (
+                        {topics.map((t) => (
                           <Box key={t} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                             <Button
                               fullWidth
@@ -424,7 +556,7 @@ export default function InformalLearning() {
                             >
                               {t}
                             </Button>
-                            {t !== "All" && (
+                            {t !== "All" && user && (
                               <IconButton
                                 size="small"
                                 onClick={(e) => {
@@ -491,7 +623,7 @@ export default function InformalLearning() {
                   <Card sx={{ mb: 2, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
                     <CardContent>
                       <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
-                        {TOPICS.map((t) => (
+                        {topics.map((t) => (
                           <Chip
                             key={t}
                             label={t}
@@ -572,7 +704,7 @@ export default function InformalLearning() {
                         <FormControl size="small" sx={{ minWidth: 140 }}>
                           <InputLabel>Topic</InputLabel>
                           <Select value={composer.topic} label="Topic" onChange={(e) => setComposer({ ...composer, topic: e.target.value })}>
-                            {TOPICS.filter((t) => t !== "All").map((t) => (
+                            {topics.filter((t) => t !== "All").map((t) => (
                               <MenuItem key={t} value={t}>{t}</MenuItem>
                             ))}
                           </Select>
@@ -601,19 +733,58 @@ export default function InformalLearning() {
                     <Card key={post.id} sx={{ boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #e5e7eb", "&:hover": { boxShadow: "0 2px 8px rgba(0,0,0,0.12)" } }}>
                       <CardContent>
                         {/* Post Header */}
-                        <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ mb: 2 }}>
+                        <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ mb: 2, position: 'relative' }}>
                           <Avatar sx={{ bgcolor: "#9ca3af", width: 40, height: 40 }}>
-                            ?
+                            <PersonIcon />
                           </Avatar>
                           <Box sx={{ flexGrow: 1 }}>
                             <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: "1rem", mb: 0.25 }}>
                               {post.title}
                             </Typography>
                             <Typography variant="caption" sx={{ color: "#6b7280", fontSize: "0.8rem" }}>
-                              Anonymous • {formatDate(post.createdAt)}
+                              {/* Always show email and role if present, else fallback to 'Unknown' */}
+                              {post.creator_email
+                                ? `${post.creator_email} (${post.creator_role || "role unknown"})`
+                                : post.email
+                                  ? `${post.email} (${post.role || "role unknown"})`
+                                  : "Unknown"}
+                              {post.created_at || post.createdAt ? (
+                                <> • {formatDate(post.created_at || post.createdAt)}</>
+                              ) : null}
                             </Typography>
+                                                  {/* Show tags if present */}
+                                                  {post.tags && (
+                                                    <Stack direction="row" spacing={1} sx={{ mt: 1, mb: 1 }}>
+                                                      {post.tags.split(",").map((tag, idx) => (
+                                                        <Chip key={idx} label={tag.trim()} size="small" />
+                                                      ))}
+                                                    </Stack>
+                                                  )}
+                                                  {/* Show media if present */}
+                                                  {post.media_url && (
+                                                    <Box sx={{ mt: 1, mb: 1 }}>
+                                                      {post.media_url.startsWith("data:image") ? (
+                                                        <img src={post.media_url} alt="uploaded" style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }} />
+                                                      ) : post.media_url.startsWith("data:video") ? (
+                                                        <video src={post.media_url} controls style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }} />
+                                                      ) : null}
+                                                    </Box>
+                                                  )}
                           </Box>
-                          <Chip size="small" label={post.topic} icon={topicIcon[post.topic]} />
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
+                            <Chip size="small" label={post.topic} icon={topicIcon[post.topic]} />
+                            {user && (post.author_id === user.id) && (
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                size="small"
+                                sx={{ minWidth: 0, px: 1, py: 0.5, fontSize: '0.75rem' }}
+                                onClick={() => setDeleteDialog({ open: true, postId: post.id })}
+                              >
+                                Delete
+                              </Button>
+                            )}
+                          </Stack>
                         </Stack>
 
                         {/* Post Body */}
@@ -624,7 +795,7 @@ export default function InformalLearning() {
                         {/* Tags */}
                         {post.tags && post.tags.length > 0 && (
                           <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1.5 }}>
-                            {post.tags.map((t) => (
+                            {(Array.isArray(post.tags) ? post.tags : typeof post.tags === 'string' ? post.tags.split(',') : []).map((t) => (
                               <Chip key={t} label={t} size="small" variant="outlined" />
                             ))}
                           </Stack>
@@ -664,9 +835,9 @@ export default function InformalLearning() {
 
                           <Button
                             size="small"
-                            startIcon={saved.includes(post.id) ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+                            startIcon={post.savers?.includes(user?.id) ? <BookmarkIcon /> : <BookmarkBorderIcon />}
                             onClick={() => handleSave(post.id)}
-                            sx={{ textTransform: "none", color: saved.includes(post.id) ? "#2563eb" : "#666" }}
+                            sx={{ textTransform: "none", color: post.savers?.includes(user?.id) ? "#2563eb" : "#666" }}
                           >
                             Save
                           </Button>
@@ -679,15 +850,28 @@ export default function InformalLearning() {
 
 
                         {/* Comments Section */}
+
                         <Stack spacing={1.5}>
-                          {(post.comments || []).map((c) => (
-                            <Box key={c.id} sx={{ background: "#f8fafc", p: 1.5, borderRadius: 1, border: "1px solid #e5e7eb" }}>
-                              <Typography variant="caption" sx={{ fontWeight: 700, color: "#111" }}>
-                                {c.author}
-                              </Typography>
-                              <Typography variant="caption" sx={{ display: "block", mt: 0.25, color: "#4b5563", lineHeight: 1.4 }}>
-                                {c.text}
-                              </Typography>
+                          {(Array.isArray(post.comments) ? post.comments : []).map((c) => (
+                            <Box key={c.id} sx={{ background: "#f8fafc", p: 1.5, borderRadius: 1, border: "1px solid #e5e7eb", display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <Box>
+                                <Typography variant="caption" sx={{ fontWeight: 700, color: "#111" }}>
+                                  {c.author}
+                                </Typography>
+                                <Typography variant="caption" sx={{ display: "block", mt: 0.25, color: "#4b5563", lineHeight: 1.4 }}>
+                                  {c.text}
+                                </Typography>
+                              </Box>
+                              {user && c.author === user.email && (
+                                <Button
+                                  size="small"
+                                  color="error"
+                                  sx={{ minWidth: 0, ml: 2, fontSize: '1.1em', fontWeight: 700 }}
+                                  onClick={() => handleDeleteComment(post.id, c.id)}
+                                >
+                                  &times;
+                                </Button>
+                              )}
                             </Box>
                           ))}
 
@@ -729,6 +913,23 @@ export default function InformalLearning() {
                     </Card>
                   )}
                 </Stack>
+                {/* Single Delete Confirmation Dialog rendered once, outside the map */}
+                <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, postId: null })}>
+                  <DialogTitle>Delete Post?</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText>
+                      Are you sure you want to delete this post? This action cannot be undone.
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={() => setDeleteDialog({ open: false, postId: null })} color="primary">
+                      Cancel
+                    </Button>
+                    <Button onClick={() => handleDeletePost(deleteDialog.postId)} color="error" autoFocus>
+                      Delete
+                    </Button>
+                  </DialogActions>
+                </Dialog>
               </Box>
 
               {/* RIGHT SIDEBAR - TRENDING & INFO (Sticky) */}
@@ -815,24 +1016,23 @@ export default function InformalLearning() {
                     </CardContent>
                   </Card>
 
-                  {/* My Library */}
+                  {/* My Library (Saved Posts) */}
                   <Card sx={{ boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
                     <CardContent>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, fontSize: "0.9rem" }}>
                         MY LIBRARY
                       </Typography>
-                      {saved.length === 0 ? (
-                        <Typography variant="caption" sx={{ color: "#94a3b8" }}>
-                          Save posts to revisit later
-                        </Typography>
-                      ) : (
-                        <Stack spacing={1}>
-                          {saved.slice(0, 5).map((id) => {
-                            const p = posts.find((x) => x.id === id);
-                            if (!p) return null;
-                            return (
+                      {(() => {
+                        if (!user) return <Typography variant="caption" sx={{ color: "#94a3b8" }}>Login to save posts</Typography>;
+                        const savedPosts = posts.filter((p) => Array.isArray(p.savers) && p.savers.includes(user.id));
+                        if (savedPosts.length === 0) {
+                          return <Typography variant="caption" sx={{ color: "#94a3b8" }}>Save posts to revisit later</Typography>;
+                        }
+                        return (
+                          <Stack spacing={1}>
+                            {savedPosts.slice(0, 5).map((p) => (
                               <Stack
-                                key={id}
+                                key={p.id}
                                 direction="row"
                                 justifyContent="space-between"
                                 alignItems="center"
@@ -859,17 +1059,20 @@ export default function InformalLearning() {
                                 </Typography>
                                 <Chip label={p.topic} size="small" />
                               </Stack>
-                            );
-                          })}
-                          {saved.length > 5 && (
-                            <Typography variant="caption" sx={{ color: "#6b7280", mt: 1 }}>
-                              +{saved.length - 5} more
-                            </Typography>
-                          )}
-                        </Stack>
-                      )}
+                            ))}
+                            {savedPosts.length > 5 && (
+                              <Typography variant="caption" sx={{ color: "#6b7280", mt: 1 }}>
+                                +{savedPosts.length - 5} more
+                              </Typography>
+                            )}
+                          </Stack>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
+
+                  {/* My Library */}
+
 
 
                 </Box>
