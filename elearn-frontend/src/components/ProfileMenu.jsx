@@ -2,10 +2,12 @@
 import { useState } from "react";
 import { Menu, MenuItem, Divider, Box, Typography, Avatar, Button, Stack, Grid, Chip, Card, CardContent } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
+import { useSidebar } from "../contexts/SidebarContext";
 import { useNavigate } from "react-router-dom";
 
 export default function ProfileMenu({ anchorEl, open, onClose }) {
   const { user, logout } = useAuth();
+  const { setIsOpen } = useSidebar();
   const navigate = useNavigate();
   const [showDetailsPrompt, setShowDetailsPrompt] = useState(false);
 
@@ -24,6 +26,7 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
 
   const handleLogout = () => {
     logout();
+    setIsOpen(false); // Close sidebar on logout
     onClose();
     navigate("/");
   };

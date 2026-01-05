@@ -13,7 +13,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const displayName = user?.name || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || user?.email;
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, setIsOpen } = useSidebar();
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -25,6 +25,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
+    setIsOpen(false); // Close sidebar on logout
     handleClose();
     navigate("/");
   };
