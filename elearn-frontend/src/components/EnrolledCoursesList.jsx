@@ -1,10 +1,13 @@
-import { Box, Grid, Card, CardContent, Typography, Button, LinearProgress, Stack, Chip } from "@mui/material";
+import { Box, Grid, Card, CardContent, Typography, Button, LinearProgress, Stack, Chip, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import { motion } from "framer-motion";
 
 const MotionCard = motion(Card);
 
+import { useState } from "react";
+
 export default function EnrolledCoursesList({ courses = [] }) {
+  const [openDialogIdx, setOpenDialogIdx] = useState(null);
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -110,47 +113,45 @@ export default function EnrolledCoursesList({ courses = [] }) {
                       <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5, color: "#1f2937", fontSize: "0.85rem" }}>
                         🎥 Live Classes
                       </Typography>
-                      <Stack spacing={1}>
-                        {course.schedules.slice(0, 2).map((schedule) => (
-                          <Box 
-                            key={schedule.id} 
-                            sx={{ 
-                              p: 1.5,
-                              background: schedule.meetLink ? "linear-gradient(135deg, #667eea15 0%, #764ba225 100%)" : "#f9fafb",
-                              border: schedule.meetLink ? "1px solid #667eea30" : "1px solid #e5e7eb",
-                              borderRadius: 2,
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: 0.5
-                            }}
-                          >
-                            <Typography variant="caption" sx={{ fontWeight: 700, color: "#1f2937" }}>
-                              {schedule.title || "Live Class"}
-                            </Typography>
-                            
-                            {schedule.meetLink && (
-                              <Button
-                                fullWidth
-                                size="small"
-                                variant="contained"
-                                href={schedule.meetLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                startIcon={<VideocamIcon />}
-                                sx={{ 
-                                  mt: 0.5,
-                                  textTransform: "none",
-                                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                                  fontWeight: 700,
-                                  fontSize: "0.75rem"
-                                }}
-                              >
-                                Join Now
-                              </Button>
-                            )}
-                          </Box>
-                        ))}
-                      </Stack>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{ mb: 1, textTransform: "none" }}
+                        onClick={() => setOpenDialogIdx(i)}
+                      >
+                        View All Classes
+                      </Button>
+                      <Dialog open={openDialogIdx === i} onClose={() => setOpenDialogIdx(null)} maxWidth="xs" fullWidth>
+                        <DialogTitle>All Scheduled Classes</DialogTitle>
+                        <DialogContent>
+                          <Stack spacing={2}>
+                            {course.schedules.map((schedule) => (
+                              <Box key={schedule.id} sx={{ p: 1.5, borderRadius: 2, border: "1px solid #e5e7eb", background: schedule.meetLink ? "linear-gradient(135deg, #667eea15 0%, #764ba225 100%)" : "#f9fafb" }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#1f2937" }}>
+                                  {schedule.title || "Live Class"}
+                                </Typography>
+                                {schedule.meetLink && (
+                                  <Button
+                                    fullWidth
+                                    size="small"
+                                    variant="contained"
+                                    href={schedule.meetLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    startIcon={<VideocamIcon />}
+                                    sx={{ mt: 0.5, textTransform: "none", background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", fontWeight: 700, fontSize: "0.75rem" }}
+                                  >
+                                    Join Now
+                                  </Button>
+                                )}
+                              </Box>
+                            ))}
+                          </Stack>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={() => setOpenDialogIdx(null)} variant="contained">Close</Button>
+                        </DialogActions>
+                      </Dialog>
                     </Box>
                   )}
                 </CardContent>

@@ -609,14 +609,6 @@ export default function Dashboard() {
               </Grid>
               <Grid item xs={12}>
                 <Box sx={{ p: 2, background: "#f5f7fa", borderRadius: 2 }}>
-                  <Typography variant="body2" sx={{ color: "#666", mb: 0.5 }}>Courses Completed</Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: "#10b981" }}>
-                    {completedCourses}
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={12}>
-                <Box sx={{ p: 2, background: "#f5f7fa", borderRadius: 2 }}>
                   <Typography variant="body2" sx={{ color: "#666", mb: 0.5 }}>Certificates Earned</Typography>
                   <Typography variant="h5" sx={{ fontWeight: 700, color: "#4facfe" }}>
                     {userCertificates.length}

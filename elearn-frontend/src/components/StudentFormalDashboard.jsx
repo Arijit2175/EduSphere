@@ -48,6 +48,8 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   const [openGradesDialog, setOpenGradesDialog] = useState({ open: false, course: null, enrollment: null });
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [openClassesDialog, setOpenClassesDialog] = useState({ open: false, course: null });
+  // Add state for assignments dialog
+  const [openAssignmentsDialog, setOpenAssignmentsDialog] = useState({ open: false, course: null, enrollment: null });
 
   useEffect(() => {
     async function fetchAttendance() {
@@ -251,35 +253,24 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                             🎥 Live Classes
                           </Typography>
                           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                            {course.schedules.slice(0, 1).map((session) => (
-                              <Button
-                                key={session.id}
-                                fullWidth
-                                variant="contained"
-                                size="small"
-                                startIcon={<VideoCall />}
-                                href={session.meet_link || session.meetLink}
-                                target="_blank"
-                                disabled={!(session.meet_link || session.meetLink) || (session.meet_link || session.meetLink) === ""}
-                                sx={{
-                                  justifyContent: "flex-start",
-                                  textTransform: "none",
-                                  background: (session.meet_link || session.meetLink) ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" : "#e5e7eb",
-                                  color: "white",
-                                  fontWeight: 600,
-                                  "&:hover": {
-                                    background: (session.meet_link || session.meetLink) ? "linear-gradient(135deg, #5568d3 0%, #63398e 100%)" : "#e5e7eb"
-                                  }
-                                }}
-                              >
-                                {session.title || "Join Session"}
-                              </Button>
-                            ))}
+                            
                             <Button
-                              variant="text"
+                              fullWidth
+                              variant="contained"
                               size="small"
-                              sx={{ mt: 1, color: "#667eea", fontWeight: 700, textTransform: "none" }}
+                              startIcon={<VideoCall />}
                               onClick={() => setOpenClassesDialog({ open: true, course })}
+                              sx={{
+                                justifyContent: "flex-start",
+                                textTransform: "none",
+                                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                color: "white",
+                                fontWeight: 600,
+                                mt: 1,
+                                '&:hover': {
+                                  background: "linear-gradient(135deg, #5568d3 0%, #63398e 100%)"
+                                }
+                              }}
                             >
                               View All Classes
                             </Button>
@@ -376,9 +367,16 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                   ) : null;
                                 })()}
                                 {course.assignments && course.assignments.length > 0 && (
-                                  <Grid item xs={12}>
+                                  <Grid item xs={12} sx={{ display: 'flex', gap: 1 }}>
                                     <Button
-                                      fullWidth
+                                      size="small"
+                                      variant="outlined"
+                                      sx={{ fontSize: "0.65rem", py: 0.3, color: "#667eea", borderColor: "#667eea" }}
+                                      onClick={() => setOpenAssignmentsDialog({ open: true, course, enrollment })}
+                                    >
+                                      View Assignments
+                                    </Button>
+                                    <Button
                                       size="small"
                                       variant="text"
                                       onClick={() => setOpenGradesDialog({ open: true, course, enrollment })}
@@ -388,6 +386,49 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                     </Button>
                                   </Grid>
                                 )}
+                                      {/* Assignments Dialog */}
+                                      <Dialog open={openAssignmentsDialog.open} onClose={() => setOpenAssignmentsDialog({ open: false, course: null, enrollment: null })} maxWidth="md" fullWidth>
+                                        <DialogTitle>Assignments</DialogTitle>
+                                        <DialogContent>
+                                          {openAssignmentsDialog.course && openAssignmentsDialog.course.assignments && openAssignmentsDialog.course.assignments.length > 0 ? (
+                                            <TableContainer component={Paper}>
+                                              <Table>
+                                                <TableHead>
+                                                  <TableRow>
+                                                    <TableCell>Title</TableCell>
+                                                    <TableCell>Description</TableCell>
+                                                    <TableCell>Status</TableCell>
+                                                  </TableRow>
+                                                </TableHead>
+                                                <TableBody>
+                                                  {openAssignmentsDialog.course.assignments.map((assignment) => {
+                                                    const completed = openAssignmentsDialog.enrollment?.completedAssignments || [];
+                                                    const isSubmitted = completed.includes(assignment.id);
+                                                    return (
+                                                      <TableRow key={assignment.id}>
+                                                        <TableCell>{assignment.title}</TableCell>
+                                                        <TableCell>{assignment.description || '-'}</TableCell>
+                                                        <TableCell>
+                                                          {isSubmitted ? (
+                                                            <Chip label="Submitted" color="success" size="small" />
+                                                          ) : (
+                                                            <Chip label="Pending" color="warning" size="small" />
+                                                          )}
+                                                        </TableCell>
+                                                      </TableRow>
+                                                    );
+                                                  })}
+                                                </TableBody>
+                                              </Table>
+                                            </TableContainer>
+                                          ) : (
+                                            <Typography>No assignments found.</Typography>
+                                          )}
+                                        </DialogContent>
+                                        <DialogActions>
+                                          <Button onClick={() => setOpenAssignmentsDialog({ open: false, course: null, enrollment: null })}>Close</Button>
+                                        </DialogActions>
+                                      </Dialog>
                                     {/* Grades Dialog: List all assignments with grades/feedback */}
                                     <Dialog open={openGradesDialog.open} onClose={() => setOpenGradesDialog({ open: false, course: null, enrollment: null })} maxWidth="md" fullWidth>
                                       <DialogTitle>Assignment Grades & Feedback</DialogTitle>
