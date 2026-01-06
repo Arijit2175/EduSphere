@@ -1,32 +1,46 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
-from dotenv import load_dotenv
+
 import requests
-import os
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import List, Optional
 
 router = APIRouter()
-load_dotenv()
-HF_API_URL = "https://router.huggingface.co/models/HuggingFaceTB/SmolLM3-3B"
-HF_TOKEN = os.getenv("HF_API_TOKEN")
-HF_HEADERS = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
 
+SYSTEM_PROMPTS = {
+    "direct": "You are a helpful learning assistant named Lumina. Provide clear, concise explanations..."
+}
 
-# Accept a JSON object with a 'question' field
-class QuestionRequest(BaseModel):
-    question: str
+class ChatRequest(BaseModel):
+    message: str
+    mode: str = "socratic"
+    history: List[dict] = []
+    context: Optional[dict] = None
+
+OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = "mistral:7b"
 
 @router.post("/ai-tutor/ask")
-async def ask_ai_tutor(data: QuestionRequest):
-    question = data.question
-    if not HF_TOKEN:
-        return {"answer": "AI Tutor is not configured. Please set HF_API_TOKEN in your environment."}
-    payload = {"inputs": question}
-    response = requests.post(HF_API_URL, headers=HF_HEADERS, json=payload)
-    if response.ok:
-        data = response.json()
-        # Hugging Face returns a list of dicts with 'generated_text'
-        answer = data[0]["generated_text"] if data and "generated_text" in data[0] else "No answer."
-        return {"answer": answer}
-    # Log the error response for debugging
-    print("Hugging Face API error:", response.status_code, response.text)
-    return {"answer": f"Sorry, AI Tutor is unavailable right now. (Error: {response.status_code})"}
+async def ask_ai_tutor(data: ChatRequest):
+    try:
+        # Build prompt with system and history
+        prompt = SYSTEM_PROMPTS["direct"] + "\n"
+        for msg in data.history:
+            if msg['role'] == 'user':
+                prompt += f"User: {msg['content']}\n"
+            else:
+                prompt += f"AI: {msg['content']}\n"
+        prompt += f"User: {data.message}\nAI:"
+
+        payload = {
+            "model": OLLAMA_MODEL,
+            "prompt": prompt,
+            "stream": False
+        }
+        response = requests.post(OLLAMA_URL, json=payload, timeout=60)
+        response.raise_for_status()
+        result = response.json()
+        answer = result.get("response", "")
+        return {"answer": answer.strip()}
+    except Exception as e:
+        print("AI Tutor Error:", e)
+        raise HTTPException(status_code=500, detail=str(e))
