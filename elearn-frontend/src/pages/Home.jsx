@@ -29,7 +29,7 @@ export default function Home() {
       icon: "💡",
     },
     {
-      title: "AI Tutor",
+      title: "Lumina",
       link: "/ai",
       description: "24/7 AI tutor for instant answers, summaries, and practice guidance.",
       icon: "🤖",

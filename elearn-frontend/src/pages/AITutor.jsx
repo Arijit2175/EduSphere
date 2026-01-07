@@ -126,12 +126,12 @@ export default function AITutor() {
       <Box sx={{ display: "flex", flexGrow: 1, height: "100vh" }}>
         {/* Sidebar for chat history */}
         <Box sx={{ width: 280, bgcolor: "#fff", borderRight: "1px solid #e5e7eb", p: 2, display: { xs: "none", md: "block" } }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>Chats</Typography>
+          <Typography variant="h6" sx={{ mb: 2, mt: 3.5, textAlign: 'center', width: '100%' }}>Chats</Typography>
           <Button
             variant="outlined"
             color="primary"
             fullWidth
-            sx={{ mb: 2, fontWeight: 600, borderRadius: 2, textTransform: 'none' }}
+            sx={{ mt: 4, mb: 2, fontWeight: 600, borderRadius: 2, textTransform: 'none' }}
             onClick={() => {
               setCurrentChatId(null);
               setMessages([]);

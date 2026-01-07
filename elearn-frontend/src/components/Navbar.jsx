@@ -46,37 +46,48 @@ export default function Navbar() {
         background: 'color-mix(in oklab, var(--color-surface) 88%, transparent)',
       }}
     >
-      <Toolbar>
-
-        {/* Hamburger menu for sidebar */}
+      <Toolbar sx={{ position: 'relative', minHeight: 64 }}>
+        {/* Hamburger menu (left) */}
         <IconButton
           color="inherit"
           edge="start"
           onClick={toggleSidebar}
-          sx={{ mr: 2, display: { md: 'none' } }}
+          sx={{ mr: 2, display: { md: 'none' }, zIndex: 2 }}
         >
           <MenuIcon />
         </IconButton>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            flexGrow: 1, 
-            fontWeight: "600",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
+
+        {/* Centered EduSphere title */}
+        <Typography
+          variant="h6"
+          sx={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            m: 'auto',
+            width: 'fit-content',
+            height: 'fit-content',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
             gap: 1,
+            justifyContent: 'center',
+            pointerEvents: 'auto',
+            zIndex: 1,
           }}
           onClick={handleHomeClick}
         >
-          <Box sx={{ fontSize: "1.8rem" }}>🎓</Box>
+          <Box sx={{ fontSize: '1.8rem' }}>🎓</Box>
           EduSphere
         </Typography>
 
-        <Button onClick={handleHomeClick} color="inherit" sx={{ borderRadius: 'var(--radius-sm)' }}>Home</Button>
-
+        {/* Right side actions */}
         {isAuthenticated ? (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto', gap: 1 }}>
+            <Button onClick={handleHomeClick} color="inherit" sx={{ borderRadius: 'var(--radius-sm)' }}>Home</Button>
             <Typography variant="body2" sx={{ mr: 1, display: { xs: 'none', sm: 'block' } }}>
               {displayName}
             </Typography>
@@ -86,7 +97,7 @@ export default function Navbar() {
             <ProfileMenu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose} />
           </Box>
         ) : (
-          <>
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto', gap: 1 }}>
             <Button 
               href="/login" 
               color="inherit" 
@@ -118,7 +129,7 @@ export default function Navbar() {
             >
               Register
             </Button>
-          </>
+          </Box>
         )}
       </Toolbar>
     </AppBar>

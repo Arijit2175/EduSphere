@@ -5,17 +5,19 @@ import Navbar from "../components/Navbar";
 import FormInput from "../components/FormInput";
 import PageHeader from "../components/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
+import { useSidebar } from "../contexts/SidebarContext";
 import { useState, useEffect } from "react";
 
 const MotionCard = motion(Card);
 
-export default function Login() {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [role, setRole] = useState("student");
   const { login, isAuthenticated } = useAuth();
+  const { setIsOpen } = useSidebar();
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -34,6 +36,7 @@ export default function Login() {
     setTimeout(() => {
       if (email && password) {
         login(email, password, role);
+        setIsOpen(false); // Close sidebar after login
         setLoading(false);
         navigate("/dashboard");
       } else {
@@ -349,3 +352,5 @@ export default function Login() {
     </Box>
   );
 }
+
+export default Login;
