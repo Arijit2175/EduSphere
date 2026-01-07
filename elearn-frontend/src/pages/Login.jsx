@@ -27,9 +27,20 @@ function Login() {
     }
   }, [isAuthenticated, navigate]);
 
+  const validateEmail = (email) => {
+    // Simple email regex for validation
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
     setLoading(true);
 
     // Simulate API call

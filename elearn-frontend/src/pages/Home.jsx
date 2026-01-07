@@ -13,25 +13,25 @@ export default function Home() {
     {
       title: "Formal Learning",
       link: "/formal",
-      description: "Structured, accredited coursework with assessments and certifications.",
+      description: "Structured, accredited coursework with assessments and attendance monitoring.",
       icon: "📚",
     },
     {
       title: "Non-Formal Learning",
       link: "/nonformal",
-      description: "Workshops and bootcamps focused on skills with hands-on projects and mentors.",
+      description: "Workshops and courses focused on skills with hands-on lessons and certifications.",
       icon: "🎯",
     },
     {
       title: "Informal Learning",
       link: "/informal",
-      description: "Post your doubts and tips, learn from community opinions, and use AI explanations to understand faster.",
+      description: "Post your doubts, tips and learn from community opinions to understand faster.",
       icon: "💡",
     },
     {
       title: "Lumina",
       link: "/ai",
-      description: "24/7 AI tutor for instant answers, summaries, and practice guidance.",
+      description: "24/7 AI tutor for instant answers, summaries and practice guidance.",
       icon: "🤖",
     },
   ];
