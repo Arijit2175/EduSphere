@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useSidebar } from "../contexts/SidebarContext";
 import {
   Drawer,
   List,
@@ -23,13 +23,13 @@ import {
   SchoolOutlined,
   SmartToy,
 } from "@mui/icons-material";
-import { useSidebar } from "../contexts/SidebarContext";
+  // (removed duplicate import)
 import { useAuth } from "../contexts/AuthContext";
 
-export default function Sidebar() {
+function Sidebar() {
   const { user } = useAuth();
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false); // Sidebar closed by default
+  const { isOpen, setIsOpen } = useSidebar();
   const drawerWidth = 260;
 
   // Build links as before, but keep icons as MUI icons
@@ -193,6 +193,7 @@ export default function Sidebar() {
                     overflow: "hidden",
                   }}
                   selected={isActive}
+                  // Remove any onClick that closes sidebar here
                 >
                   <ListItemIcon
                     sx={{
@@ -277,3 +278,5 @@ export default function Sidebar() {
     </>
   );
 }
+
+export default Sidebar;
