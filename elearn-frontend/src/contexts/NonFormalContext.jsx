@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 
 const NonFormalContext = createContext();
@@ -377,7 +377,7 @@ export const NonFormalProvider = ({ children }) => {
       }
     };
     fetchData();
-  }, [user]);
+  }, [user?.id, user?.access_token]);
 
   const enrollCourse = async (userId, courseId) => {
     try {
@@ -581,26 +581,26 @@ export const NonFormalProvider = ({ children }) => {
     // await fetch("http://127.0.0.1:8000/nonformal/reset", { method: "POST" });
   };
 
+  const value = useMemo(() => ({
+    courses,
+    enrollments,
+    progress,
+    certificates,
+    enrollCourse,
+    isEnrolled,
+    getEnrolledCourses,
+    updateLessonProgress,
+    updateAssessmentScore,
+    decrementAttempts,
+    resetAttempts,
+    getCourseProgress,
+    resetCourseProgress,
+    resetAllData,
+    earnCertificate,
+  }), [courses, enrollments, progress, certificates]);
+
   return (
-    <NonFormalContext.Provider
-      value={{
-        courses,
-        enrollments,
-        progress,
-        certificates,
-        enrollCourse,
-        isEnrolled,
-        getEnrolledCourses,
-        updateLessonProgress,
-        updateAssessmentScore,
-        decrementAttempts,
-        resetAttempts,
-        getCourseProgress,
-        resetCourseProgress,
-        resetAllData,
-        earnCertificate,
-      }}
-    >
+    <NonFormalContext.Provider value={value}>
       {children}
     </NonFormalContext.Provider>
   );

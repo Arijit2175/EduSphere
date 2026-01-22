@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 
 const buildUser = (data) => {
   const first_name = data.first_name || data.email?.split("@")[0] || "User";
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email, password, role = "student") => {
+  const login = useCallback(async (email, password, role = "student") => {
     try {
       const response = await fetch("http://127.0.0.1:8000/auth/login", {
         method: "POST",
@@ -57,8 +57,9 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       throw err;
     }
-  };
-  const register = async (formData) => {
+  }, []);
+  
+  const register = useCallback(async (formData) => {
     try {
       const response = await fetch("http://127.0.0.1:8000/auth/register", {
         method: "POST",
@@ -74,16 +75,21 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       throw err;
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("enrolledCourses");
-  };
+  }, []);
 
   // Add updateUser to allow profile editing (now updates backend too)
-  const updateUser = async (updatedFields) => {
+  const updateUser = useCallback(async (updatedFields) => {
+    setUser((prev) => {
+      if (!prev || !prev.access_token) return prev;
+      return buildUser({ ...prev, ...updatedFields });
+    });
+    
     if (!user || !user.access_token) return;
     try {
       const res = await fetch("http://127.0.0.1:8000/users/me", {
@@ -97,13 +103,12 @@ export const AuthProvider = ({ children }) => {
       if (!res.ok) {
         throw new Error("Failed to update profile");
       }
-      setUser((prev) => buildUser({ ...prev, ...updatedFields }));
     } catch (err) {
       // Optionally handle error (show toast, etc.)
     }
-  };
+  }, [user]);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     loading,
     login,
@@ -111,7 +116,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     isAuthenticated: !!user,
-  };
+  }), [user, loading, login, register, logout, updateUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

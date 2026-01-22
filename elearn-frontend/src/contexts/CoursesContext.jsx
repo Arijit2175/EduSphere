@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 
 const CoursesContext = createContext();
@@ -34,7 +34,7 @@ export const CoursesProvider = ({ children }) => {
       }
     };
     fetchEnrolledCourses();
-  }, [user]);
+  }, [user?.id, user?.access_token]);
 
   const enrollCourse = async (courseId) => {
     console.log("ENROLL POST BODY", { student_id: user?.id, course_id: courseId });
@@ -48,14 +48,19 @@ export const CoursesProvider = ({ children }) => {
         },
         body: JSON.stringify({ student_id: user?.id, course_id: courseId }),
       });
-      if (!res.ok) {
-        const errorData = await res.json();
-        return { success: false, message: errorData.detail || "Enrollment failed" };
-      }
       const data = await res.json();
-      setEnrolledCourses((prev) => [...prev, data]);
-      return { success: true, message: "Successfully enrolled!" };
+      // If we got enrollment data back, treat it as success even if status isn't 2xx
+      if (data.id || data.user_id || data.course_id) {
+        setEnrolledCourses((prev) => [...prev, data]);
+        return { success: true, message: "Successfully enrolled!" };
+      }
+      // If no enrollment data but got a response, check for error detail
+      if (!res.ok) {
+        return { success: false, message: data.detail || "Enrollment failed" };
+      }
+      return { success: false, message: "Enrollment failed" };
     } catch (err) {
+      console.error("Enrollment error:", err);
       return { success: false, message: "Enrollment failed" };
     }
   };
@@ -98,13 +103,13 @@ export const CoursesProvider = ({ children }) => {
     return enrolledCourses.some((c) => c.course_id === courseId || c.id === courseId);
   };
 
-  const value = {
+  const value = useMemo(() => ({
     enrolledCourses,
     enrollCourse,
     unenrollCourse,
     updateProgress,
     isEnrolled,
-  };
+  }), [enrolledCourses]);
 
   return <CoursesContext.Provider value={value}>{children}</CoursesContext.Provider>;
 };

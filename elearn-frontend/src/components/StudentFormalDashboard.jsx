@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, Button, Grid, Typography, LinearProgress, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useFormalEducation } from "../contexts/FormalEducationContext";
 import { useAuth } from "../contexts/AuthContext";
 import Section from "./Section";
@@ -71,21 +71,22 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
     fetchAttendance();
   }, [user?.id]);
 
-  // Only include enrollments for formal courses, and attach attendance
-  const studentEnrollments = getStudentEnrollments(user?.id)
-    .filter(e => {
-      const course = getCourseById(e.courseId);
-      return course && course.type === "formal";
-    })
-    .map(e => {
-      const course = getCourseById(e.courseId);
-      if (!course) return e;
-      // Attach attendance records for this enrollment/course
-      return {
-        ...e,
-        attendance: attendanceRecords.filter(a => course.schedules?.some(s => s.id === a.schedule_id)),
-      };
-    });
+  // Only include enrollments for formal courses, and attach attendance - memoized to prevent re-renders
+  const studentEnrollments = useMemo(() => 
+    getStudentEnrollments(user?.id)
+      .filter(e => {
+        const course = getCourseById(e.courseId);
+        return course && course.type === "formal";
+      })
+      .map(e => {
+        const course = getCourseById(e.courseId);
+        if (!course) return e;
+        // Attach attendance records for this enrollment/course
+        return {
+          ...e,
+          attendance: attendanceRecords.filter(a => course.schedules?.some(s => s.id === a.schedule_id)),
+        };
+      }), [enrollments, courses, user?.id, attendanceRecords]);
 
   const handleSubmitAssignment = () => {
     if (submission.trim() && selectedAssignment) {

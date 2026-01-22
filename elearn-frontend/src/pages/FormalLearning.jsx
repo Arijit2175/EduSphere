@@ -1,4 +1,4 @@
-import { Box, Container, Tabs, Tab, Typography } from "@mui/material";
+import { Box, Container, Tabs, Tab, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 import { useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -17,6 +17,8 @@ export default function FormalLearning() {
   const { user } = useAuth();
   const { courses, enrollStudent, getStudentEnrollments } = useFormalEducation();
   const [tabValue, setTabValue] = useState(0);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, course: null });
+  const [enrollmentMessage, setEnrollmentMessage] = useState({ type: "", message: "" });
 
   // Detect if user is a teacher based on explicit role
   const isTeacher = user?.role === "teacher";
@@ -48,13 +50,33 @@ export default function FormalLearning() {
     );
   }
 
-  // Only show formal courses with an instructor_id
-  const catalogCourses = courses.filter(course => course.type === 'formal' && !!course.instructor_id);
+  // Only show formal courses with an instructor_id - memoized to prevent re-renders
+  const catalogCourses = useMemo(() => 
+    courses.filter(course => course.type === 'formal' && !!course.instructor_id), 
+    [courses]
+  );
+  // Recompute on every render so new enrollments are immediately reflected
   const studentEnrollments = getStudentEnrollments(user?.id);
 
   const handleEnroll = (course) => {
-    const result = enrollStudent(user?.id, course.id);
-    return result;
+    // Reset any prior enrollment status when opening dialog
+    setEnrollmentMessage({ type: "", message: "" });
+    setConfirmDialog({ open: true, course });
+  };
+
+  const handleConfirmEnroll = async () => {
+    console.log("handleConfirmEnroll invoked", { course: confirmDialog.course, userId: user?.id });
+    const course = confirmDialog.course;
+    const result = await enrollStudent(user?.id, course.id);
+    console.log("handleConfirmEnroll result", result);
+    if (result.success) {
+      setEnrollmentMessage({ type: "success", message: "Successfully enrolled in the course!" });
+      setConfirmDialog({ open: false, course: null });
+      setTimeout(() => setEnrollmentMessage({ type: "", message: "" }), 3000);
+    } else {
+      setEnrollmentMessage({ type: "error", message: result.message || "Enrollment failed" });
+      // Keep dialog open on error
+    }
   };
 
   // Student view
@@ -174,6 +196,33 @@ export default function FormalLearning() {
           </Typography>
         </Box>
       </Box>
+
+      {/* Enrollment Confirmation Dialog */}
+      <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({ open: false, course: null })}>
+        <DialogTitle>Confirm Enrollment</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mt: 2, mb: 2 }}>
+            Are you sure you want to enroll in <strong>{confirmDialog.course?.title}</strong>?
+          </Typography>
+          {enrollmentMessage.message && (
+            <Typography 
+              sx={{ 
+                color: enrollmentMessage.type === 'error' ? '#dc2626' : '#16a34a',
+                mb: 2,
+                fontWeight: 500
+              }}
+            >
+              {enrollmentMessage.message}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialog({ open: false, course: null })}>Cancel</Button>
+          <Button onClick={handleConfirmEnroll} variant="contained" color="primary">
+            Confirm Enroll
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

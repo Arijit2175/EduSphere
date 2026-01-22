@@ -57,9 +57,9 @@ export default function TeacherDashboard() {
   // Fetch enrolled students for present/absent dialog when it opens
   useEffect(() => {
     const fetchEnrolled = async () => {
-      if (attendanceDetailsDialog.open && attendanceDetailsDialog.students?.length > 0) {
+      if (attendanceDetailsDialog.open) {
         // Try to get courseId from the first student (they have schedule/course info)
-        const first = attendanceDetailsDialog.students[0];
+        const first = attendanceDetailsDialog.students?.[0];
         const courseId = first?.courseId || first?.course_id;
         if (courseId) {
           try {
@@ -81,7 +81,7 @@ export default function TeacherDashboard() {
       }
     };
     fetchEnrolled();
-  }, [attendanceDetailsDialog.open, attendanceDetailsDialog.students]);
+  }, [attendanceDetailsDialog.open]);
 
   // Now all logic and hooks
   const { user } = useAuth();
@@ -137,11 +137,11 @@ export default function TeacherDashboard() {
     fetchEnrolledStudents();
   }, [manageDialog.open, manageDialog.course?.id]);
 
-  const teacherCourses = getTeacherCourses(user?.id);
+  const teacherCourses = useMemo(() => getTeacherCourses(user?.id), [getTeacherCourses, user?.id]);
 
   const [liveClasses, setLiveClasses] = useState([]);
 
-  // Fetch live classes and attendance records on mount or when teacherCourses change
+  // Fetch live classes and attendance records on mount or when courses change
   useEffect(() => {
     const fetchAttendanceForSessions = async () => {
       // Build sessions from teacherCourses
@@ -169,7 +169,7 @@ export default function TeacherDashboard() {
       setLiveClasses(sessionsWithAttendance);
     };
     fetchAttendanceForSessions();
-  }, [teacherCourses]);
+  }, [courses, user?.id]);
 
   const handleCreate = () => {
     if (formData.title && formData.description) {
@@ -1031,7 +1031,9 @@ export default function TeacherDashboard() {
                 ) : (
                   enrolledStudents.map((student) => {
                     // Find submission for this student
-                    const sub = (gradeDialog.submissions || []).find(s => s.student_id === student.user_id || s.student_id === student.id);
+                    const sub = (gradeDialog.submissions || []).find(
+                      s => s.student_id === student.student_id || s.student_id === student.user_id || s.student_id === student.id
+                    );
                     return (
                       <TableRow key={student.user_id || student.id}>
                         <TableCell>{student.user_id || student.id}</TableCell>

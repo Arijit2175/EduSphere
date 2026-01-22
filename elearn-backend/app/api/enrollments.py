@@ -14,7 +14,7 @@ def get_course_students(course_id: int):
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor(dictionary=True)
     cursor.execute('''
-        SELECT e.*, u.first_name, u.last_name
+        SELECT e.*, u.first_name, u.last_name, u.student_id
         FROM enrollments e
         JOIN users u ON e.user_id = u.id
         WHERE e.course_id = %s
@@ -69,10 +69,17 @@ def enroll_student(data: EnrollRequest):
     cursor = conn.cursor()
     # Check if already enrolled
     cursor.execute("SELECT id FROM enrollments WHERE user_id=%s AND course_id=%s", (student_id, course_id))
-    if cursor.fetchone():
+    existing = cursor.fetchone()
+    if existing:
         cursor.close()
         conn.close()
-        raise HTTPException(status_code=400, detail="Already enrolled")
+        # Return the existing enrollment instead of raising an error
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM enrollments WHERE user_id=%s AND course_id=%s", (student_id, course_id))
+        enrollment = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return enrollment
     cursor.execute(
         "INSERT INTO enrollments (user_id, course_id) VALUES (%s, %s)",
         (student_id, course_id)

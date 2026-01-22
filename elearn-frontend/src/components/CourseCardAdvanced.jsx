@@ -1,4 +1,4 @@
-import { Card, CardContent, Box, Typography, Chip, Button, LinearProgress, Snackbar, Alert } from "@mui/material";
+import { Card, CardContent, Box, Typography, Chip, Button, LinearProgress, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useCourses } from "../contexts/CoursesContext";
@@ -30,16 +30,19 @@ export default function CourseCardAdvanced({
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const [confirmDialog, setConfirmDialog] = useState({ open: false });
   const enrolled = enrolledOverride !== undefined ? enrolledOverride : isEnrolled(id);
 
-  const handleEnroll = () => {
+  const handleEnrollClick = () => {
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
-
+    // If parent supplied onEnroll, let parent handle confirmation/UI and do not open local dialog
     if (onEnroll) {
       const result = onEnroll({ id, title, description, icon, category, level, duration, instructor, rating });
+      // Parent handled UI (e.g., opened its own confirm) and returned nothing
+      if (result === undefined) return;
       setSnackbar({
         open: true,
         message: result?.message || (result?.success ? "Enrolled" : "Unable to enroll"),
@@ -50,6 +53,14 @@ export default function CourseCardAdvanced({
       }
       return;
     }
+    // Default local confirmation dialog
+    setConfirmDialog({ open: true });
+  };
+
+  const handleConfirmEnroll = async () => {
+    setConfirmDialog({ open: false });
+    
+    // Only reaches here when no onEnroll is provided (local confirm)
 
     const courseData = { id, title, description, icon, category, level, duration, instructor, rating };
     const result = enrollCourse(courseData);
@@ -240,7 +251,7 @@ export default function CourseCardAdvanced({
           <Button
             fullWidth
             variant="contained"
-            onClick={handleEnroll}
+            onClick={handleEnrollClick}
             disabled={enrolled}
             startIcon={enrolled ? <CheckCircleIcon /> : null}
             sx={{
@@ -270,6 +281,22 @@ export default function CourseCardAdvanced({
           </Button>
         </motion.div>
       </CardContent>
+
+      {/* Enrollment Confirmation Dialog */}
+      <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({ open: false })}>
+        <DialogTitle>Confirm Enrollment</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mt: 2 }}>
+            Are you sure you want to enroll in <strong>{title}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialog({ open: false })}>Cancel</Button>
+          <Button onClick={handleConfirmEnroll} variant="contained" color="primary">
+            Confirm Enroll
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Snackbar for notifications */}
       <Snackbar

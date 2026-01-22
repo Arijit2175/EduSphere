@@ -32,8 +32,9 @@ function Login() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Login submit clicked", { email, role });
     setError("");
 
     if (!validateEmail(email)) {
@@ -41,20 +42,23 @@ function Login() {
       return;
     }
 
-    setLoading(true);
+    if (!email || !password) {
+      setError("Please enter valid credentials");
+      return;
+    }
 
-    // Simulate API call
-    setTimeout(() => {
-      if (email && password) {
-        login(email, password, role);
-        setIsOpen(false); // Close sidebar after login
-        setLoading(false);
-        navigate("/dashboard");
-      } else {
-        setError("Please enter valid credentials");
-        setLoading(false);
-      }
-    }, 1000);
+    setLoading(true);
+    try {
+      const user = await login(email, password, role);
+      console.log("Login success", user);
+      setIsOpen(false);
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Login error", err);
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 
 const FormalEducationContext = createContext();
 
@@ -121,51 +121,56 @@ export const FormalEducationProvider = ({ children }) => {
   };
 
   // Student: Enroll in course
-  const enrollStudent = async (userId, courseId) => {
+  const enrollStudent = useCallback(async (userId, courseId) => {
     try {
       const res = await fetch("http://127.0.0.1:8000/enrollments/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ student_id: userId, course_id: courseId }),
       });
-      if (!res.ok) {
-        const errorData = await res.json();
-        return { success: false, message: errorData.detail || "Enrollment failed" };
+      const data = await res.json();
+      console.log("Enrollment response:", res.status, data);
+      
+      // Check if we got enrollment data back (success case)
+      if (data && (data.id || data.user_id || data.course_id)) {
+        // Map backend fields to camelCase for consistency
+        const mappedEnrollment = {
+          id: data.id,
+          studentId: data.user_id,
+          courseId: data.course_id,
+          enrolledAt: data.enrolled_at,
+          progress: data.progress,
+          status: data.status,
+          ...data
+        };
+        setEnrollments((prev) => [...prev, mappedEnrollment]);
+        // Refresh enrollments from backend so UI updates
+        try {
+          const enrollmentsRes = await fetch("http://127.0.0.1:8000/enrollments/");
+          if (enrollmentsRes.ok) {
+            const enrollmentsData = await enrollmentsRes.json();
+            const mapped = enrollmentsData.map(e => ({
+              id: e.id,
+              studentId: e.user_id,
+              courseId: e.course_id,
+              enrolledAt: e.enrolled_at,
+              progress: e.progress,
+              status: e.status,
+              ...e
+            }));
+            setEnrollments(mapped);
+          }
+        } catch (refreshErr) {}
+        return { success: true, message: "Successfully enrolled", enrollment: mappedEnrollment };
       }
-      const enrollment = await res.json();
-      // Map backend fields to camelCase for consistency
-      const mappedEnrollment = {
-        id: enrollment.id,
-        studentId: enrollment.user_id,
-        courseId: enrollment.course_id,
-        enrolledAt: enrollment.enrolled_at,
-        progress: enrollment.progress,
-        status: enrollment.status,
-        ...enrollment
-      };
-      setEnrollments((prev) => [...prev, mappedEnrollment]);
-      // Refresh enrollments from backend so UI updates
-      try {
-        const enrollmentsRes = await fetch("http://127.0.0.1:8000/enrollments/");
-        if (enrollmentsRes.ok) {
-          const enrollmentsData = await enrollmentsRes.json();
-          const mapped = enrollmentsData.map(e => ({
-            id: e.id,
-            studentId: e.user_id,
-            courseId: e.course_id,
-            enrolledAt: e.enrolled_at,
-            progress: e.progress,
-            status: e.status,
-            ...e
-          }));
-          setEnrollments(mapped);
-        }
-      } catch (refreshErr) {}
-      return { success: true, message: "Successfully enrolled", enrollment: mappedEnrollment };
+      
+      // No enrollment data - error case
+      return { success: false, message: data.detail || "Enrollment failed" };
     } catch (err) {
+      console.error("Enrollment error:", err);
       return { success: false, message: "Enrollment failed" };
     }
-  };
+  }, []);
 
 
   // Teacher: Add material (save to backend)
@@ -481,7 +486,7 @@ export const FormalEducationProvider = ({ children }) => {
     }
   };
 
-  const value = {
+  const value = useMemo(() => ({
     courses,
     enrollments,
     submissions,
@@ -507,7 +512,7 @@ export const FormalEducationProvider = ({ children }) => {
     getSubmission,
     getAssignmentsForEnrollment,
     deleteMaterial,
-  };
+  }), [courses, enrollments, submissions, enrollStudent]);
 
   return (
     <FormalEducationContext.Provider value={value}>

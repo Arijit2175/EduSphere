@@ -127,12 +127,27 @@ from fastapi import Request
 async def submit_assignment(assignment_id: int, request: Request):
     data = await request.json()
     enrollment_id = data.get("enrollment_id")
-    student_id = data.get("student_id")
     content = data.get("content")
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
+    # Resolve enrollment to get the canonical student id to avoid FK errors
+    cursor.execute("SELECT * FROM enrollments WHERE id=%s", (enrollment_id,))
+    enrollment_row = cursor.fetchone()
+    if not enrollment_row:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Enrollment not found")
+    user_id = enrollment_row.get("user_id")
+    # Look up the linked student_id from users table
+    cursor.execute("SELECT student_id FROM users WHERE id=%s", (user_id,))
+    user_row = cursor.fetchone()
+    if not user_row or not user_row.get("student_id"):
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=400, detail="Student profile not found for this enrollment")
+    student_id = user_row.get("student_id")
     # Check if already submitted
     cursor.execute("SELECT id FROM assignment_submissions WHERE assignment_id=%s AND enrollment_id=%s", (assignment_id, enrollment_id))
     if cursor.fetchone():
