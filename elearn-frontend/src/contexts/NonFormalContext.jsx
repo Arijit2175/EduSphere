@@ -30,7 +30,7 @@ const DEFAULT_COURSES = [
       { id: "l2", title: "Variables & Data Types", duration: "15 min", videoUrl: "https://www.youtube.com/embed/LKFrQXaoSMQ" },
       { id: "l3", title: "Control Flow", duration: "18 min", videoUrl: "https://www.youtube.com/embed/FvMPfrgGeKs" },
     ],
-    attachments: [{ name: "Python_Cheatsheet.pdf", url: "#" }],
+    attachments: [{ name: "Python_Cheatsheet.pdf", url: "https://cdn.codewithmosh.com/image/upload/v1702942822/cheat-sheets/python.pdf" }],
     certificate: true,
     assessmentQuestions: [
       {
@@ -71,7 +71,7 @@ const DEFAULT_COURSES = [
       { id: "l2", title: "SEO Fundamentals", duration: "14 min", videoUrl: "<https://www.youtube.com/embed/MYE6T_gd7H0" },
       { id: "l3", title: "Social Media Strategy", duration: "12 min", videoUrl: "https://www.youtube.com/embed/VS0Sao1oHlw" },
     ],
-    attachments: [{ name: "Marketing_Toolkit.pdf", url: "#" }],
+    attachments: [{ name: "Marketing_Toolkit.pdf", url: "https://www.riba.org/media/d2hddxio/riba-marketing-toolkitpdf.pdf" }],
     certificate: true,
     assessmentQuestions: [
       {
@@ -112,7 +112,7 @@ const DEFAULT_COURSES = [
       { id: "l2", title: "Wireframing & Prototyping", duration: "20 min", videoUrl: "https://www.youtube.com/embed/qpH7-KFWZRI" },
       { id: "l3", title: "Typography & Color", duration: "14 min", videoUrl: "https://www.youtube.com/embed/9-oefwZ6Z74" },
     ],
-    attachments: [{ name: "Design_Resources.pdf", url: "#" }],
+    attachments: [{ name: "Design_Resources.pdf", url: "https://www.share4rare.org/sites/default/files/imce/S4R_Template_Branding%20%26%20Graphic%20Design.pdf" }],
     certificate: true,
     assessmentQuestions: [
       {
@@ -153,7 +153,7 @@ const DEFAULT_COURSES = [
       { id: "l2", title: "Common Phrases", duration: "15 min", videoUrl: "https://www.youtube.com/embed/bj5btO2nvt8" },
       { id: "l3", title: "Fluent Speaking", duration: "17 min", videoUrl: "https://www.youtube.com/embed/dWmUsWorYh0" },
     ],
-    attachments: [{ name: "Speaking_Guide.pdf", url: "#" }],
+    attachments: [{ name: "Speaking_Guide.pdf", url: "https://ati.dae.gov.in/ati12052021_2.pdf" }],
     certificate: true,
     assessmentQuestions: [
       {
@@ -194,7 +194,7 @@ const DEFAULT_COURSES = [
       { id: "l2", title: "DOM Manipulation", duration: "18 min", videoUrl: "https://www.youtube.com/embed/y17RuWkWdn8" },
       { id: "l3", title: "Async JavaScript", duration: "20 min", videoUrl: "https://www.youtube.com/embed/9j1dZwFEJ-c" },
     ],
-    attachments: [{ name: "JS_Cheatsheet.pdf", url: "#" }],
+    attachments: [{ name: "JS_Cheatsheet.pdf", url: "https://websitesetup.org/wp-content/uploads/2020/09/Javascript-Cheat-Sheet.pdf" }],
     certificate: true,
     assessmentQuestions: [
       {
@@ -235,7 +235,7 @@ const DEFAULT_COURSES = [
       { id: "l2", title: "Business Model", duration: "14 min", videoUrl: "https://www.youtube.com/embed/IP0cUBWTgpY" },
       { id: "l3", title: "Pitching Your Idea", duration: "12 min", videoUrl: "https://www.youtube.com/embed/l0hVIH3EnlQ" },
     ],
-    attachments: [{ name: "Startup_Guide.pdf", url: "#" }],
+    attachments: [{ name: "Startup_Guide.pdf", url: "https://otd.harvard.edu/uploads/Files/OTD_Startup_Guide.pdf" }],
     certificate: true,
     assessmentQuestions: [
       {
@@ -276,7 +276,7 @@ const DEFAULT_COURSES = [
       { id: "l2", title: "Daily Mindfulness", duration: "12 min", videoUrl: "https://www.youtube.com/embed/7CBfCW67xT8" },
       { id: "l3", title: "Advanced Techniques", duration: "15 min", videoUrl: "https://www.youtube.com/embed/5yfIOtOBMBo" },
     ],
-    attachments: [{ name: "Mindfulness_Guide.pdf", url: "#" }],
+    attachments: [{ name: "Mindfulness_Guide.pdf", url: "https://www.dcu.ie/sites/default/files/students/mindfulness_based_stress_reduction_handbook.pdf" }],
     certificate: true,
     assessmentQuestions: [
       {
