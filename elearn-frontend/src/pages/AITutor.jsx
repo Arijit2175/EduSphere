@@ -146,6 +146,7 @@ export default function AITutor() {
       }
 
       setRateLimitError("");
+      const newMessage = { role: "user", content: question };
       const aiMessage = { role: "ai", content: data.answer };
       const updatedMessages = [...messages, newMessage, aiMessage];
       setMessages(updatedMessages);
