@@ -2,7 +2,7 @@
 import os
 import requests
 import replicate
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from typing import List, Optional
 from ..core.config import (
@@ -132,7 +132,7 @@ def call_gemini_api(prompt: str) -> str:
 
 @router.post("/ai-tutor/ask")
 @limiter.limit(f"{AI_TUTOR_REQUESTS_PER_MINUTE}/minute;{AI_TUTOR_REQUESTS_PER_HOUR}/hour;{AI_TUTOR_REQUESTS_PER_DAY}/day")
-async def ask_ai_tutor(request, data: ChatRequest):
+async def ask_ai_tutor(request: Request, data: ChatRequest):
     """AI Tutor endpoint supporting multiple LLM providers."""
     try:
         system_prompt = SYSTEM_PROMPTS.get(data.mode, SYSTEM_PROMPTS["direct"])
