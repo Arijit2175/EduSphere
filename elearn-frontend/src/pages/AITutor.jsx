@@ -70,6 +70,7 @@ export default function AITutor() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showEmojis, setShowEmojis] = useState(false);
+  const [rateLimitError, setRateLimitError] = useState("");
   const chatEndRef = useRef(null);
 
   const [shuffledPrompts, setShuffledPrompts] = useState([]);
@@ -128,14 +129,23 @@ export default function AITutor() {
         },
         body: JSON.stringify({
           message: question,
-          mode: "socratic",
+          mode: "direct",
           history,
           context: null
         }),
       });
       const data = await res.json();
 
-      const newMessage = { role: "user", content: question };
+      if (!res.ok) {
+        if (res.status === 429) {
+          setRateLimitError("Rate limit exceeded. Please wait before asking another question.");
+          setLoading(false);
+          return;
+        }
+        throw new Error(data.detail || "Error getting response");
+      }
+
+      setRateLimitError("");
       const aiMessage = { role: "ai", content: data.answer };
       const updatedMessages = [...messages, newMessage, aiMessage];
       setMessages(updatedMessages);
@@ -773,6 +783,21 @@ export default function AITutor() {
             )}
 
             {/* Input Field */}
+            {rateLimitError && (
+              <Box
+                sx={{
+                  bgcolor: '#FEE2E2',
+                  color: '#DC2626',
+                  p: 1.5,
+                  borderRadius: 2,
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  border: '1px solid #FECACA',
+                }}
+              >
+                {rateLimitError}
+              </Box>
+            )}
             <Box
               sx={{
                 display: 'flex',
