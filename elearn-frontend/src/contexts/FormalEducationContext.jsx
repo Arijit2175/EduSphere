@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
+import { useAuth } from "./AuthContext";
 
 const FormalEducationContext = createContext();
 
@@ -11,6 +12,7 @@ export const useFormalEducation = () => {
 };
 
 export const FormalEducationProvider = ({ children }) => {
+  const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [submissions, setSubmissions] = useState([]);
@@ -19,6 +21,9 @@ export const FormalEducationProvider = ({ children }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        if (!user || !user.access_token) {
+          return; // Wait until we have an authenticated user
+        }
         const coursesRes = await fetch("http://127.0.0.1:8000/courses/");
         let coursesData = [];
         if (coursesRes.ok) {
@@ -66,21 +71,24 @@ export const FormalEducationProvider = ({ children }) => {
             ...e
           }));
         }
-        // Fetch all assignment submissions to set completedAssignments
-        const submissionsRes = await fetch("http://127.0.0.1:8000/assignments/assignment_submissions/");
-        let allSubmissions = [];
+        // Fetch assignment submissions with auth; students receive their own
+        const submissionsRes = await fetch("http://127.0.0.1:8000/assignments/assignment_submissions/", {
+          headers: user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {}
+        });
+        let mappedSubmissions = [];
         if (submissionsRes.ok) {
-          allSubmissions = await submissionsRes.json();
-          // Map submitted_at to submittedAt for frontend consistency
-          const mappedSubmissions = allSubmissions.map(s => ({
+          const allSubmissions = await submissionsRes.json();
+          mappedSubmissions = allSubmissions.map(s => ({
             ...s,
             submittedAt: s.submitted_at || s.submittedAt
           }));
           setSubmissions(mappedSubmissions);
+        } else {
+          setSubmissions([]);
         }
         // For each enrollment, set completedAssignments based on submissions
         mapped = mapped.map(e => {
-          const completed = allSubmissions
+          const completed = mappedSubmissions
             .filter(s => s.enrollment_id === e.id)
             .map(s => s.assignment_id);
           return { ...e, completedAssignments: completed };
@@ -91,7 +99,7 @@ export const FormalEducationProvider = ({ children }) => {
       }
     };
     fetchData();
-  }, []);
+  }, [user]);
   // Get all assignments for an enrollment (helper)
   const getAssignmentsForEnrollment = (enrollmentId) => {
     const enrollment = enrollments.find(e => e.id === enrollmentId);
@@ -343,12 +351,17 @@ export const FormalEducationProvider = ({ children }) => {
     try {
       const res = await fetch("http://127.0.0.1:8000/attendance/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {})
+        },
         body: JSON.stringify({ schedule_id: scheduleId, student_id: studentId, status }),
       });
       if (res.ok) {
         // After marking, fetch all attendance for this student in this course
-        const attendanceRes = await fetch(`http://127.0.0.1:8000/attendance/?student_id=${studentId}`);
+        const attendanceRes = await fetch(`http://127.0.0.1:8000/attendance/?student_id=${studentId}`, {
+          headers: user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {}
+        });
         let presentCount = 0;
         if (attendanceRes.ok) {
           const attendanceRecords = await attendanceRes.json();

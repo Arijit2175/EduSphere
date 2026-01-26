@@ -144,6 +144,7 @@ export default function TeacherDashboard() {
   // Fetch live classes and attendance records on mount or when courses change
   useEffect(() => {
     const fetchAttendanceForSessions = async () => {
+      if (!user || !user.access_token) return;
       // Build sessions from teacherCourses
       const sessions = teacherCourses.flatMap((course) =>
         (course.schedules || []).map((s) => ({
@@ -157,7 +158,9 @@ export default function TeacherDashboard() {
       const sessionsWithAttendance = await Promise.all(
         sessions.map(async (session) => {
           try {
-            const res = await fetch(`http://127.0.0.1:8000/attendance/?schedule_id=${session.id}`);
+            const res = await fetch(`http://127.0.0.1:8000/attendance/?schedule_id=${session.id}`, {
+              headers: { Authorization: `Bearer ${user.access_token}` }
+            });
             if (res.ok) {
               const attendees = await res.json();
               return { ...session, attendees };
@@ -169,7 +172,7 @@ export default function TeacherDashboard() {
       setLiveClasses(sessionsWithAttendance);
     };
     fetchAttendanceForSessions();
-  }, [courses, user?.id]);
+  }, [courses, user?.id, user?.access_token]);
 
   const handleCreate = () => {
     if (formData.title && formData.description) {

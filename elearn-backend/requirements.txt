@@ -3,3 +3,7 @@ uvicorn
 mysql-connector-python
 python-jose
 passlib[bcrypt]
+python-dotenv
+slowapi
+pydantic[email]
+bleach

@@ -1,11 +1,20 @@
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Depends, Request
 from pydantic import BaseModel
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from app.db import get_db_connection
+from app.api.auth import get_current_user
+from app.core.security import sanitize_string, validate_url, check_teacher_role
+from app.core.config import RATE_LIMIT_PER_MINUTE
+
+limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(prefix="/resources", tags=["resources"])
 
 @router.get("/")
-def list_resources(course_id: int = None):
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def list_resources(request: Request, course_id: int = None):
+    """Public endpoint - accessible to students and teachers"""
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
@@ -19,8 +28,6 @@ def list_resources(course_id: int = None):
     conn.close()
     return resources
 
-
-# Pydantic model for resource creation
 class ResourceCreate(BaseModel):
     course_id: int
     name: str
@@ -28,14 +35,33 @@ class ResourceCreate(BaseModel):
     type: str = None
 
 @router.post("/")
-def create_resource(resource: ResourceCreate = Body(...)):
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def create_resource(request: Request, resource: ResourceCreate = Body(...), user=Depends(get_current_user)):
+    """Teacher-only endpoint - create resources for own courses"""
+    check_teacher_role(user)
+    
+    name = sanitize_string(resource.name, max_length=200)
+    url = validate_url(resource.url)
+    resource_type = sanitize_string(resource.type, max_length=50) if resource.type else None
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM courses WHERE id=%s", (resource.course_id,))
+    course = cursor.fetchone()
+    if not course:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Course not found")
+    if course["instructor_id"] != user["id"]:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized to create resources for this course")
+    
     cursor.execute(
         "INSERT INTO resources (course_id, name, url, type) VALUES (%s, %s, %s, %s)",
-        (resource.course_id, resource.name, resource.url, resource.type)
+        (resource.course_id, name, url, resource_type)
     )
     conn.commit()
     resource_id = cursor.lastrowid
@@ -48,27 +74,38 @@ def create_resource(resource: ResourceCreate = Body(...)):
     return new_resource
 
 @router.put("/{resource_id}")
-def update_resource(resource_id: int, name: str = None, url: str = None, type: str = None):
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def update_resource(request: Request, resource_id: int, user=Depends(get_current_user), name: str = None, url: str = None, type: str = None):
+    """Teacher-only endpoint - update resources in own courses"""
+    check_teacher_role(user)
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM resources WHERE id=%s", (resource_id,))
-    if not cursor.fetchone():
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT r.*, c.instructor_id FROM resources r JOIN courses c ON r.course_id = c.id WHERE r.id=%s", (resource_id,))
+    resource = cursor.fetchone()
+    if not resource:
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Resource not found")
+    
+    if resource["instructor_id"] != user["id"]:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized to update this resource")
+    
     update_fields = []
     params = []
     if name is not None:
         update_fields.append("name=%s")
-        params.append(name)
+        params.append(sanitize_string(name, max_length=200))
     if url is not None:
         update_fields.append("url=%s")
-        params.append(url)
+        params.append(validate_url(url))
     if type is not None:
         update_fields.append("type=%s")
-        params.append(type)
+        params.append(sanitize_string(type, max_length=50))
     if not update_fields:
         cursor.close()
         conn.close()
@@ -81,16 +118,27 @@ def update_resource(resource_id: int, name: str = None, url: str = None, type: s
     return {"id": resource_id, "updated": True}
 
 @router.delete("/{resource_id}")
-def delete_resource(resource_id: int):
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def delete_resource(request: Request, resource_id: int, user=Depends(get_current_user)):
+    """Teacher-only endpoint - delete resources in own courses"""
+    check_teacher_role(user)
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM resources WHERE id=%s", (resource_id,))
-    if not cursor.fetchone():
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT r.*, c.instructor_id FROM resources r JOIN courses c ON r.course_id = c.id WHERE r.id=%s", (resource_id,))
+    resource = cursor.fetchone()
+    if not resource:
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Resource not found")
+    
+    if resource["instructor_id"] != user["id"]:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized to delete this resource")
+    
     cursor.execute("DELETE FROM resources WHERE id=%s", (resource_id,))
     conn.commit()
     cursor.close()

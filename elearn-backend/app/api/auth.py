@@ -3,9 +3,18 @@ from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from app.db import get_db_connection
-from app.core.config import SECRET_KEY, ALGORITHM
+from app.core.config import SECRET_KEY, ALGORITHM, RATE_LIMIT_AUTH_PER_MINUTE
+from app.core.security import (
+    sanitize_string, 
+    validate_email, 
+    validate_password
+)
 from fastapi.security import OAuth2PasswordBearer
+
+limiter = Limiter(key_func=get_remote_address)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -36,7 +45,6 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Utility functions
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -51,26 +59,33 @@ def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=2
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-# Registration endpoint
 
 from fastapi import Request
 
 @router.post("/register")
+@limiter.limit(f"{RATE_LIMIT_AUTH_PER_MINUTE}/minute")
 async def register(request: Request):
     data = await request.json()
-    first_name = data.get("first_name")
-    last_name = data.get("last_name")
-    email = data.get("email")
-    password = data.get("password")
+    first_name = sanitize_string(data.get("first_name", ""), max_length=100)
+    last_name = sanitize_string(data.get("last_name", ""), max_length=100)
+    email = validate_email(data.get("email", ""))
+    password = validate_password(data.get("password", ""))
     role = data.get("role", "student")
+    
     if not all([first_name, last_name, email, password]):
         raise HTTPException(status_code=400, detail="All fields are required")
+    
+    if role not in ["student", "teacher"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
     if cursor.fetchone():
+        cursor.close()
+        conn.close()
         raise HTTPException(status_code=400, detail="Email already registered")
     hashed = get_password_hash(password)
     student_id = None
@@ -87,11 +102,9 @@ async def register(request: Request):
             (first_name, last_name, email, hashed)
         )
         teacher_id = cursor.lastrowid
-    else:
-        raise HTTPException(status_code=400, detail="Invalid role")
     cursor.execute(
-        "INSERT INTO users (email, password_hash, role, student_id, teacher_id) VALUES (%s, %s, %s, %s, %s)",
-        (email, hashed, role, student_id, teacher_id)
+        "INSERT INTO users (email, password_hash, role, student_id, teacher_id, first_name, last_name) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+        (email, hashed, role, student_id, teacher_id, first_name, last_name)
     )
     user_id = cursor.lastrowid
     conn.commit()
@@ -99,18 +112,23 @@ async def register(request: Request):
     conn.close()
     return {"id": user_id, "email": email, "role": role}
 
-# Login endpoint
 from fastapi import Request
 
 
 @router.post("/login")
+@limiter.limit(f"{RATE_LIMIT_AUTH_PER_MINUTE}/minute")
 async def login(request: Request):
     data = await request.json()
-    email = data.get("email")
-    password = data.get("password")
-    role = data.get("role")
+    email = validate_email(data.get("email", ""))
+    password = data.get("password", "")
+    role = data.get("role", "")
+    
     if not email or not password or not role:
         raise HTTPException(status_code=400, detail="Email, password, and role required")
+    
+    if role not in ["student", "teacher"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")

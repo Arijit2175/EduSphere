@@ -31,6 +31,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import Sidebar from "../components/Sidebar.jsx";
+import { useAuth } from "../contexts/AuthContext.jsx";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -61,6 +62,7 @@ export default function AITutor() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const { user } = useAuth();
 
   const [question, setQuestion] = useState("");
   const [chats, setChats] = useState([]);
@@ -78,22 +80,31 @@ export default function AITutor() {
   }, []);
 
   useEffect(() => {
-    fetch(`${API_URL}/ai-tutor-chats/`)
-      .then(res => res.json())
-      .then(data => setChats(data))
+    if (!user) return;
+    fetch(`${API_URL}/ai-tutor-chats/`, {
+      headers: {
+        'Authorization': user?.access_token ? `Bearer ${user.access_token}` : ''
+      }
+    })
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setChats(Array.isArray(data) ? data : []))
       .catch(() => setChats([]));
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    if (currentChatId) {
-      fetch(`${API_URL}/ai-tutor-chats/${currentChatId}`)
-        .then(res => res.json())
-        .then(chat => setMessages(JSON.parse(chat.messages || "[]")))
+    if (currentChatId && user) {
+      fetch(`${API_URL}/ai-tutor-chats/${currentChatId}`, {
+        headers: {
+          'Authorization': user?.access_token ? `Bearer ${user.access_token}` : ''
+        }
+      })
+        .then(res => res.ok ? res.json() : null)
+        .then(chat => setMessages(chat && chat.messages ? JSON.parse(chat.messages || "[]") : []))
         .catch(() => setMessages([]));
     } else {
       setMessages([]);
     }
-  }, [currentChatId]);
+  }, [currentChatId, user]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -111,7 +122,10 @@ export default function AITutor() {
     try {
       const res = await fetch(`${API_URL}/ai-tutor/ask`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(user?.access_token ? { 'Authorization': `Bearer ${user.access_token}` } : {})
+        },
         body: JSON.stringify({
           message: question,
           mode: "socratic",
@@ -129,16 +143,21 @@ export default function AITutor() {
       if (currentChatId) {
         await fetch(`${API_URL}/ai-tutor-chats/${currentChatId}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(user?.access_token ? { 'Authorization': `Bearer ${user.access_token}` } : {})
+          },
           body: JSON.stringify({ messages: JSON.stringify(updatedMessages) }),
         });
       } else {
         const chatTitle = question.slice(0, 30) + (question.length > 30 ? '...' : '');
         const chatRes = await fetch(`${API_URL}/ai-tutor-chats/`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(user?.access_token ? { 'Authorization': `Bearer ${user.access_token}` } : {})
+          },
           body: JSON.stringify({
-            student_id: 1,
             chat_title: chatTitle,
             messages: JSON.stringify(updatedMessages)
           }),
@@ -157,7 +176,12 @@ export default function AITutor() {
 
   const handleDeleteChat = async (chatId) => {
     try {
-      await fetch(`${API_URL}/ai-tutor-chats/${chatId}`, { method: "DELETE" });
+      await fetch(`${API_URL}/ai-tutor-chats/${chatId}`, {
+        method: "DELETE",
+        headers: {
+          ...(user?.access_token ? { 'Authorization': `Bearer ${user.access_token}` } : {})
+        }
+      });
       setChats(prev => prev.filter(c => c.id !== chatId));
       if (currentChatId === chatId) {
         setCurrentChatId(null);

@@ -1,25 +1,52 @@
 
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Depends, Request
 from pydantic import BaseModel
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from app.db import get_db_connection
+from app.api.auth import get_current_user
+from app.core.security import sanitize_string, check_teacher_role
+from app.core.config import RATE_LIMIT_PER_MINUTE
+
+limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(prefix="/assignments", tags=["assignments"])
 
-# List all assignment submissions (for dashboard count)
 @router.get("/assignment_submissions/")
-def list_all_assignment_submissions():
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def list_all_assignment_submissions(request: Request, user=Depends(get_current_user)):
+    """Teachers: all submissions; Students: only their submissions"""
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM assignment_submissions")
+
+    # Teachers get all submissions
+    if user.get("role") == "teacher":
+        cursor.execute("SELECT * FROM assignment_submissions")
+        submissions = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return submissions
+
+    # Students get only their submissions
+    cursor.execute("SELECT student_id FROM users WHERE id=%s", (user["id"],))
+    user_row = cursor.fetchone()
+    if not user_row or not user_row.get("student_id"):
+        cursor.close()
+        conn.close()
+        return []
+    student_id = user_row["student_id"]
+    cursor.execute("SELECT * FROM assignment_submissions WHERE student_id=%s", (student_id,))
     submissions = cursor.fetchall()
     cursor.close()
     conn.close()
     return submissions
 
 @router.get("/")
-def list_assignments(course_id: int = None):
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def list_assignments(request: Request, course_id: int = None):
+    """Public endpoint - accessible to students and teachers"""
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
@@ -34,16 +61,31 @@ def list_assignments(course_id: int = None):
     return assignments
 
 @router.post("/")
-@router.post("/")
-def create_assignment(data: dict = Body(...)):
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def create_assignment(request: Request, data: dict = Body(...), user=Depends(get_current_user)):
+    """Teacher-only endpoint"""
+    check_teacher_role(user)
+    
     course_id = data.get("course_id")
-    title = data.get("title")
-    description = data.get("description", "")
+    title = sanitize_string(data.get("title"), max_length=200)
+    description = sanitize_string(data.get("description", ""), max_length=2000)
     due_date = data.get("due_date")
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM courses WHERE id=%s", (course_id,))
+    course = cursor.fetchone()
+    if not course:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Course not found")
+    if course["instructor_id"] != user["id"]:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized to create assignments for this course")
+    
     cursor.execute(
         "INSERT INTO assignments (course_id, title, description, due_date) VALUES (%s, %s, %s, %s)",
         (course_id, title, description, due_date)
@@ -59,24 +101,35 @@ def create_assignment(data: dict = Body(...)):
     return new_assignment
 
 @router.put("/{assignment_id}")
-def update_assignment(assignment_id: int, title: str = None, description: str = None, due_date: str = None):
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def update_assignment(request: Request, assignment_id: int, user=Depends(get_current_user), title: str = None, description: str = None, due_date: str = None):
+    """Teacher-only endpoint - can only update assignments in own courses"""
+    check_teacher_role(user)
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM assignments WHERE id=%s", (assignment_id,))
-    if not cursor.fetchone():
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT a.*, c.instructor_id FROM assignments a JOIN courses c ON a.course_id = c.id WHERE a.id=%s", (assignment_id,))
+    assignment = cursor.fetchone()
+    if not assignment:
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    if assignment["instructor_id"] != user["id"]:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized to update this assignment")
+    
     update_fields = []
     params = []
     if title is not None:
         update_fields.append("title=%s")
-        params.append(title)
+        params.append(sanitize_string(title, max_length=200))
     if description is not None:
         update_fields.append("description=%s")
-        params.append(description)
+        params.append(sanitize_string(description, max_length=2000))
     if due_date is not None:
         update_fields.append("due_date=%s")
         params.append(due_date)
@@ -91,13 +144,33 @@ def update_assignment(assignment_id: int, title: str = None, description: str = 
     conn.close()
     return {"id": assignment_id, "updated": True}
 
-# ReviewSubmissionRequest and review_submission are defined later in the file
-def delete_assignment(assignment_id: int):
+@router.delete("/{assignment_id}")
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def delete_assignment(request: Request, assignment_id: int, user=Depends(get_current_user)):
+    """Teacher-only endpoint - can only delete assignments in own courses"""
+    check_teacher_role(user)
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM assignments WHERE id=%s", (assignment_id,))
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT a.*, c.instructor_id FROM assignments a JOIN courses c ON a.course_id = c.id WHERE a.id=%s", (assignment_id,))
+    assignment = cursor.fetchone()
+    if not assignment:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    if assignment["instructor_id"] != user["id"]:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized to delete this assignment")
+    
+    cursor.execute("DELETE FROM assignments WHERE id=%s", (assignment_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"id": assignment_id, "deleted": True}
     if not cursor.fetchone():
         cursor.close()
         conn.close()
@@ -108,39 +181,58 @@ def delete_assignment(assignment_id: int):
     conn.close()
     return {"id": assignment_id, "deleted": True}
 
-# Assignment Submissions
 @router.get("/{assignment_id}/submissions")
-def list_submissions(assignment_id: int):
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def list_submissions(request: Request, assignment_id: int, user=Depends(get_current_user)):
+    """Teacher-only endpoint - view submissions for own course assignments"""
+    check_teacher_role(user)
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT a.*, c.instructor_id FROM assignments a JOIN courses c ON a.course_id = c.id WHERE a.id=%s", (assignment_id,))
+    assignment = cursor.fetchone()
+    if not assignment:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    if assignment["instructor_id"] != user["id"]:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized to view submissions for this assignment")
+    
     cursor.execute("SELECT * FROM assignment_submissions WHERE assignment_id=%s", (assignment_id,))
     submissions = cursor.fetchall()
     cursor.close()
     conn.close()
     return submissions
 
-from fastapi import Request
-
 @router.post("/{assignment_id}/submit")
-async def submit_assignment(assignment_id: int, request: Request):
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def submit_assignment(request: Request, assignment_id: int, user=Depends(get_current_user)):
+    """Student endpoint - submit assignment"""
     data = await request.json()
     enrollment_id = data.get("enrollment_id")
-    content = data.get("content")
+    content = sanitize_string(data.get("content"), max_length=10000)
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor(dictionary=True)
-    # Resolve enrollment to get the canonical student id to avoid FK errors
     cursor.execute("SELECT * FROM enrollments WHERE id=%s", (enrollment_id,))
     enrollment_row = cursor.fetchone()
     if not enrollment_row:
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Enrollment not found")
+    
+    if enrollment_row.get("user_id") != user["id"]:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized to submit for this enrollment")
+    
     user_id = enrollment_row.get("user_id")
-    # Look up the linked student_id from users table
     cursor.execute("SELECT student_id FROM users WHERE id=%s", (user_id,))
     user_row = cursor.fetchone()
     if not user_row or not user_row.get("student_id"):
@@ -148,7 +240,6 @@ async def submit_assignment(assignment_id: int, request: Request):
         conn.close()
         raise HTTPException(status_code=400, detail="Student profile not found for this enrollment")
     student_id = user_row.get("student_id")
-    # Check if already submitted
     cursor.execute("SELECT id FROM assignment_submissions WHERE assignment_id=%s AND enrollment_id=%s", (assignment_id, enrollment_id))
     if cursor.fetchone():
         cursor.close()
@@ -164,35 +255,49 @@ async def submit_assignment(assignment_id: int, request: Request):
     conn.close()
     return {"id": submission_id, "assignment_id": assignment_id, "enrollment_id": enrollment_id, "student_id": student_id}
 
-from pydantic import BaseModel
-
 class ReviewSubmissionRequest(BaseModel):
     status: str = "graded"
     grade: str = None
     feedback: str = None
 
 @router.put("/submissions/{submission_id}/review")
-def review_submission(submission_id: int, review: ReviewSubmissionRequest):
+@limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
+async def review_submission(request: Request, submission_id: int, review: ReviewSubmissionRequest, user=Depends(get_current_user)):
+    """Teacher-only endpoint - review submissions in own courses"""
+    check_teacher_role(user)
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM assignment_submissions WHERE id=%s", (submission_id,))
-    if not cursor.fetchone():
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT sub.*, c.instructor_id 
+        FROM assignment_submissions sub 
+        JOIN assignments a ON sub.assignment_id = a.id 
+        JOIN courses c ON a.course_id = c.id 
+        WHERE sub.id=%s
+    """, (submission_id,))
+    submission = cursor.fetchone()
+    if not submission:
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Submission not found")
+    if submission["instructor_id"] != user["id"]:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized to review this submission")
+    
     update_fields = []
     params = []
     if review.status is not None:
         update_fields.append("status=%s")
-        params.append(review.status)
+        params.append(sanitize_string(review.status, max_length=50))
     if review.grade is not None:
         update_fields.append("grade=%s")
-        params.append(review.grade)
+        params.append(sanitize_string(review.grade, max_length=10))
     if review.feedback is not None:
         update_fields.append("feedback=%s")
-        params.append(review.feedback)
+        params.append(sanitize_string(review.feedback, max_length=2000))
     if not update_fields:
         cursor.close()
         conn.close()
