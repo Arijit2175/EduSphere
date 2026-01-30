@@ -1,3 +1,4 @@
+import API_URL from "../config";
 import { Box, Container, Typography, TextField, Button, Grid, Card, CardContent } from "@mui/material";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -19,7 +20,7 @@ export default function ContactUs() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://127.0.0.1:8000/contact-messages/", {
+      const res = await fetch(`${API_URL}/contact-messages/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

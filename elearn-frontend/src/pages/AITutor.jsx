@@ -1,3 +1,4 @@
+import API_URL from "../config";
 import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
@@ -32,8 +33,6 @@ import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import Sidebar from "../components/Sidebar.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
-
-const API_URL = "http://127.0.0.1:8000";
 
 const emojiList = [
   "😀", "😃", "😄", "😁", "😆", "😅", "😂", "😊",

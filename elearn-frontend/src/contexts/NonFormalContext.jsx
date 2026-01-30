@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
+import API_URL from "../config";
 import { useAuth } from "./AuthContext";
 
 const NonFormalContext = createContext();
@@ -321,7 +322,7 @@ export const NonFormalProvider = ({ children }) => {
       try {
         const token = user.access_token;
         const authHeader = { Authorization: `Bearer ${token}` };
-        const coursesRes = await fetch("http://127.0.0.1:8000/nonformal/courses/", { headers: authHeader });
+        const coursesRes = await fetch("${API_URL}/nonformal/courses/", { headers: authHeader });
         if (coursesRes.ok) {
           const fetchedCourses = await coursesRes.json();
           if (Array.isArray(fetchedCourses) && fetchedCourses.length > 0) {
@@ -354,11 +355,11 @@ export const NonFormalProvider = ({ children }) => {
         } else {
           setCourses(DEFAULT_COURSES);
         }
-        const enrollmentsRes = await fetch("http://127.0.0.1:8000/nonformal/enrollments/", { headers: authHeader });
+        const enrollmentsRes = await fetch("${API_URL}/nonformal/enrollments/", { headers: authHeader });
         if (enrollmentsRes.ok) {
           setEnrollments(await enrollmentsRes.json());
         }
-        const progressRes = await fetch("http://127.0.0.1:8000/nonformal/progress/", { headers: authHeader });
+        const progressRes = await fetch("${API_URL}/nonformal/progress/", { headers: authHeader });
         if (progressRes.ok) {
           const progressArr = await progressRes.json();
           // Convert array to object keyed by userId-courseId
@@ -368,7 +369,7 @@ export const NonFormalProvider = ({ children }) => {
           }
           setProgress(progressObj);
         }
-        const certsRes = await fetch("http://127.0.0.1:8000/nonformal/certificates/", { headers: authHeader });
+        const certsRes = await fetch("${API_URL}/nonformal/certificates/", { headers: authHeader });
         if (certsRes.ok) {
           setCertificates(await certsRes.json());
         }
@@ -382,7 +383,7 @@ export const NonFormalProvider = ({ children }) => {
   const enrollCourse = async (userId, courseId) => {
     try {
       const token = JSON.parse(localStorage.getItem("user"))?.access_token;
-      const res = await fetch("http://127.0.0.1:8000/nonformal/enrollments/", {
+      const res = await fetch("${API_URL}/nonformal/enrollments/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -396,7 +397,7 @@ export const NonFormalProvider = ({ children }) => {
       if (token) {
         const authHeader = { Authorization: `Bearer ${token}` };
         // Fetch courses
-        const coursesRes = await fetch("http://127.0.0.1:8000/nonformal/courses/", { headers: authHeader });
+        const coursesRes = await fetch("${API_URL}/nonformal/courses/", { headers: authHeader });
         if (coursesRes.ok) {
           const fetchedCourses = await coursesRes.json();
           if (Array.isArray(fetchedCourses) && fetchedCourses.length > 0) {
@@ -426,12 +427,12 @@ export const NonFormalProvider = ({ children }) => {
           setCourses(DEFAULT_COURSES);
         }
         // Fetch enrollments
-        const enrollmentsRes = await fetch("http://127.0.0.1:8000/nonformal/enrollments/", { headers: authHeader });
+        const enrollmentsRes = await fetch("${API_URL}/nonformal/enrollments/", { headers: authHeader });
         if (enrollmentsRes.ok) {
           setEnrollments(await enrollmentsRes.json());
         }
         // Fetch progress
-        const progressRes = await fetch("http://127.0.0.1:8000/nonformal/progress/", { headers: authHeader });
+        const progressRes = await fetch("${API_URL}/nonformal/progress/", { headers: authHeader });
         if (progressRes.ok) {
           const progressArr = await progressRes.json();
           const progressObj = {};
@@ -441,7 +442,7 @@ export const NonFormalProvider = ({ children }) => {
           setProgress(progressObj);
         }
         // Fetch certificates
-        const certsRes = await fetch("http://127.0.0.1:8000/nonformal/certificates/", { headers: authHeader });
+        const certsRes = await fetch("${API_URL}/nonformal/certificates/", { headers: authHeader });
         if (certsRes.ok) {
           setCertificates(await certsRes.json());
         }
@@ -464,7 +465,7 @@ export const NonFormalProvider = ({ children }) => {
   const updateLessonProgress = async (userId, courseId, lessonIndex) => {
     try {
       const token = JSON.parse(localStorage.getItem("user"))?.access_token;
-      const res = await fetch("http://127.0.0.1:8000/nonformal/progress/", {
+      const res = await fetch("${API_URL}/nonformal/progress/", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -488,7 +489,7 @@ export const NonFormalProvider = ({ children }) => {
   const updateAssessmentScore = async (userId, courseId, score) => {
     try {
       const token = JSON.parse(localStorage.getItem("user"))?.access_token;
-      const res = await fetch("http://127.0.0.1:8000/nonformal/progress/score", {
+      const res = await fetch("${API_URL}/nonformal/progress/score", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -539,7 +540,7 @@ export const NonFormalProvider = ({ children }) => {
   const earnCertificate = async (userId, courseId) => {
     try {
       const token = JSON.parse(localStorage.getItem("user"))?.access_token;
-      const res = await fetch("http://127.0.0.1:8000/nonformal/certificates/", {
+      const res = await fetch("${API_URL}/nonformal/certificates/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -549,7 +550,7 @@ export const NonFormalProvider = ({ children }) => {
       });
       if (res.ok) {
         // After claiming, re-fetch all certificates to ensure state is up to date
-        const certsRes = await fetch("http://127.0.0.1:8000/nonformal/certificates/", {
+        const certsRes = await fetch("${API_URL}/nonformal/certificates/", {
           headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         });
         if (certsRes.ok) {
@@ -578,7 +579,7 @@ export const NonFormalProvider = ({ children }) => {
     setProgress({});
     setCertificates([]);
     // Optionally, call backend endpoint to reset all data for the user
-    // await fetch("http://127.0.0.1:8000/nonformal/reset", { method: "POST" });
+    // await fetch("${API_URL}/nonformal/reset", { method: "POST" });
   };
 
   const value = useMemo(() => ({

@@ -1,3 +1,4 @@
+import API_URL from "../config";
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 
@@ -22,7 +23,7 @@ export const CoursesProvider = ({ children }) => {
       }
       try {
         const token = user.access_token;
-        const res = await fetch("http://127.0.0.1:8000/enrollments/me", {
+        const res = await fetch(`${API_URL}/enrollments/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -40,7 +41,7 @@ export const CoursesProvider = ({ children }) => {
     console.log("ENROLL POST BODY", { student_id: user?.id, course_id: courseId });
     try {
       const token = user?.access_token;
-      const res = await fetch("http://127.0.0.1:8000/enrollments/", {
+      const res = await fetch(`${API_URL}/enrollments/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

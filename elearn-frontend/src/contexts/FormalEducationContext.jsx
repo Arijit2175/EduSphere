@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
+import API_URL from "../config";
 import { useAuth } from "./AuthContext";
 
 const FormalEducationContext = createContext();
@@ -24,7 +25,7 @@ export const FormalEducationProvider = ({ children }) => {
         if (!user || !user.access_token) {
           return; // Wait until we have an authenticated user
         }
-        const coursesRes = await fetch("http://127.0.0.1:8000/courses/");
+        const coursesRes = await fetch("${API_URL}/courses/");
         let coursesData = [];
         if (coursesRes.ok) {
           coursesData = await coursesRes.json();
@@ -35,19 +36,19 @@ export const FormalEducationProvider = ({ children }) => {
               let assignments = [];
               let schedules = [];
               try {
-                const matRes = await fetch(`http://127.0.0.1:8000/resources/?course_id=${course.id}`);
+                const matRes = await fetch(`${API_URL}/resources/?course_id=${course.id}`);
                 if (matRes.ok) {
                   materials = await matRes.json();
                 }
               } catch {}
               try {
-                const assignRes = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${course.id}`);
+                const assignRes = await fetch(`${API_URL}/assignments/?course_id=${course.id}`);
                 if (assignRes.ok) {
                   assignments = await assignRes.json();
                 }
               } catch {}
               try {
-                const schedRes = await fetch(`http://127.0.0.1:8000/class-schedules/?course_id=${course.id}`);
+                const schedRes = await fetch(`${API_URL}/class-schedules/?course_id=${course.id}`);
                 if (schedRes.ok) {
                   schedules = await schedRes.json();
                 }
@@ -57,7 +58,7 @@ export const FormalEducationProvider = ({ children }) => {
           );
           setCourses(coursesWithDetails);
         }
-        const enrollmentsRes = await fetch("http://127.0.0.1:8000/enrollments/");
+        const enrollmentsRes = await fetch("${API_URL}/enrollments/");
         let mapped = [];
         if (enrollmentsRes.ok) {
           const enrollmentsData = await enrollmentsRes.json();
@@ -72,7 +73,7 @@ export const FormalEducationProvider = ({ children }) => {
           }));
         }
         // Fetch assignment submissions with auth; students receive their own
-        const submissionsRes = await fetch("http://127.0.0.1:8000/assignments/assignment_submissions/", {
+        const submissionsRes = await fetch("${API_URL}/assignments/assignment_submissions/", {
           headers: user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {}
         });
         let mappedSubmissions = [];
@@ -111,7 +112,7 @@ export const FormalEducationProvider = ({ children }) => {
   // Teacher: Create course
   const createCourse = async (courseData) => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/courses/", {
+      const res = await fetch("${API_URL}/courses/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(courseData),
@@ -131,7 +132,7 @@ export const FormalEducationProvider = ({ children }) => {
   // Student: Enroll in course
   const enrollStudent = useCallback(async (userId, courseId) => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/enrollments/", {
+      const res = await fetch("${API_URL}/enrollments/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ student_id: userId, course_id: courseId }),
@@ -154,7 +155,7 @@ export const FormalEducationProvider = ({ children }) => {
         setEnrollments((prev) => [...prev, mappedEnrollment]);
         // Refresh enrollments from backend so UI updates
         try {
-          const enrollmentsRes = await fetch("http://127.0.0.1:8000/enrollments/");
+          const enrollmentsRes = await fetch("${API_URL}/enrollments/");
           if (enrollmentsRes.ok) {
             const enrollmentsData = await enrollmentsRes.json();
             const mapped = enrollmentsData.map(e => ({
@@ -196,7 +197,7 @@ export const FormalEducationProvider = ({ children }) => {
         reader.readAsDataURL(material.file);
       });
     }
-    const res = await fetch("http://127.0.0.1:8000/resources/", {
+    const res = await fetch("${API_URL}/resources/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ course_id: courseId, name: material.name, url, type }),
@@ -222,7 +223,7 @@ export const FormalEducationProvider = ({ children }) => {
         assignmentData.due_date = assignment.dueDate;
         delete assignmentData.dueDate;
       }
-      const res = await fetch(`http://127.0.0.1:8000/assignments/`, {
+      const res = await fetch(`${API_URL}/assignments/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(assignmentData),
@@ -244,7 +245,7 @@ export const FormalEducationProvider = ({ children }) => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
       const studentId = user?.id;
-      const res = await fetch(`http://127.0.0.1:8000/assignments/${assignmentId}/submit`, {
+      const res = await fetch(`${API_URL}/assignments/${assignmentId}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -279,7 +280,7 @@ export const FormalEducationProvider = ({ children }) => {
   // Teacher: Create quiz
   const createQuiz = async (courseId, quiz) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/quizzes/`, {
+      const res = await fetch(`${API_URL}/quizzes/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...quiz, course_id: courseId }),
@@ -299,7 +300,7 @@ export const FormalEducationProvider = ({ children }) => {
   // Student: Submit quiz
   const submitQuiz = async (enrollmentId, quizId, answers, score) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/quiz_submissions/`, {
+      const res = await fetch(`${API_URL}/quiz_submissions/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enrollment_id: enrollmentId, quiz_id: quizId, answers, score }),
@@ -320,7 +321,7 @@ export const FormalEducationProvider = ({ children }) => {
   const scheduleClass = async (courseId, schedule) => {
     // POST to backend
     try {
-      const res = await fetch("http://127.0.0.1:8000/class-schedules/", {
+      const res = await fetch("${API_URL}/class-schedules/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -349,7 +350,7 @@ export const FormalEducationProvider = ({ children }) => {
   // Mark attendance for a class session and student
   const markAttendanceForClass = async (courseId, scheduleId, studentId, status = "present") => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/attendance/", {
+      const res = await fetch("${API_URL}/attendance/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -359,7 +360,7 @@ export const FormalEducationProvider = ({ children }) => {
       });
       if (res.ok) {
         // After marking, fetch all attendance for this student in this course
-        const attendanceRes = await fetch(`http://127.0.0.1:8000/attendance/?student_id=${studentId}`, {
+        const attendanceRes = await fetch(`${API_URL}/attendance/?student_id=${studentId}`, {
           headers: user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {}
         });
         let presentCount = 0;
@@ -403,7 +404,7 @@ export const FormalEducationProvider = ({ children }) => {
   // Mark attendance
   const markAttendance = async (enrollmentId) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/attendance/`, {
+      const res = await fetch(`${API_URL}/attendance/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enrollment_id: enrollmentId }),
@@ -425,7 +426,7 @@ export const FormalEducationProvider = ({ children }) => {
   // Generate certificate (when progress = 100)
   const generateCertificate = async (enrollmentId) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/certificates/`, {
+      const res = await fetch(`${API_URL}/certificates/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enrollment_id: enrollmentId }),
@@ -482,7 +483,7 @@ export const FormalEducationProvider = ({ children }) => {
   // Delete material
   const deleteMaterial = async (courseId, materialId) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/resources/${materialId}`, {
+      const res = await fetch(`${API_URL}/resources/${materialId}`, {
         method: "DELETE"
       });
       if (res.ok) {

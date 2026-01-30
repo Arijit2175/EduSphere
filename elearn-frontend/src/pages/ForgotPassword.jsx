@@ -1,3 +1,4 @@
+import API_URL from "../config";
 
 import { Box, Container, Button, Typography, Card, CardContent, Link, Alert } from "@mui/material";
 import { motion } from "framer-motion";
@@ -63,7 +64,7 @@ export default function ForgotPassword() {
     }
 
     // Real API call for resetting password
-    fetch("http://127.0.0.1:8000/auth/forgot-password", {
+    fetch(`${API_URL}/auth/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, new_password: newPassword }),

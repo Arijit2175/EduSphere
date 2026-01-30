@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
+import API_URL from "../config";
 
 const buildUser = (data) => {
   const first_name = data.first_name || data.email?.split("@")[0] || "User";
@@ -32,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback(async (email, password, role = "student") => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/auth/login", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, role }),
@@ -43,7 +44,7 @@ export const AuthProvider = ({ children }) => {
       }
       const data = await response.json();
       // Fetch full user profile after login
-      const profileRes = await fetch("http://127.0.0.1:8000/users/me", {
+      const profileRes = await fetch(`${API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${data.access_token}` },
       });
       let profile = {};
@@ -61,7 +62,7 @@ export const AuthProvider = ({ children }) => {
   
   const register = useCallback(async (formData) => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/auth/register", {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
