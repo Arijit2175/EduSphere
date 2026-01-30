@@ -23,7 +23,7 @@ export const CoursesProvider = ({ children }) => {
       }
       try {
         const token = user.access_token;
-        const res = await fetch(`${API_URL}/enrollments/me", {
+        const res = await fetch(`${API_URL}/enrollments/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -41,7 +41,7 @@ export const CoursesProvider = ({ children }) => {
     console.log("ENROLL POST BODY", { student_id: user?.id, course_id: courseId });
     try {
       const token = user?.access_token;
-      const res = await fetch(`${API_URL}/enrollments/", {
+      const res = await fetch(`${API_URL}/enrollments/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
