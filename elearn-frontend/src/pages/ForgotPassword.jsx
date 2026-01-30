@@ -64,7 +64,7 @@ export default function ForgotPassword() {
     }
 
     // Real API call for resetting password
-    fetch(`${API_URL}/auth/forgot-password", {
+    fetch(`${API_URL}/auth/forgot-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, new_password: newPassword }),
