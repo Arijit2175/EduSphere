@@ -1,5 +1,4 @@
 -- PostgreSQL Schema for EduSphere (Supabase)
-
 -- Students Table
 CREATE TABLE IF NOT EXISTS students (
     id SERIAL PRIMARY KEY,
@@ -18,7 +17,6 @@ CREATE TABLE IF NOT EXISTS students (
     avatar TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 -- Teachers Table
 CREATE TABLE IF NOT EXISTS teachers (
     id SERIAL PRIMARY KEY,
@@ -37,7 +35,6 @@ CREATE TABLE IF NOT EXISTS teachers (
     avatar TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 -- Unified Users Table for Authentication
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -60,7 +57,6 @@ CREATE TABLE IF NOT EXISTS users (
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
 );
-
 -- Courses Table
 CREATE TABLE IF NOT EXISTS courses (
     id SERIAL PRIMARY KEY,
@@ -77,9 +73,9 @@ CREATE TABLE IF NOT EXISTS courses (
     reviews INT,
     paid SMALLINT DEFAULT 0,
     instructor VARCHAR(100),
-    FOREIGN KEY (instructor_id) REFERENCES teachers(id) ON DELETE SET NULL
+    FOREIGN KEY (instructor_id) REFERENCES teachers(id) ON DELETE
+    SET NULL
 );
-
 -- Enrollments Table
 CREATE TABLE IF NOT EXISTS enrollments (
     id SERIAL PRIMARY KEY,
@@ -91,7 +87,6 @@ CREATE TABLE IF NOT EXISTS enrollments (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
-
 -- Lessons Table
 CREATE TABLE IF NOT EXISTS lessons (
     id SERIAL PRIMARY KEY,
@@ -102,7 +97,6 @@ CREATE TABLE IF NOT EXISTS lessons (
     order_index INT DEFAULT 0,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
-
 -- Resources Table
 CREATE TABLE IF NOT EXISTS resources (
     id SERIAL PRIMARY KEY,
@@ -112,7 +106,6 @@ CREATE TABLE IF NOT EXISTS resources (
     type VARCHAR(50),
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
-
 -- Assignments Table
 CREATE TABLE IF NOT EXISTS assignments (
     id SERIAL PRIMARY KEY,
@@ -123,7 +116,6 @@ CREATE TABLE IF NOT EXISTS assignments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
-
 -- Assignment Submissions Table
 CREATE TABLE IF NOT EXISTS assignment_submissions (
     id SERIAL PRIMARY KEY,
@@ -139,7 +131,6 @@ CREATE TABLE IF NOT EXISTS assignment_submissions (
     FOREIGN KEY (enrollment_id) REFERENCES enrollments(id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
 );
-
 -- Certificates Table
 CREATE TABLE IF NOT EXISTS certificates (
     id SERIAL PRIMARY KEY,
@@ -150,7 +141,6 @@ CREATE TABLE IF NOT EXISTS certificates (
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
-
 -- Quizzes Table
 CREATE TABLE IF NOT EXISTS quizzes (
     id SERIAL PRIMARY KEY,
@@ -159,7 +149,6 @@ CREATE TABLE IF NOT EXISTS quizzes (
     description TEXT,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
-
 -- Quiz Questions Table
 CREATE TABLE IF NOT EXISTS quiz_questions (
     id SERIAL PRIMARY KEY,
@@ -169,7 +158,6 @@ CREATE TABLE IF NOT EXISTS quiz_questions (
     correct_answer VARCHAR(255) NOT NULL,
     FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
 );
-
 -- Quiz Submissions Table
 CREATE TABLE IF NOT EXISTS quiz_submissions (
     id SERIAL PRIMARY KEY,
@@ -180,7 +168,6 @@ CREATE TABLE IF NOT EXISTS quiz_submissions (
     FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
 );
-
 -- Class Schedules Table
 CREATE TABLE IF NOT EXISTS class_schedules (
     id SERIAL PRIMARY KEY,
@@ -192,7 +179,6 @@ CREATE TABLE IF NOT EXISTS class_schedules (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
-
 -- Attendance Table
 CREATE TABLE IF NOT EXISTS attendance (
     id SERIAL PRIMARY KEY,
@@ -203,7 +189,6 @@ CREATE TABLE IF NOT EXISTS attendance (
     FOREIGN KEY (schedule_id) REFERENCES class_schedules(id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
 );
-
 -- Contact Messages Table
 CREATE TABLE IF NOT EXISTS contact_messages (
     id SERIAL PRIMARY KEY,
@@ -213,7 +198,6 @@ CREATE TABLE IF NOT EXISTS contact_messages (
     message TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 -- AI Tutor Chat Logs Table
 CREATE TABLE IF NOT EXISTS ai_tutor_chats (
     id SERIAL PRIMARY KEY,
@@ -224,7 +208,6 @@ CREATE TABLE IF NOT EXISTS ai_tutor_chats (
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
 );
-
 -- Informal Posts Table (for informal learning discussions)
 CREATE TABLE IF NOT EXISTS informal_posts (
     id SERIAL PRIMARY KEY,
@@ -240,7 +223,6 @@ CREATE TABLE IF NOT EXISTS informal_posts (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
 -- Topics Table (for organizing content)
 CREATE TABLE IF NOT EXISTS topics (
     id SERIAL PRIMARY KEY,
@@ -248,7 +230,6 @@ CREATE TABLE IF NOT EXISTS topics (
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 -- Followed Topics Table
 CREATE TABLE IF NOT EXISTS followed_topics (
     id SERIAL PRIMARY KEY,
@@ -258,7 +239,6 @@ CREATE TABLE IF NOT EXISTS followed_topics (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE
 );
-
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_enrollments_user ON enrollments(user_id);
