@@ -19,7 +19,7 @@ async def forgot_password(request: Request):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
     user = cursor.fetchone()
     if not user:

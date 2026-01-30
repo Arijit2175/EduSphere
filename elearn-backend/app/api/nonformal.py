@@ -5,7 +5,6 @@ from app.api.auth import get_current_user
 
 from pydantic import BaseModel
 
-# --- Request Models ---
 class EnrollRequest(BaseModel):
     course_id: str
 
@@ -13,13 +12,12 @@ class EnrollRequest(BaseModel):
 router = APIRouter(prefix="/nonformal", tags=["nonformal"])
 
 
-# --- Progress ---
 @router.get("/progress/")
 def get_nonformal_progress(user=Depends(get_current_user)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("""
         SELECT e.id, e.course_id, e.progress, c.title FROM enrollments e
         JOIN courses c ON e.course_id = c.id
@@ -29,26 +27,24 @@ def get_nonformal_progress(user=Depends(get_current_user)):
     conn.close()
     return progress
 
-# --- Courses ---
 @router.get("/courses/")
 def list_nonformal_courses():
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM courses WHERE type = 'non-formal'")
     courses = cursor.fetchall()
     cursor.close()
     conn.close()
     return courses
 
-# --- Enrollments ---
 @router.get("/enrollments/")
 def list_nonformal_enrollments(user=Depends(get_current_user)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("""
         SELECT e.* FROM enrollments e
         JOIN courses c ON e.course_id = c.id
@@ -104,14 +100,12 @@ async def update_nonformal_progress(request: Request, user=Depends(get_current_u
     )
     conn.commit()
 
-# --- Certificates ---
 @router.get("/certificates/")
 def get_nonformal_certificates(user=Depends(get_current_user)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
-    # Get certificates for non-formal courses
+    cursor = conn.cursor()
     cursor.execute("""
         SELECT certificates.* FROM certificates
         JOIN courses c ON certificates.course_id = c.id
@@ -121,7 +115,6 @@ def get_nonformal_certificates(user=Depends(get_current_user)):
     conn.close()
     return certificates
 
-# --- Claim Certificate ---
 @router.post("/certificates/")
 async def claim_nonformal_certificate(request: Request, user=Depends(get_current_user)):
     data = await request.json()
@@ -131,27 +124,22 @@ async def claim_nonformal_certificate(request: Request, user=Depends(get_current
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
-    # Check if already has certificate
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM certificates WHERE user_id=%s AND course_id=%s", (user["id"], course_id))
     existing = cursor.fetchone()
     if existing:
         cursor.close()
         conn.close()
         raise HTTPException(status_code=400, detail="Certificate already claimed")
-    # Generate a unique certificate_id
     cert_id = str(uuid.uuid4())
-    # Insert certificate with certificate_id
     cursor.execute("INSERT INTO certificates (user_id, course_id, certificate_id) VALUES (%s, %s, %s)", (user["id"], course_id, cert_id))
     conn.commit()
-    # Return the created certificate object
     cursor.execute("SELECT * FROM certificates WHERE user_id=%s AND course_id=%s ORDER BY id DESC LIMIT 1", (user["id"], course_id))
     cert = cursor.fetchone()
     cursor.close()
     conn.close()
     return cert
 
-# --- Progress Score Update ---
 @router.put("/progress/score")
 async def update_nonformal_progress_score(request: Request, user=Depends(get_current_user)):
     data = await request.json()

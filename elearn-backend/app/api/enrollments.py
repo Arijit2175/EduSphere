@@ -6,13 +6,12 @@ from app.db import get_db_connection
 
 router = APIRouter(prefix="/enrollments", tags=["enrollments"])
 
-# Endpoint to get all students enrolled in a course, including their full names
 @router.get("/course/{course_id}/students")
 def get_course_students(course_id: int):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute('''
         SELECT e.*, u.first_name, u.last_name, u.student_id
         FROM enrollments e
@@ -24,7 +23,6 @@ def get_course_students(course_id: int):
     conn.close()
     return students
 
-# Request model for enrollment
 class EnrollRequest(BaseModel):
     student_id: int
     course_id: int
@@ -34,8 +32,7 @@ def get_my_enrollments(user=Depends(get_current_user)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
-    # Join enrollments with courses to get course details
+    cursor = conn.cursor()
     cursor.execute("""
         SELECT e.*, c.title, c.description, c.duration, c.instructor_id
         FROM enrollments e
@@ -52,7 +49,7 @@ def list_enrollments():
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM enrollments")
     enrollments = cursor.fetchall()
     cursor.close()
@@ -67,27 +64,23 @@ def enroll_student(data: EnrollRequest):
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
-    # Check if already enrolled
     cursor.execute("SELECT id FROM enrollments WHERE user_id=%s AND course_id=%s", (student_id, course_id))
     existing = cursor.fetchone()
     if existing:
         cursor.close()
         conn.close()
-        # Return the existing enrollment instead of raising an error
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor()
         cursor.execute("SELECT * FROM enrollments WHERE user_id=%s AND course_id=%s", (student_id, course_id))
         enrollment = cursor.fetchone()
         cursor.close()
         conn.close()
         return enrollment
     cursor.execute(
-        "INSERT INTO enrollments (user_id, course_id) VALUES (%s, %s)",
+        "INSERT INTO enrollments (user_id, course_id) VALUES (%s, %s) RETURNING id",
         (student_id, course_id)
     )
+    enrollment_id = cursor.fetchone()['id']
     conn.commit()
-    enrollment_id = cursor.lastrowid
-    # Fetch the full enrollment row
-    cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM enrollments WHERE id=%s", (enrollment_id,))
     enrollment = cursor.fetchone()
     cursor.close()

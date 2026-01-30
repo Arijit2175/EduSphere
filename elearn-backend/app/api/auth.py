@@ -33,7 +33,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))
     user = cursor.fetchone()
     cursor.close()
@@ -81,7 +81,7 @@ async def register(request: Request):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
     if cursor.fetchone():
         cursor.close()
@@ -92,21 +92,21 @@ async def register(request: Request):
     teacher_id = None
     if role == "student":
         cursor.execute(
-            "INSERT INTO students (first_name, last_name, email, password_hash) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO students (first_name, last_name, email, password_hash) VALUES (%s, %s, %s, %s) RETURNING id",
             (first_name, last_name, email, hashed)
         )
-        student_id = cursor.lastrowid
+        student_id = cursor.fetchone()['id']
     elif role == "teacher":
         cursor.execute(
-            "INSERT INTO teachers (first_name, last_name, email, password_hash) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO teachers (first_name, last_name, email, password_hash) VALUES (%s, %s, %s, %s) RETURNING id",
             (first_name, last_name, email, hashed)
         )
-        teacher_id = cursor.lastrowid
+        teacher_id = cursor.fetchone()['id']
     cursor.execute(
-        "INSERT INTO users (email, password_hash, role, student_id, teacher_id, first_name, last_name) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+        "INSERT INTO users (email, password_hash, role, student_id, teacher_id, first_name, last_name) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
         (email, hashed, role, student_id, teacher_id, first_name, last_name)
     )
-    user_id = cursor.lastrowid
+    user_id = cursor.fetchone()['id']
     conn.commit()
     cursor.close()
     conn.close()
@@ -132,7 +132,7 @@ async def login(request: Request):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
     user = cursor.fetchone()
     cursor.close()

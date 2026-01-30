@@ -6,7 +6,6 @@ from app.db import get_db_connection
 from app.api.auth import get_current_user
 from app.core.security import sanitize_string
 from app.core.config import RATE_LIMIT_PER_MINUTE
-# Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
 class ChatCreate(BaseModel):
@@ -26,7 +25,7 @@ async def list_chats(request: Request, user=Depends(get_current_user)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM ai_tutor_chats WHERE student_id=%s ORDER BY last_updated DESC", (user["id"],))
     chats = cursor.fetchall()
     cursor.close()
@@ -45,11 +44,11 @@ async def create_chat(request: Request, chat: ChatCreate = Body(...), user=Depen
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO ai_tutor_chats (student_id, chat_title, messages) VALUES (%s, %s, %s)",
+        "INSERT INTO ai_tutor_chats (student_id, chat_title, messages) VALUES (%s, %s, %s) RETURNING id",
         (user["id"], chat_title, messages)
     )
+    chat_id = cursor.fetchone()['id']
     conn.commit()
-    chat_id = cursor.lastrowid
     cursor.close()
     conn.close()
     return {"id": chat_id, "student_id": user["id"], "chat_title": chat_title}
@@ -61,7 +60,7 @@ async def get_chat(request: Request, chat_id: int, user=Depends(get_current_user
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM ai_tutor_chats WHERE id=%s AND student_id=%s", (chat_id, user["id"]))
     chat = cursor.fetchone()
     cursor.close()

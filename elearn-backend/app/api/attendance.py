@@ -23,7 +23,7 @@ async def list_attendance(request: Request, user=Depends(get_current_user), sche
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     
     if user["role"] == "student":
         cursor.execute("SELECT student_id FROM users WHERE id=%s", (user["id"],))
@@ -65,7 +65,7 @@ async def mark_attendance(request: Request, data: AttendanceRequest, user=Depend
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     
     cursor.execute("""
         SELECT s.*, c.instructor_id 
@@ -89,11 +89,11 @@ async def mark_attendance(request: Request, data: AttendanceRequest, user=Depend
         conn.close()
         raise HTTPException(status_code=400, detail="Attendance already marked")
     cursor.execute(
-        "INSERT INTO attendance (schedule_id, student_id, status) VALUES (%s, %s, %s)",
+        "INSERT INTO attendance (schedule_id, student_id, status) VALUES (%s, %s, %s) RETURNING id",
         (schedule_id, student_id, status)
     )
+    attendance_id = cursor.fetchone()['id']
     conn.commit()
-    attendance_id = cursor.lastrowid
     cursor.close()
     conn.close()
     return {"id": attendance_id, "schedule_id": schedule_id, "student_id": student_id, "status": status}
@@ -111,7 +111,7 @@ async def update_attendance(request: Request, attendance_id: int, status: str, u
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     
     cursor.execute("""
         SELECT a.*, c.instructor_id 
@@ -145,7 +145,7 @@ async def delete_attendance(request: Request, attendance_id: int, user=Depends(g
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     
     cursor.execute("""
         SELECT a.*, c.instructor_id 

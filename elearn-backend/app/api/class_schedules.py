@@ -25,7 +25,7 @@ async def list_schedules(request: Request, course_id: int = None):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     if course_id:
         cursor.execute("SELECT * FROM class_schedules WHERE course_id=%s ORDER BY start_time ASC", (course_id,))
     else:
@@ -49,7 +49,7 @@ async def create_schedule(request: Request, data: ScheduleCreate = Body(...), us
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM courses WHERE id=%s", (data.course_id,))
     course = cursor.fetchone()
     if not course:
@@ -73,15 +73,14 @@ async def create_schedule(request: Request, data: ScheduleCreate = Body(...), us
 
     start_time_mysql = iso_to_mysql(data.start_time)
     cursor.execute(
-        "INSERT INTO class_schedules (course_id, title, start_time, duration, meet_link) VALUES (%s, %s, %s, %s, %s)",
+        "INSERT INTO class_schedules (course_id, title, start_time, duration, meet_link) VALUES (%s, %s, %s, %s, %s) RETURNING id",
         (data.course_id, title, start_time_mysql, data.duration, meet_link)
     )
+    schedule_id = cursor.fetchone()['id']
     conn.commit()
-    schedule_id = cursor.lastrowid
-    cursor2 = conn.cursor(dictionary=True)
-    cursor2.execute("SELECT * FROM class_schedules WHERE id=%s", (schedule_id,))
-    schedule = cursor2.fetchone()
-    cursor2.close()
+    cursor.execute("SELECT * FROM class_schedules WHERE id=%s", (schedule_id,))
+    schedule = cursor.fetchone()
+    cursor.close()
     conn.close()
     return schedule
 
@@ -94,7 +93,7 @@ async def update_schedule(request: Request, schedule_id: int, user=Depends(get_c
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT s.*, c.instructor_id FROM class_schedules s JOIN courses c ON s.course_id = c.id WHERE s.id=%s", (schedule_id,))
     schedule = cursor.fetchone()
     if not schedule:
@@ -141,7 +140,7 @@ async def delete_schedule(request: Request, schedule_id: int, user=Depends(get_c
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT s.*, c.instructor_id FROM class_schedules s JOIN courses c ON s.course_id = c.id WHERE s.id=%s", (schedule_id,))
     schedule = cursor.fetchone()
     if not schedule:

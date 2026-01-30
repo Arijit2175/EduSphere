@@ -12,13 +12,12 @@ from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/informal-posts", tags=["Informal Posts"])
 
-# Delete a comment from a post
 @router.delete("/{post_id}/comment/{comment_id}")
 def delete_comment(post_id: int, comment_id: str, user=Depends(get_current_user)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT comments FROM informal_posts WHERE id=%s", (post_id,))
     post = cursor.fetchone()
     if not post:
@@ -31,7 +30,6 @@ def delete_comment(post_id: int, comment_id: str, user=Depends(get_current_user)
         comment_list = json.loads(comments) if comments else []
     except Exception:
         comment_list = []
-    # Only allow author to delete their own comment
     new_comments = [c for c in comment_list if not (c["id"] == comment_id and c["author"] == user.get("email"))]
     cursor.execute("UPDATE informal_posts SET comments=%s WHERE id=%s", (json.dumps(new_comments), post_id))
     conn.commit()
@@ -43,14 +41,13 @@ def like_informal_post(post_id: int, user=Depends(get_current_user)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT likers, likes FROM informal_posts WHERE id=%s", (post_id,))
     post = cursor.fetchone()
     if not post:
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Post not found")
-    # Robustly handle NULLs and always treat as list/int
     likers = post.get("likers") or ""
     likes = post.get("likes")
     liker_list = [int(x) for x in likers.split(",") if x.strip().isdigit()]
@@ -72,7 +69,7 @@ def comment_informal_post(post_id: int, text: str = Body(...), user=Depends(get_
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT comments FROM informal_posts WHERE id=%s", (post_id,))
     post = cursor.fetchone()
     if not post:
@@ -102,7 +99,7 @@ def save_informal_post(post_id: int, user=Depends(get_current_user)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT savers FROM informal_posts WHERE id=%s", (post_id,))
     post = cursor.fetchone()
     if not post:
@@ -129,8 +126,7 @@ def delete_informal_post(post_id: int, user=Depends(get_current_user)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
-    # Only allow delete if user is the author
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM informal_posts WHERE id=%s", (post_id,))
     post = cursor.fetchone()
     if not post:
@@ -152,7 +148,7 @@ def create_informal_post(post: dict, user=Depends(get_current_user)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     sql = """
         INSERT INTO informal_posts
         (title, body, tags, topic, type, media_url, creator, author_id, role)
@@ -170,9 +166,9 @@ def create_informal_post(post: dict, user=Depends(get_current_user)):
         user["id"],
         user["role"]
     )
-    cursor.execute(sql, values)
+    cursor.execute(sql + " RETURNING id", values)
+    post_id = cursor.fetchone()['id']
     conn.commit()
-    post_id = cursor.lastrowid
     cursor.execute("SELECT * FROM informal_posts WHERE id=%s", (post_id,))
     new_post = cursor.fetchone()
     cursor.close()
@@ -184,7 +180,7 @@ def get_informal_posts():
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute(
             """
             SELECT p.*, u.email AS creator_email, u.role AS creator_role
@@ -195,13 +191,11 @@ def get_informal_posts():
         )
     import json
     posts = cursor.fetchall()
-    # Normalize savers to always be a list of ints
     for post in posts:
         savers = post.get("savers")
         if savers is None or savers == "":
             post["savers"] = []
         else:
-            # Accept both comma-separated and JSON array strings
             try:
                 if savers.startswith("["):
                     post["savers"] = json.loads(savers)

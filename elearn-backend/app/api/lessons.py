@@ -8,7 +8,7 @@ def list_lessons(course_id: int = None):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     if course_id:
         cursor.execute("SELECT * FROM lessons WHERE course_id=%s ORDER BY order_index ASC", (course_id,))
     else:
@@ -25,11 +25,11 @@ def create_lesson(course_id: int, title: str, content: str = "", video_url: str 
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO lessons (course_id, title, content, video_url, order_index) VALUES (%s, %s, %s, %s, %s)",
+        "INSERT INTO lessons (course_id, title, content, video_url, order_index) VALUES (%s, %s, %s, %s, %s) RETURNING id",
         (course_id, title, content, video_url, order_index)
     )
+    lesson_id = cursor.fetchone()['id']
     conn.commit()
-    lesson_id = cursor.lastrowid
     cursor.close()
     conn.close()
     return {"id": lesson_id, "course_id": course_id, "title": title}

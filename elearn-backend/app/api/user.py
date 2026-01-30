@@ -11,7 +11,7 @@ async def get_user_me(current_user: dict = Depends(get_current_user)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT id, email, first_name, last_name, phone, gender, state, city, bio, linkedin, github, avatar, role FROM users WHERE id=%s", (user_id,))
     user = cursor.fetchone()
     cursor.close()
@@ -34,7 +34,7 @@ async def update_user(request: Request, current_user: dict = Depends(get_current
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute(f"UPDATE users SET {set_clause} WHERE id=%s", values)
     conn.commit()
     cursor.close()

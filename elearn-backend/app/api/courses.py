@@ -28,7 +28,7 @@ async def list_courses(request: Request):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM courses")
     courses = cursor.fetchall()
     cursor.close()
@@ -42,7 +42,7 @@ async def get_course(request: Request, course_id: int):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM courses WHERE id=%s", (course_id,))
     course = cursor.fetchone()
     cursor.close()
@@ -69,11 +69,11 @@ async def create_course(request: Request, course: CourseCreate, user=Depends(get
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO courses (title, description, type, category, level, duration, instructor_id) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+        "INSERT INTO courses (title, description, type, category, level, duration, instructor_id) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
         (title, description, course_type, category, level, duration, course.instructor_id or user["id"])
     )
+    course_id = cursor.fetchone()['id']
     conn.commit()
-    course_id = cursor.lastrowid
     cursor.close()
     conn.close()
     return {"id": course_id, "title": title}
@@ -87,7 +87,7 @@ async def update_course(request: Request, course_id: int, user=Depends(get_curre
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM courses WHERE id=%s", (course_id,))
     course = cursor.fetchone()
     if not course:
@@ -137,7 +137,7 @@ async def delete_course(request: Request, course_id: int, user=Depends(get_curre
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM courses WHERE id=%s", (course_id,))
     course = cursor.fetchone()
     if not course:

@@ -19,9 +19,8 @@ async def list_all_assignment_submissions(request: Request, user=Depends(get_cur
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
 
-    # Teachers get all submissions
     if user.get("role") == "teacher":
         cursor.execute("SELECT * FROM assignment_submissions")
         submissions = cursor.fetchall()
@@ -29,7 +28,6 @@ async def list_all_assignment_submissions(request: Request, user=Depends(get_cur
         conn.close()
         return submissions
 
-    # Students get only their submissions
     cursor.execute("SELECT student_id FROM users WHERE id=%s", (user["id"],))
     user_row = cursor.fetchone()
     if not user_row or not user_row.get("student_id"):
@@ -50,7 +48,7 @@ async def list_assignments(request: Request, course_id: int = None):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     if course_id:
         cursor.execute("SELECT * FROM assignments WHERE course_id=%s", (course_id,))
     else:
@@ -74,7 +72,7 @@ async def create_assignment(request: Request, data: dict = Body(...), user=Depen
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM courses WHERE id=%s", (course_id,))
     course = cursor.fetchone()
     if not course:
@@ -87,11 +85,11 @@ async def create_assignment(request: Request, data: dict = Body(...), user=Depen
         raise HTTPException(status_code=403, detail="Not authorized to create assignments for this course")
     
     cursor.execute(
-        "INSERT INTO assignments (course_id, title, description, due_date) VALUES (%s, %s, %s, %s)",
+        "INSERT INTO assignments (course_id, title, description, due_date) VALUES (%s, %s, %s, %s) RETURNING id",
         (course_id, title, description, due_date)
     )
+    assignment_id = cursor.fetchone()['id']
     conn.commit()
-    assignment_id = cursor.lastrowid
     cursor.execute("SELECT * FROM assignments WHERE id=%s", (assignment_id,))
     new_assignment = cursor.fetchone()
     cursor.close()
@@ -109,7 +107,7 @@ async def update_assignment(request: Request, assignment_id: int, user=Depends(g
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT a.*, c.instructor_id FROM assignments a JOIN courses c ON a.course_id = c.id WHERE a.id=%s", (assignment_id,))
     assignment = cursor.fetchone()
     if not assignment:
@@ -153,7 +151,7 @@ async def delete_assignment(request: Request, assignment_id: int, user=Depends(g
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT a.*, c.instructor_id FROM assignments a JOIN courses c ON a.course_id = c.id WHERE a.id=%s", (assignment_id,))
     assignment = cursor.fetchone()
     if not assignment:
@@ -190,7 +188,7 @@ async def list_submissions(request: Request, assignment_id: int, user=Depends(ge
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT a.*, c.instructor_id FROM assignments a JOIN courses c ON a.course_id = c.id WHERE a.id=%s", (assignment_id,))
     assignment = cursor.fetchone()
     if not assignment:
@@ -219,7 +217,7 @@ async def submit_assignment(request: Request, assignment_id: int, user=Depends(g
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM enrollments WHERE id=%s", (enrollment_id,))
     enrollment_row = cursor.fetchone()
     if not enrollment_row:
@@ -246,11 +244,11 @@ async def submit_assignment(request: Request, assignment_id: int, user=Depends(g
         conn.close()
         raise HTTPException(status_code=400, detail="Already submitted")
     cursor.execute(
-        "INSERT INTO assignment_submissions (assignment_id, enrollment_id, student_id, content) VALUES (%s, %s, %s, %s)",
+        "INSERT INTO assignment_submissions (assignment_id, enrollment_id, student_id, content) VALUES (%s, %s, %s, %s) RETURNING id",
         (assignment_id, enrollment_id, student_id, content)
     )
+    submission_id = cursor.fetchone()['id']
     conn.commit()
-    submission_id = cursor.lastrowid
     cursor.close()
     conn.close()
     return {"id": submission_id, "assignment_id": assignment_id, "enrollment_id": enrollment_id, "student_id": student_id}
@@ -269,7 +267,7 @@ async def review_submission(request: Request, submission_id: int, review: Review
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("""
         SELECT sub.*, c.instructor_id 
         FROM assignment_submissions sub 

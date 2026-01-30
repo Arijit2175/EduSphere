@@ -7,7 +7,7 @@ router = APIRouter(prefix="/topics", tags=["Topics"])
 @router.get("/", summary="List all topics")
 def list_topics():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM topics")
     topics = cursor.fetchall()
     cursor.close()
@@ -17,7 +17,7 @@ def list_topics():
 @router.get("/followed", summary="List topics followed by current user")
 def get_followed_topics(user=Depends(get_current_user)):
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("""
         SELECT t.* FROM topics t
         JOIN followed_topics f ON t.id = f.topic_id
@@ -32,7 +32,6 @@ def get_followed_topics(user=Depends(get_current_user)):
 def follow_topic(topic_id: int = Body(...), user=Depends(get_current_user)):
     conn = get_db_connection()
     cursor = conn.cursor()
-    # Check if already followed
     cursor.execute("SELECT 1 FROM followed_topics WHERE user_id=%s AND topic_id=%s", (user["id"], topic_id))
     if cursor.fetchone():
         cursor.close()

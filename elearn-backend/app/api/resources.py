@@ -18,7 +18,7 @@ async def list_resources(request: Request, course_id: int = None):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     if course_id:
         cursor.execute("SELECT * FROM resources WHERE course_id=%s", (course_id,))
     else:
@@ -47,7 +47,7 @@ async def create_resource(request: Request, resource: ResourceCreate = Body(...)
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM courses WHERE id=%s", (resource.course_id,))
     course = cursor.fetchone()
     if not course:
@@ -60,11 +60,11 @@ async def create_resource(request: Request, resource: ResourceCreate = Body(...)
         raise HTTPException(status_code=403, detail="Not authorized to create resources for this course")
     
     cursor.execute(
-        "INSERT INTO resources (course_id, name, url, type) VALUES (%s, %s, %s, %s)",
+        "INSERT INTO resources (course_id, name, url, type) VALUES (%s, %s, %s, %s) RETURNING id",
         (resource.course_id, name, url, resource_type)
     )
+    resource_id = cursor.fetchone()['id']
     conn.commit()
-    resource_id = cursor.lastrowid
     cursor.execute("SELECT * FROM resources WHERE id=%s", (resource_id,))
     new_resource = cursor.fetchone()
     cursor.close()
@@ -82,7 +82,7 @@ async def update_resource(request: Request, resource_id: int, user=Depends(get_c
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT r.*, c.instructor_id FROM resources r JOIN courses c ON r.course_id = c.id WHERE r.id=%s", (resource_id,))
     resource = cursor.fetchone()
     if not resource:
@@ -126,7 +126,7 @@ async def delete_resource(request: Request, resource_id: int, user=Depends(get_c
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT r.*, c.instructor_id FROM resources r JOIN courses c ON r.course_id = c.id WHERE r.id=%s", (resource_id,))
     resource = cursor.fetchone()
     if not resource:
