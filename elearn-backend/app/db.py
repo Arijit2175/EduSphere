@@ -11,6 +11,7 @@ DB_CONFIG = {
     'password': os.environ.get('DB_PASSWORD', ''),
     'database': os.environ.get('DB_NAME', 'postgres'),
     'port': int(os.environ.get('DB_PORT', 5432)),
+    'sslmode': 'require',
 }
 
 def get_db_connection():
