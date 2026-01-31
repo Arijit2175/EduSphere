@@ -57,7 +57,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
       if (!user?.id) return;
       try {
         const token = JSON.parse(localStorage.getItem("user"))?.access_token;
-        const res = await fetch(`http://127.0.0.1:8000/attendance/?student_id=${user.id}`, {
+        const res = await fetch(`${API_URL}/attendance/?student_id=${user.id}`, {
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {})
           }
