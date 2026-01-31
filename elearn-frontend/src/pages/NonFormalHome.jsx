@@ -48,7 +48,6 @@ export default function NonFormalHome() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   // Build a set of certified course IDs for the current user
   const certifiedIds = useMemo(
