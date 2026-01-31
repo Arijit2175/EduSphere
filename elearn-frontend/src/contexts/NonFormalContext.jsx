@@ -365,7 +365,11 @@ export const NonFormalProvider = ({ children }) => {
           // Convert array to object keyed by userId-courseId
           const progressObj = {};
           for (const p of progressArr) {
-            progressObj[`${p.user_id || user.id}-${p.course_id}`] = p;
+            progressObj[`${p.user_id || user.id}-${p.course_id}`] = {
+              ...p,
+              currentLessonIndex: p.progress || 0,
+              completedLessons: Array.from({ length: p.progress || 0 }, (_, i) => i),
+            };
           }
           setProgress(progressObj);
         }
@@ -437,7 +441,11 @@ export const NonFormalProvider = ({ children }) => {
           const progressArr = await progressRes.json();
           const progressObj = {};
           for (const p of progressArr) {
-            progressObj[`${p.user_id || userId}-${p.course_id}`] = p;
+            progressObj[`${p.user_id || userId}-${p.course_id}`] = {
+              ...p,
+              currentLessonIndex: p.progress || 0,
+              completedLessons: Array.from({ length: p.progress || 0 }, (_, i) => i),
+            };
           }
           setProgress(progressObj);
         }
