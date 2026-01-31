@@ -60,6 +60,10 @@ export default function Register() {
       setError("Password must be at least 6 characters");
       return;
     }
+    if (formData.password.length > 72) {
+      setError("Password must be 72 characters or fewer");
+      return;
+    }
 
     setLoading(true);
     setTimeout(() => {

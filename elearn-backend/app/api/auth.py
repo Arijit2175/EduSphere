@@ -87,6 +87,8 @@ async def register(request: Request):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=400, detail="Email already registered")
+    if len(password) > 72:
+        raise HTTPException(status_code=400, detail="Password must be 72 characters or fewer.")
     hashed = get_password_hash(password)
     student_id = None
     teacher_id = None
