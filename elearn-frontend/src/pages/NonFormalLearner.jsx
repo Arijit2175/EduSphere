@@ -57,6 +57,20 @@ export default function NonFormalLearner() {
     ? course.assessmentQuestions
     : [];
 
+  if (!courses || courses.length === 0) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <Sidebar />
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, transition: "margin-left 0.3s ease", p: 4, display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <Typography variant="h5">Loading course...</Typography>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
   if (!course || !userProgress) {
     return (
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
