@@ -57,8 +57,10 @@ export default function NonFormalLearner() {
     ? course.assessmentQuestions
     : [];
 
-  // Show loading state while data is being fetched
-  if (isLoading) {
+  // Show loading state while context is loading OR if we don't have courses/enrollments data yet
+  const isDataPending = isLoading || !courses || courses.length === 0 || !enrollments;
+  
+  if (isDataPending) {
     return (
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
         <Sidebar />
@@ -72,7 +74,7 @@ export default function NonFormalLearner() {
     );
   }
 
-  // Only show error if data is loaded but course/progress not found
+  // Only show error if data is fully loaded but course/progress not found
   if (!course || !userProgress) {
     return (
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
