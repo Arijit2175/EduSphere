@@ -307,16 +307,19 @@ export const NonFormalProvider = ({ children }) => {
   const [enrollments, setEnrollments] = useState([]);
   const [progress, setProgress] = useState({});
   const [certificates, setCertificates] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
   // Fetch all non-formal data from backend when user/token changes
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       if (!user || !user.access_token) {
         setCourses(DEFAULT_COURSES);
         setEnrollments([]);
         setProgress({});
         setCertificates([]);
+        setIsLoading(false);
         return;
       }
       try {
@@ -379,6 +382,8 @@ export const NonFormalProvider = ({ children }) => {
         }
       } catch (err) {
         setCourses(DEFAULT_COURSES);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -595,6 +600,7 @@ export const NonFormalProvider = ({ children }) => {
     enrollments,
     progress,
     certificates,
+    isLoading,
     enrollCourse,
     isEnrolled,
     getEnrolledCourses,
@@ -606,7 +612,7 @@ export const NonFormalProvider = ({ children }) => {
     resetCourseProgress,
     resetAllData,
     earnCertificate,
-  }), [courses, enrollments, progress, certificates]);
+  }), [courses, enrollments, progress, certificates, isLoading]);
 
   return (
     <NonFormalContext.Provider value={value}>

@@ -36,7 +36,7 @@ export default function NonFormalLearner() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
   const { courseId } = useParams();
-  const { courses, getCourseProgress, updateLessonProgress, updateAssessmentScore, resetCourseProgress, earnCertificate, enrollments, progress } = useNonFormal();
+  const { courses, getCourseProgress, updateLessonProgress, updateAssessmentScore, resetCourseProgress, earnCertificate, enrollments, progress, isLoading } = useNonFormal();
   const navigate = useNavigate();
 
   // Debug logging after all hooks/vars
@@ -52,16 +52,13 @@ export default function NonFormalLearner() {
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
 
-  // Check if data is still loading - if we have no enrollments at all, we're still fetching
-  const isDataLoading = !enrollments || enrollments.length === 0;
-
   const [quizScore, setQuizScore] = useState(0);
   const quizQuestions = course?.assessmentQuestions && Array.isArray(course.assessmentQuestions) && course.assessmentQuestions.length > 0
     ? course.assessmentQuestions
     : [];
 
   // Show loading state while data is being fetched
-  if (isDataLoading) {
+  if (isLoading) {
     return (
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
         <Sidebar />
