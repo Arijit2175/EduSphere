@@ -2,6 +2,7 @@ import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
 import PersonIcon from "@mui/icons-material/Person";
 import axios from "axios";
+import API_URL from "../config";
 import ImageIcon from "@mui/icons-material/Image";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -89,7 +90,7 @@ export default function InformalLearning() {
         return;
       }
       try {
-        await axios.delete(`http://localhost:8000/informal-posts/${postId}`, {
+        await axios.delete(`${API_URL}/informal-posts/${postId}`, {
           headers: { Authorization: `Bearer ${accessToken}` },
           withCredentials: true,
         });
@@ -106,7 +107,7 @@ export default function InformalLearning() {
 
   // Fetch posts from backend on mount and when user changes
   useEffect(() => {
-    axios.get("http://localhost:8000/informal-posts/")
+    axios.get(`${API_URL}/informal-posts/`)
       .then(res => {
         const posts = (res.data || []).map(post => ({
           ...post,
@@ -154,13 +155,13 @@ export default function InformalLearning() {
 
   // Fetch topics and followed topics from backend
   useEffect(() => {
-    axios.get("http://localhost:8000/topics/")
+    axios.get(`${API_URL}/topics/`)
       .then(res => {
         const backendTopics = res.data.map(t => t.name);
         setTopics(["All", ...backendTopics]);
       });
     if (user && user.access_token) {
-      axios.get("http://localhost:8000/topics/followed", {
+      axios.get(`${API_URL}/topics/followed`, {
         headers: { Authorization: `Bearer ${user.access_token}` }
       }).then(res => {
         setFollowingTopics(res.data.map(t => t.name));
