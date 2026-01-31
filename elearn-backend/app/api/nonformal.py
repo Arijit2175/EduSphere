@@ -66,19 +66,19 @@ def enroll_nonformal_course(data: EnrollRequest, user=Depends(get_current_user))
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
-    cursor.execute("SELECT id FROM courses WHERE id=%s AND type='non-formal'", (course_id,))
+    cursor.execute("SELECT id FROM courses WHERE id=%s AND type='non-formal'", (course_id_int,))
     if not cursor.fetchone():
         cursor.close()
         conn.close()
         raise HTTPException(status_code=400, detail="Course is not non-formal or does not exist")
-    cursor.execute("SELECT id FROM enrollments WHERE user_id=%s AND course_id=%s", (user["id"], course_id))
+    cursor.execute("SELECT id FROM enrollments WHERE user_id=%s AND course_id=%s", (user["id"], course_id_int))
     if cursor.fetchone():
         cursor.close()
         conn.close()
         raise HTTPException(status_code=400, detail="Already enrolled")
     cursor.execute(
         "INSERT INTO enrollments (user_id, course_id, progress) VALUES (%s, %s, %s)",
-        (user["id"], course_id, 0)
+        (user["id"], course_id_int, 0)
     )
     conn.commit()
     cursor.close()
