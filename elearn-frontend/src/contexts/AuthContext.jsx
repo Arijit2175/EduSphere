@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }) => {
     
     if (!user || !user.access_token) return;
     try {
-      const res = await fetch("http://127.0.0.1:8000/users/me", {
+      const res = await fetch(`${API_URL}/users/me`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
