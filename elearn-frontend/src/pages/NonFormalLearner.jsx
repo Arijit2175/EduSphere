@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Box,
   Container,
@@ -51,13 +51,41 @@ export default function NonFormalLearner() {
   const [openQuiz, setOpenQuiz] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Wait a bit for data to load before showing error
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const [quizScore, setQuizScore] = useState(0);
   const quizQuestions = course?.assessmentQuestions && Array.isArray(course.assessmentQuestions) && course.assessmentQuestions.length > 0
     ? course.assessmentQuestions
     : [];
 
-  if (!courses || courses.length === 0) {
+  // Show loading state while data is being fetched
+  if (isLoading || !course || !userProgress) {
+    // Only show error after loading timeout
+    if (!isLoading && (!course || !userProgress)) {
+      return (
+        <Box sx={{ display: "flex", minHeight: "100vh" }}>
+          <Sidebar />
+          <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+            <Navbar />
+            <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, transition: "margin-left 0.3s ease", p: 4 }}>
+              <Typography variant="h5">Course not found or not enrolled</Typography>
+              <Button onClick={() => navigate("/nonformal") } sx={{ mt: 2 }}>
+                Back to Courses
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      );
+    }
+    // Show loading
     return (
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
         <Sidebar />
@@ -65,23 +93,6 @@ export default function NonFormalLearner() {
           <Navbar />
           <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, transition: "margin-left 0.3s ease", p: 4, display: "flex", justifyContent: "center", alignItems: "center" }}>
             <Typography variant="h5">Loading course...</Typography>
-          </Box>
-        </Box>
-      </Box>
-    );
-  }
-
-  if (!course || !userProgress) {
-    return (
-      <Box sx={{ display: "flex", minHeight: "100vh" }}>
-        <Sidebar />
-        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-          <Navbar />
-          <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, transition: "margin-left 0.3s ease", p: 4 }}>
-            <Typography variant="h5">Course not found or not enrolled</Typography>
-            <Button onClick={() => navigate("/nonformal") } sx={{ mt: 2 }}>
-              Back to Courses
-            </Button>
           </Box>
         </Box>
       </Box>
