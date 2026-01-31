@@ -62,7 +62,7 @@ export default function Dashboard() {
     const course = (nonFormalCoursesList || []).find(course => String(course.id) === String(c.course_id));
     return {
       ...c,
-      userId: c.user_id,
+      userId: c.student_id, 
       courseId: c.course_id,
       earnedAt: c.earned_at,
       certificateId: c.certificate_id,
