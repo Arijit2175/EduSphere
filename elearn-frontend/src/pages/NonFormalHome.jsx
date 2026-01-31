@@ -12,6 +12,7 @@ import {
   TextField,
   InputAdornment,
   Alert,
+  Snackbar,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -42,10 +43,18 @@ const CATEGORIES = [
 export default function NonFormalHome() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
-  const { courses } = useNonFormal();
+  const { courses, certificates } = useNonFormal();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  // Build a set of certified course IDs for the current user
+  const certifiedIds = useMemo(
+    () => new Set((certificates || []).filter(c => c.student_id === user?.id).map(c => c.course_id)),
+    [certificates, user?.id]
+  );
 
   const categoryMap = {
     tech: "Tech Skills",
@@ -176,7 +185,13 @@ export default function NonFormalHome() {
                   {recommended.map((course) => (
                     <Grid item xs={12} sm={6} md={3} key={course.id}>
                       <Card
-                        onClick={() => navigate(`/nonformal/course/${course.id}`)}
+                        onClick={() => {
+                          if (certifiedIds.has(course.id)) {
+                            setSnackbarOpen(true);
+                          } else {
+                            navigate(`/nonformal/course/${course.id}`);
+                          }
+                        }}
                         sx={{
                           cursor: "pointer",
                           transition: "all 0.3s ease",
@@ -263,7 +278,13 @@ export default function NonFormalHome() {
                     {filtered.map((course) => (
                       <Grid item xs={12} sm={6} md={4} lg={3} key={course.id}>
                         <Card
-                          onClick={() => navigate(`/nonformal/course/${course.id}`)}
+                          onClick={() => {
+                            if (certifiedIds.has(course.id)) {
+                              setSnackbarOpen(true);
+                            } else {
+                              navigate(`/nonformal/course/${course.id}`);
+                            }
+                          }}
                           sx={{
                             cursor: "pointer",
                             transition: "all 0.3s ease",
@@ -315,6 +336,12 @@ export default function NonFormalHome() {
           </Container>
         </Box>
       </Box>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        message="Already certified for this course"
+      />
     </Box>
   );
 }
