@@ -204,6 +204,9 @@ export default function NonFormalLearner() {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       title={currentLesson?.title}
+                      onError={(e) => {
+                        console.warn('Video iframe error (safe to ignore):', e);
+                      }}
                     ></iframe>
                   </Box>
 
