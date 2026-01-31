@@ -109,7 +109,7 @@ def get_nonformal_certificates(user=Depends(get_current_user)):
     cursor.execute("""
         SELECT certificates.* FROM certificates
         JOIN courses c ON certificates.course_id = c.id
-        WHERE certificates.user_id = %s AND c.type = 'non-formal'""", (user["id"],))
+        WHERE certificates.student_id = %s AND c.type = 'non-formal'""", (user["id"],))
     certificates = cursor.fetchall()
     cursor.close()
     conn.close()
