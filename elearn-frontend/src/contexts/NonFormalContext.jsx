@@ -69,7 +69,7 @@ const DEFAULT_COURSES = [
     outcomes: ["SEO Basics", "Social Media Strategy", "Content Marketing"],
     lessons: [
       { id: "l1", title: "What is Digital Marketing?", duration: "10 min", videoUrl: "https://www.youtube.com/embed/RNh8VHc8qkk" },
-      { id: "l2", title: "SEO Fundamentals", duration: "14 min", videoUrl: "<https://www.youtube.com/embed/MYE6T_gd7H0" },
+      { id: "l2", title: "SEO Fundamentals", duration: "14 min", videoUrl: "https://www.youtube.com/embed/MYE6T_gd7H0" },
       { id: "l3", title: "Social Media Strategy", duration: "12 min", videoUrl: "https://www.youtube.com/embed/VS0Sao1oHlw" },
     ],
     attachments: [{ name: "Marketing_Toolkit.pdf", url: "https://www.riba.org/media/d2hddxio/riba-marketing-toolkitpdf.pdf" }],
