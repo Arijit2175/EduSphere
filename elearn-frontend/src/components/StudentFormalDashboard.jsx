@@ -348,35 +348,16 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                 📝 ASSIGNMENTS
                               </Typography>
                               <Grid container spacing={0.5}>
-                                {(() => {
-                                  const completed = enrollment.completedAssignments ? enrollment.completedAssignments : [];
-                                  const pending = course.assignments.find(a => !completed.includes(a.id));
-                                  return pending ? (
-                                    <Grid item xs={12}>
-                                      <Button
-                                        fullWidth
-                                        size="small"
-                                        variant="outlined"
-                                        onClick={() => {
-                                          setSelectedAssignment({ ...pending, courseId: course.id, enrollmentId: enrollment.id });
-                                          setOpenAssignment(true);
-                                        }}
-                                        sx={{ fontSize: "0.7rem", py: 0.5 }}
-                                      >
-                                        Submit
-                                      </Button>
-                                    </Grid>
-                                  ) : null;
-                                })()}
                                 {course.assignments && course.assignments.length > 0 && (
                                   <Grid item xs={12} sx={{ display: 'flex', gap: 1 }}>
                                     <Button
+                                      fullWidth
                                       size="small"
                                       variant="outlined"
                                       sx={{ fontSize: "0.65rem", py: 0.3, color: "#667eea", borderColor: "#667eea" }}
                                       onClick={() => setOpenAssignmentsDialog({ open: true, course, enrollment })}
                                     >
-                                      View Assignments
+                                      Submit
                                     </Button>
                                     <Button
                                       size="small"
@@ -388,7 +369,6 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                     </Button>
                                   </Grid>
                                 )}
-                                      {/* Assignments Dialog */}
                                       <Dialog open={openAssignmentsDialog.open} onClose={() => setOpenAssignmentsDialog({ open: false, course: null, enrollment: null })} maxWidth="md" fullWidth>
                                         <DialogTitle>Assignments - Submit or View Status</DialogTitle>
                                         <DialogContent sx={{ pt: 2 }}>
