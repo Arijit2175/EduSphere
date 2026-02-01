@@ -187,7 +187,7 @@ export default function InformalLearning() {
             ? p.tags.split(',').map(t => t.trim())
             : [];
         return p.title.toLowerCase().includes(q)
-          || p.body.toLowerCase().includes(q)
+          || (p.content || p.body || '').toLowerCase().includes(q)
           || tagsArr.some((t) => t.toLowerCase().includes(q));
       });
     }
@@ -789,7 +789,7 @@ export default function InformalLearning() {
 
                         {/* Post Body */}
                         <Typography variant="body2" sx={{ color: "#374151", mb: 1.5, lineHeight: 1.5 }}>
-                          {post.body}
+                          {post.content || post.body}
                         </Typography>
 
                         {/* Tags */}
