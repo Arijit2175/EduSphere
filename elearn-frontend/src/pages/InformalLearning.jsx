@@ -221,7 +221,7 @@ export default function InformalLearning() {
     ].filter(Boolean);
   }, [posts, user?.id, commentDraft]);
 
-  const BACKEND_URL = "http://localhost:8000";
+  const BACKEND_URL = API_URL;
   const handleLike = async (id) => {
     try {
       if (!user || !user.access_token) throw new Error("Not authenticated");
@@ -254,7 +254,7 @@ export default function InformalLearning() {
       );
       if (res.data && res.data.success) {
         // Re-fetch all posts to guarantee sync with DB
-        axios.get("http://localhost:8000/informal-posts/")
+        axios.get(`${API_URL}/informal-posts/`)
           .then(res2 => {
             const posts = (res2.data || []).map(post => ({
               ...post,
@@ -405,7 +405,7 @@ export default function InformalLearning() {
       return;
     }
     axios.post(
-      "http://localhost:8000/informal-posts/",
+      `${API_URL}/informal-posts/`,
       postPayload,
       {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -414,7 +414,7 @@ export default function InformalLearning() {
     )
       .then((res) => {
         // After creating, re-fetch all posts for instant sync
-        axios.get("http://localhost:8000/informal-posts/")
+        axios.get(`${API_URL}/informal-posts/`)
           .then(res2 => {
             const posts = (res2.data || []).map(post => ({
               ...post,
@@ -454,21 +454,21 @@ export default function InformalLearning() {
     // Fetch topic id from backend topics endpoint
     let topicId = null;
     try {
-      const res = await axios.get("http://localhost:8000/topics/");
+      const res = await axios.get(`${API_URL}/topics/`);
       const found = res.data.find(t => t.name === topic);
       if (found) topicId = found.id;
     } catch {}
     if (!topicId) return;
     if (followingTopics.includes(topic)) {
       // Unfollow
-      await axios.post("http://localhost:8000/topics/unfollow", topicId, {
+      await axios.post(`${API_URL}/topics/unfollow`, topicId, {
         headers: { Authorization: `Bearer ${user.access_token}` },
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.access_token}` }
       });
       setFollowingTopics(prev => prev.filter(t => t !== topic));
     } else {
       // Follow
-      await axios.post("http://localhost:8000/topics/follow", topicId, {
+      await axios.post(`${API_URL}/topics/follow`, topicId, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.access_token}` }
       });
       setFollowingTopics(prev => [...prev, topic]);
