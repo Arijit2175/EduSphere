@@ -390,39 +390,93 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                 )}
                                       {/* Assignments Dialog */}
                                       <Dialog open={openAssignmentsDialog.open} onClose={() => setOpenAssignmentsDialog({ open: false, course: null, enrollment: null })} maxWidth="md" fullWidth>
-                                        <DialogTitle>Assignments</DialogTitle>
-                                        <DialogContent>
+                                        <DialogTitle>Assignments - Submit or View Status</DialogTitle>
+                                        <DialogContent sx={{ pt: 2 }}>
                                           {openAssignmentsDialog.course && openAssignmentsDialog.course.assignments && openAssignmentsDialog.course.assignments.length > 0 ? (
-                                            <TableContainer component={Paper}>
-                                              <Table>
-                                                <TableHead>
-                                                  <TableRow>
-                                                    <TableCell>Title</TableCell>
-                                                    <TableCell>Description</TableCell>
-                                                    <TableCell>Status</TableCell>
-                                                  </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                  {openAssignmentsDialog.course.assignments.map((assignment) => {
-                                                    const completed = openAssignmentsDialog.enrollment?.completedAssignments || [];
-                                                    const isSubmitted = completed.includes(assignment.id);
-                                                    return (
-                                                      <TableRow key={assignment.id}>
-                                                        <TableCell>{assignment.title}</TableCell>
-                                                        <TableCell>{assignment.description || '-'}</TableCell>
-                                                        <TableCell>
-                                                          {isSubmitted ? (
-                                                            <Chip label="Submitted" color="success" size="small" />
-                                                          ) : (
-                                                            <Chip label="Pending" color="warning" size="small" />
-                                                          )}
-                                                        </TableCell>
-                                                      </TableRow>
-                                                    );
-                                                  })}
-                                                </TableBody>
-                                              </Table>
-                                            </TableContainer>
+                                            <Box>
+                                              <TableContainer component={Paper}>
+                                                <Table>
+                                                  <TableHead>
+                                                    <TableRow sx={{ background: "#f9fafb" }}>
+                                                      <TableCell sx={{ fontWeight: 700 }}>Title</TableCell>
+                                                      <TableCell sx={{ fontWeight: 700 }}>Due Date</TableCell>
+                                                      <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                                                      <TableCell sx={{ fontWeight: 700 }}>Action</TableCell>
+                                                    </TableRow>
+                                                  </TableHead>
+                                                  <TableBody>
+                                                    {openAssignmentsDialog.course.assignments.map((assignment) => {
+                                                      const completed = openAssignmentsDialog.enrollment?.completedAssignments || [];
+                                                      const isSubmitted = completed.includes(assignment.id);
+                                                      
+                                                      // Check if assignment is expired
+                                                      const dueDate = new Date(assignment.due_date);
+                                                      const now = new Date();
+                                                      const isExpired = now > dueDate;
+                                                      
+                                                      return (
+                                                        <TableRow key={assignment.id} sx={{ 
+                                                          background: isExpired ? "#fee2e2" : "transparent",
+                                                          "&:hover": {
+                                                            background: isExpired ? "#fecaca" : "#f9fafb"
+                                                          }
+                                                        }}>
+                                                          <TableCell>{assignment.title}</TableCell>
+                                                          <TableCell>
+                                                            {new Date(assignment.due_date).toLocaleDateString()}
+                                                          </TableCell>
+                                                          <TableCell>
+                                                            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
+                                                              {isSubmitted ? (
+                                                                <Chip label="Submitted" color="success" size="small" />
+                                                              ) : isExpired ? (
+                                                                <Chip label="Date is Over" color="error" size="small" />
+                                                              ) : (
+                                                                <Chip label="Pending" color="warning" size="small" />
+                                                              )}
+                                                            </Box>
+                                                          </TableCell>
+                                                          <TableCell>
+                                                            {!isExpired && !isSubmitted && (
+                                                              <Button
+                                                                size="small"
+                                                                variant="contained"
+                                                                onClick={() => {
+                                                                  setSelectedAssignment({ 
+                                                                    ...assignment, 
+                                                                    courseId: openAssignmentsDialog.course.id, 
+                                                                    enrollmentId: openAssignmentsDialog.enrollment.id 
+                                                                  });
+                                                                  setOpenAssignment(true);
+                                                                  setOpenAssignmentsDialog({ open: false, course: null, enrollment: null });
+                                                                }}
+                                                                sx={{
+                                                                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                                                  fontSize: "0.75rem"
+                                                                }}
+                                                              >
+                                                                Submit
+                                                              </Button>
+                                                            )}
+                                                            {isExpired && !isSubmitted && (
+                                                              <Chip label="Cannot Submit" size="small" variant="outlined" color="error" />
+                                                            )}
+                                                            {isSubmitted && (
+                                                              <Chip label="Already Submitted" size="small" color="success" />
+                                                            )}
+                                                          </TableCell>
+                                                        </TableRow>
+                                                      );
+                                                    })}
+                                                  </TableBody>
+                                                </Table>
+                                              </TableContainer>
+                                              <Box sx={{ mt: 2, p: 2, background: "#f0f9ff", border: "1px solid #0ea5e9", borderRadius: 1 }}>
+                                                <Typography variant="caption" sx={{ color: "#0369a1", fontWeight: 600 }}>
+                                                  💡 <strong>Note:</strong> Once the due date passes, you cannot submit to that assignment but can access others that are still open.
+                                                </Typography>
+                                              </Box>
+                                            </Box>
                                           ) : (
                                             <Typography>No assignments found.</Typography>
                                           )}
