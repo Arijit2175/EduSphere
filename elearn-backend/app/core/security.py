@@ -39,7 +39,17 @@ def validate_url(url: str) -> str:
     """
     if not url:
         return url
-    
+
+    url = url.strip()
+
+    if url.startswith("data:"):
+        if len(url) > 10_000_000:
+            raise HTTPException(status_code=400, detail="Data URL too large")
+        data_url_regex = r'^data:(application/pdf|image/(png|jpeg|jpg|gif));base64,[A-Za-z0-9+/=\s]+$'
+        if not re.match(data_url_regex, url):
+            raise HTTPException(status_code=400, detail="Invalid data URL format")
+        return url
+
     url_regex = r'^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(/.*)?$'
     if not re.match(url_regex, url):
         raise HTTPException(status_code=400, detail="Invalid URL format")
@@ -56,8 +66,8 @@ def validate_url(url: str) -> str:
     for pattern in dangerous_patterns:
         if re.search(pattern, url.lower()):
             raise HTTPException(status_code=400, detail="URL points to internal network")
-    
-    return url.strip()
+
+    return url
 
 def validate_course_id(course_id: int) -> int:
     """
