@@ -8,6 +8,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api import auth, courses, enrollments, assignments, lessons, attendance, quizzes, resources, certificates, ai_tutor_chats, ai_tutor, class_schedules, contact_messages, nonformal, user, forgot_password, informal_posts, topics
 from app.core.config import RATE_LIMIT_PER_MINUTE
+from app.db import get_db_connection
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -67,6 +68,38 @@ app.include_router(nonformal.router)
 app.include_router(informal_posts.router)
 
 app.include_router(topics.router)
+
+def reset_sequences():
+    """Reset all primary key sequences to prevent duplicate key errors"""
+    conn = get_db_connection()
+    if not conn:
+        print("Warning: Could not reset sequences - DB connection failed")
+        return
+    cursor = conn.cursor()
+    try:
+        sequences = [
+            ("courses", "courses_id_seq"),
+            ("enrollments", "enrollments_id_seq"),
+            ("assignments", "assignments_id_seq"),
+            ("quizzes", "quizzes_id_seq"),
+            ("lessons", "lessons_id_seq"),
+            ("resources", "resources_id_seq"),
+            ("informal_posts", "informal_posts_id_seq"),
+        ]
+        for table_name, seq_name in sequences:
+            cursor.execute(f"SELECT setval('{seq_name}', (SELECT COALESCE(MAX(id), 0) FROM {table_name}) + 1)")
+        conn.commit()
+        print("✓ Database sequences reset successfully")
+    except Exception as e:
+        print(f"Warning: Error resetting sequences: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize sequences on app startup"""
+    reset_sequences()
 
 @app.get("/")
 @limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
