@@ -461,14 +461,13 @@ export default function InformalLearning() {
     if (!topicId) return;
     if (followingTopics.includes(topic)) {
       // Unfollow
-      await axios.post(`${API_URL}/topics/unfollow`, topicId, {
-        headers: { Authorization: `Bearer ${user.access_token}` },
+      await axios.post(`${API_URL}/topics/unfollow`, { topic_id: topicId }, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.access_token}` }
       });
       setFollowingTopics(prev => prev.filter(t => t !== topic));
     } else {
       // Follow
-      await axios.post(`${API_URL}/topics/follow`, topicId, {
+      await axios.post(`${API_URL}/topics/follow`, { topic_id: topicId }, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.access_token}` }
       });
       setFollowingTopics(prev => [...prev, topic]);
