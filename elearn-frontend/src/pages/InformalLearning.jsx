@@ -385,7 +385,7 @@ export default function InformalLearning() {
       .join(",");
     const postPayload = {
       title: composer.title,
-      body: composer.body,
+      content: composer.body,  // Map body to content for backend
       topic: composer.topic,
       type: composer.type,
       tags: tags || null,
