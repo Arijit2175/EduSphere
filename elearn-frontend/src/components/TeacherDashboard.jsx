@@ -856,7 +856,7 @@ export default function TeacherDashboard() {
                       setMaterialForm({ name: "", file: null });
                       // Fetch latest materials from backend and update dialog
                       try {
-                        const res = await fetch(`http://127.0.0.1:8000/resources/?course_id=${manageDialog.course.id}`);
+                        const res = await fetch(`${API_URL}/resources/?course_id=${manageDialog.course.id}`);
                         if (res.ok) {
                           const materials = await res.json();
                           setManageDialog(prev => ({ open: true, course: { ...prev.course, materials } }));
@@ -982,7 +982,7 @@ export default function TeacherDashboard() {
                       if (result && result.success) {
                         // Fetch latest assignments from backend and update dialog
                         try {
-                          const res = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${manageDialog.course.id}`);
+                          const res = await fetch(`${API_URL}/assignments/?course_id=${manageDialog.course.id}`);
                           if (res.ok) {
                             const assignments = await res.json();
                             setManageDialog(prev => ({ open: true, course: { ...prev.course, assignments } }));

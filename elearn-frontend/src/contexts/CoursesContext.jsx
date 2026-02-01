@@ -69,7 +69,7 @@ export const CoursesProvider = ({ children }) => {
   const unenrollCourse = async (courseId) => {
     try {
       const token = user?.access_token;
-      const res = await fetch(`http://127.0.0.1:8000/enrollments/${courseId}`, {
+      const res = await fetch(`${API_URL}/enrollments/${courseId}`, {
         method: "DELETE",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -82,7 +82,7 @@ export const CoursesProvider = ({ children }) => {
   const updateProgress = async (courseId, progress) => {
     try {
       const token = user?.access_token;
-      const res = await fetch(`http://127.0.0.1:8000/enrollments/${courseId}/progress`, {
+      const res = await fetch(`${API_URL}/enrollments/${courseId}/progress`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
