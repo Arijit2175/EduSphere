@@ -39,7 +39,7 @@ export default function Dashboard() {
   // Certificate view dialog state
   const [viewCert, setViewCert] = useState(null);
 
-  const displayName = user?.name || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Learner";
+  const displayName = user?.name || `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || "Learner";
   // Only show formal courses assigned by a teacher (from enrollments)
   const studentFormalEnrollments = user?.id ? getStudentEnrollments(user.id) : [];
   // Only show formal courses assigned by a teacher (from enrollments) and with at least one live class
@@ -97,7 +97,9 @@ export default function Dashboard() {
   const completedCourses = completedFormal + completedNonFormal;
 
   // Teacher-specific data
-  const teacherCourses = user?.role === "teacher" && user?.id ? getTeacherCourses(user.id) : [];
+  const teacherCourses = user?.role === "teacher" && (user?.teacher_id || user?.id)
+    ? getTeacherCourses(user.teacher_id || user.id)
+    : [];
   const teacherStudentsCount = teacherCourses.reduce((acc, c) => acc + (getCourseStudents(c.id)?.length || 0), 0);
   const teacherUpcomingClasses = teacherCourses.reduce((acc, c) => acc + ((c.schedules || []).filter(s => new Date(s.startTime) > new Date()).length), 0);
 
