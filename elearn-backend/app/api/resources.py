@@ -54,7 +54,7 @@ async def create_resource(request: Request, resource: ResourceCreate = Body(...)
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Course not found")
-    if course["instructor_id"] != user["id"]:
+    if course["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to create resources for this course")
@@ -90,7 +90,7 @@ async def update_resource(request: Request, resource_id: int, user=Depends(get_c
         conn.close()
         raise HTTPException(status_code=404, detail="Resource not found")
     
-    if resource["instructor_id"] != user["id"]:
+    if resource["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to update this resource")
@@ -134,7 +134,7 @@ async def delete_resource(request: Request, resource_id: int, user=Depends(get_c
         conn.close()
         raise HTTPException(status_code=404, detail="Resource not found")
     
-    if resource["instructor_id"] != user["id"]:
+    if resource["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to delete this resource")

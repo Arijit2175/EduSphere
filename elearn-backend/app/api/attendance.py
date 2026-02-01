@@ -78,7 +78,7 @@ async def mark_attendance(request: Request, data: AttendanceRequest, user=Depend
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Schedule not found")
-    if schedule["instructor_id"] != user["id"]:
+    if schedule["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to mark attendance for this schedule")
@@ -125,7 +125,7 @@ async def update_attendance(request: Request, attendance_id: int, status: str, u
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Attendance record not found")
-    if attendance["instructor_id"] != user["id"]:
+    if attendance["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to update this attendance record")
@@ -159,7 +159,7 @@ async def delete_attendance(request: Request, attendance_id: int, user=Depends(g
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Attendance record not found")
-    if attendance["instructor_id"] != user["id"]:
+    if attendance["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to delete this attendance record")

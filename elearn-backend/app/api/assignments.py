@@ -79,7 +79,7 @@ async def create_assignment(request: Request, data: dict = Body(...), user=Depen
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Course not found")
-    if course["instructor_id"] != user["id"]:
+    if course["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to create assignments for this course")
@@ -115,7 +115,7 @@ async def update_assignment(request: Request, assignment_id: int, user=Depends(g
         conn.close()
         raise HTTPException(status_code=404, detail="Assignment not found")
     
-    if assignment["instructor_id"] != user["id"]:
+    if assignment["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to update this assignment")
@@ -159,20 +159,11 @@ async def delete_assignment(request: Request, assignment_id: int, user=Depends(g
         conn.close()
         raise HTTPException(status_code=404, detail="Assignment not found")
     
-    if assignment["instructor_id"] != user["id"]:
+    if assignment["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to delete this assignment")
     
-    cursor.execute("DELETE FROM assignments WHERE id=%s", (assignment_id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"id": assignment_id, "deleted": True}
-    if not cursor.fetchone():
-        cursor.close()
-        conn.close()
-        raise HTTPException(status_code=404, detail="Assignment not found")
     cursor.execute("DELETE FROM assignments WHERE id=%s", (assignment_id,))
     conn.commit()
     cursor.close()
@@ -195,7 +186,7 @@ async def list_submissions(request: Request, assignment_id: int, user=Depends(ge
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Assignment not found")
-    if assignment["instructor_id"] != user["id"]:
+    if assignment["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to view submissions for this assignment")
@@ -280,7 +271,7 @@ async def review_submission(request: Request, submission_id: int, review: Review
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Submission not found")
-    if submission["instructor_id"] != user["id"]:
+    if submission["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to review this submission")

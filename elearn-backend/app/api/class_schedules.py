@@ -56,7 +56,7 @@ async def create_schedule(request: Request, data: ScheduleCreate = Body(...), us
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Course not found")
-    if course["instructor_id"] != user["id"]:
+    if course["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to create schedules for this course")
@@ -101,7 +101,7 @@ async def update_schedule(request: Request, schedule_id: int, user=Depends(get_c
         conn.close()
         raise HTTPException(status_code=404, detail="Schedule not found")
     
-    if schedule["instructor_id"] != user["id"]:
+    if schedule["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to update this schedule")
@@ -148,7 +148,7 @@ async def delete_schedule(request: Request, schedule_id: int, user=Depends(get_c
         conn.close()
         raise HTTPException(status_code=404, detail="Schedule not found")
     
-    if schedule["instructor_id"] != user["id"]:
+    if schedule["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to delete this schedule")

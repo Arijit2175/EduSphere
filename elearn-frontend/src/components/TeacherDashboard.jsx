@@ -102,7 +102,10 @@ export default function TeacherDashboard() {
   // Delete assignment helper
   async function handleDeleteAssignment(courseId, assignmentId) {
     if (!window.confirm('Are you sure you want to delete this assignment?')) return;
-    const res = await fetch(`${API_URL}/assignments/${assignmentId}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/assignments/${assignmentId}`, {
+      method: 'DELETE',
+      headers: user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {}
+    });
     if (res.ok) {
       // Fetch latest assignments from backend and update dialog
       try {
@@ -138,7 +141,7 @@ export default function TeacherDashboard() {
     fetchEnrolledStudents();
   }, [manageDialog.open, manageDialog.course?.id]);
 
-  const teacherCourses = useMemo(() => getTeacherCourses(user?.id), [getTeacherCourses, user?.id]);
+  const teacherCourses = useMemo(() => getTeacherCourses(user?.teacher_id || user?.id), [getTeacherCourses, user?.teacher_id, user?.id]);
 
   const [liveClasses, setLiveClasses] = useState([]);
 
@@ -179,8 +182,8 @@ export default function TeacherDashboard() {
     if (formData.title && formData.description) {
       createCourse({
         ...formData,
-        instructor_id: user?.id,
-        teacherName: `${user?.firstName} ${user?.lastName}`,
+        instructor_id: user?.teacher_id || user?.id,
+        teacherName: `${user?.first_name || ""} ${user?.last_name || ""}`.trim(),
       });
       setFormData({ title: "", description: "", duration: "", schedule: "" });
       setOpenDialog(false);
@@ -1097,29 +1100,22 @@ export default function TeacherDashboard() {
                 variant="contained"
                 onClick={async () => {
                   if (gradeDialog.gradeSub && gradeForm.grade) {
-                    const res = await fetch(`${API_URL}/assignments/submissions/${gradeDialog.gradeSub.id}/review`, {
-                      method: "PUT",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        status: "graded",
-                        grade: gradeForm.grade,
-                        feedback: gradeForm.feedback
-                      })
-                    });
-                    if (res.ok) {
+                    const result = await reviewSubmission(gradeDialog.gradeSub.id, gradeForm.grade, gradeForm.feedback);
+                    if (result?.success) {
                       // Fetch latest submissions from backend to ensure up-to-date content/status
                       const assignmentId = gradeDialog.assignment?.id;
                       let latestSubmissions = [];
                       if (assignmentId) {
                         try {
-                          const resp = await fetch(`${API_URL}/assignments/${assignmentId}/submissions`);
+                          const resp = await fetch(`${API_URL}/assignments/${assignmentId}/submissions`, {
+                            headers: user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {}
+                          });
                           if (resp.ok) {
                             latestSubmissions = await resp.json();
                           }
                         } catch {}
                       }
                       setGradeDialog(gd => ({ ...gd, submissions: latestSubmissions, gradeSub: null }));
-                      reviewSubmission(gradeDialog.gradeSub.id, gradeForm.grade, gradeForm.feedback);
                       setGradeForm({ grade: "", feedback: "" });
                     }
                   }

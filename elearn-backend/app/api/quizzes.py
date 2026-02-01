@@ -46,7 +46,7 @@ async def create_quiz(request: Request, course_id: int, user=Depends(get_current
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Course not found")
-    if course["instructor_id"] != user["id"]:
+    if course["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to create quizzes for this course")
@@ -78,7 +78,7 @@ async def delete_quiz(request: Request, quiz_id: int, user=Depends(get_current_u
         conn.close()
         raise HTTPException(status_code=404, detail="Quiz not found")
     
-    if quiz["instructor_id"] != user["id"]:
+    if quiz["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to delete this quiz")
@@ -123,7 +123,7 @@ async def create_question(request: Request, quiz_id: int, question: str, options
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Quiz not found")
-    if quiz["instructor_id"] != user["id"]:
+    if quiz["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to create questions for this quiz")
@@ -161,7 +161,7 @@ async def delete_question(request: Request, question_id: int, user=Depends(get_c
         conn.close()
         raise HTTPException(status_code=404, detail="Question not found")
     
-    if question["instructor_id"] != user["id"]:
+    if question["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to delete this question")
@@ -188,7 +188,7 @@ async def list_submissions(request: Request, quiz_id: int, user=Depends(get_curr
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Quiz not found")
-    if quiz["instructor_id"] != user["id"]:
+    if quiz["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to view submissions for this quiz")

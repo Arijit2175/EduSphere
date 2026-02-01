@@ -125,7 +125,12 @@ export const FormalEducationProvider = ({ children }) => {
         const errorData = await res.json();
         return { success: false, message: errorData.detail || "Course creation failed" };
       }
-      const newCourse = await res.json();
+      const created = await res.json();
+      const newCourse = {
+        ...courseData,
+        ...created,
+        instructor_id: courseData?.instructor_id || user?.teacher_id || user?.id,
+      };
       setCourses((prev) => [...prev, newCourse]);
       return { success: true, course: newCourse };
     } catch (err) {
@@ -489,11 +494,28 @@ export const FormalEducationProvider = ({ children }) => {
   };
 
   // Review submission
-  const reviewSubmission = (submissionId, grade, feedback) => {
-    setSubmissions(submissions.map(s => s.id === submissionId
-      ? { ...s, grade, feedback, status: "graded" }
-      : s
-    ));
+  const reviewSubmission = async (submissionId, grade, feedback) => {
+    try {
+      const token = user?.access_token;
+      const res = await fetch(`${API_URL}/assignments/submissions/${submissionId}/review`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ status: "graded", grade, feedback })
+      });
+      if (!res.ok) {
+        return { success: false, message: "Failed to review submission" };
+      }
+      setSubmissions(prev => prev.map(s => s.id === submissionId
+        ? { ...s, grade, feedback, status: "graded" }
+        : s
+      ));
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: "Failed to review submission" };
+    }
   };
 
   // Get submissions for an assignment
@@ -510,7 +532,8 @@ export const FormalEducationProvider = ({ children }) => {
   const deleteMaterial = async (courseId, materialId) => {
     try {
       const res = await fetch(`${API_URL}/resources/${materialId}`, {
-        method: "DELETE"
+        method: "DELETE",
+        headers: user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {}
       });
       if (res.ok) {
         setCourses(courses => courses.map(c => c.id === courseId

@@ -56,6 +56,9 @@ async def get_course(request: Request, course_id: int):
 async def create_course(request: Request, course: CourseCreate, user=Depends(get_current_user)):
     """Teacher-only endpoint"""
     check_teacher_role(user)
+    teacher_id = user.get("teacher_id")
+    if not teacher_id:
+        raise HTTPException(status_code=400, detail="Teacher profile not found")
     
     title = sanitize_string(course.title, max_length=200)
     description = sanitize_string(course.description, max_length=2000)
@@ -70,7 +73,7 @@ async def create_course(request: Request, course: CourseCreate, user=Depends(get
     cursor = conn.cursor()
     cursor.execute(
         "INSERT INTO courses (title, description, type, category, level, duration, instructor_id) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
-        (title, description, course_type, category, level, duration, course.instructor_id or user["id"])
+        (title, description, course_type, category, level, duration, teacher_id)
     )
     course_id = cursor.fetchone()['id']
     conn.commit()
@@ -95,7 +98,7 @@ async def update_course(request: Request, course_id: int, user=Depends(get_curre
         conn.close()
         raise HTTPException(status_code=404, detail="Course not found")
     
-    if course["instructor_id"] != user["id"]:
+    if course["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to update this course")
@@ -145,7 +148,7 @@ async def delete_course(request: Request, course_id: int, user=Depends(get_curre
         conn.close()
         raise HTTPException(status_code=404, detail="Course not found")
     
-    if course["instructor_id"] != user["id"]:
+    if course["instructor_id"] != user.get("teacher_id"):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to delete this course")
