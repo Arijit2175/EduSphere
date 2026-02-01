@@ -98,10 +98,33 @@ export default function AITutor() {
           'Authorization': user?.access_token ? `Bearer ${user.access_token}` : ''
         }
       })
-        .then(res => res.ok ? res.json() : null)
-        .then(chat => setMessages(chat && chat.messages ? JSON.parse(chat.messages || "[]") : []))
-        .catch(() => setMessages([]));
-    } else {
+        .then(res => {
+          if (!res.ok) {
+            console.error('Failed to fetch chat:', res.status);
+            return null;
+          }
+          return res.json();
+        })
+        .then(chat => {
+          if (chat && chat.messages) {
+            try {
+              const parsedMessages = typeof chat.messages === 'string' 
+                ? JSON.parse(chat.messages) 
+                : chat.messages;
+              setMessages(Array.isArray(parsedMessages) ? parsedMessages : []);
+            } catch (err) {
+              console.error('Error parsing messages:', err);
+              setMessages([]);
+            }
+          } else {
+            setMessages([]);
+          }
+        })
+        .catch((err) => {
+          console.error('Error fetching chat:', err);
+          setMessages([]);
+        });
+    } else if (!currentChatId) {
       setMessages([]);
     }
   }, [currentChatId, user]);
