@@ -151,13 +151,13 @@ def create_informal_post(post: dict, user=Depends(get_current_user)):
     cursor = conn.cursor()
     sql = """
         INSERT INTO informal_posts
-        (title, body, tags, topic, type, media_url, creator, author_id, role)
+        (title, content, tags, topic, type, media_url, creator, author_id, role)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     creator = user.get("username") or user.get("email") or str(user.get("id"))
     values = (
         post.get("title"),
-        post.get("body"),
+        post.get("content"),
         post.get("tags"),
         post.get("topic"),
         post.get("type"),
