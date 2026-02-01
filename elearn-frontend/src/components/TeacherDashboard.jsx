@@ -64,7 +64,7 @@ export default function TeacherDashboard() {
         const courseId = first?.courseId || first?.course_id;
         if (courseId) {
           try {
-            const res = await fetch(`http://127.0.0.1:8000/enrollments/course/${courseId}/students`);
+            const res = await fetch(`${API_URL}/enrollments/course/${courseId}/students`);
             if (res.ok) {
               const students = await res.json();
               setAttendanceDetailsEnrolledStudents(Array.isArray(students) ? students : []);
@@ -90,7 +90,7 @@ export default function TeacherDashboard() {
 
   useEffect(() => {
     if (attendanceDialog.open && attendanceDialog.courseId) {
-      fetch(`http://127.0.0.1:8000/enrollments/course/${attendanceDialog.courseId}/students`)
+      fetch(`${API_URL}/enrollments/course/${attendanceDialog.courseId}/students`)
         .then(res => res.ok ? res.json() : [])
         .then(data => setEnrolledStudents(Array.isArray(data) ? data : []))
         .catch(() => setEnrolledStudents([]));
@@ -102,11 +102,11 @@ export default function TeacherDashboard() {
   // Delete assignment helper
   async function handleDeleteAssignment(courseId, assignmentId) {
     if (!window.confirm('Are you sure you want to delete this assignment?')) return;
-    const res = await fetch(`http://127.0.0.1:8000/assignments/${assignmentId}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/assignments/${assignmentId}`, { method: 'DELETE' });
     if (res.ok) {
       // Fetch latest assignments from backend and update dialog
       try {
-        const res2 = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${courseId}`);
+        const res2 = await fetch(`${API_URL}/assignments/?course_id=${courseId}`);
         if (res2.ok) {
           const assignments = await res2.json();
           setManageDialog(prev => ({ open: true, course: { ...prev.course, assignments } }));
@@ -121,7 +121,7 @@ export default function TeacherDashboard() {
     const fetchEnrolledStudents = async () => {
       if (manageDialog.open && manageDialog.course?.id) {
         try {
-          const res = await fetch(`http://127.0.0.1:8000/enrollments/course/${manageDialog.course.id}/students`);
+          const res = await fetch(`${API_URL}/enrollments/course/${manageDialog.course.id}/students`);
           if (res.ok) {
             const students = await res.json();
             setEnrolledStudents(students);
@@ -159,7 +159,7 @@ export default function TeacherDashboard() {
       const sessionsWithAttendance = await Promise.all(
         sessions.map(async (session) => {
           try {
-            const res = await fetch(`http://127.0.0.1:8000/attendance/?schedule_id=${session.id}`, {
+            const res = await fetch(`${API_URL}/attendance/?schedule_id=${session.id}`, {
               headers: { Authorization: `Bearer ${user.access_token}` }
             });
             if (res.ok) {
@@ -805,7 +805,7 @@ export default function TeacherDashboard() {
                             onClick={async () => {
                               await deleteMaterial(manageDialog.course.id, material.id);
                               // Optionally refresh materials list after deletion
-                              const res = await fetch(`http://127.0.0.1:8000/resources/?course_id=${manageDialog.course.id}`);
+                              const res = await fetch(`${API_URL}/resources/?course_id=${manageDialog.course.id}`);
                               if (res.ok) {
                                 const materials = await res.json();
                                 setManageDialog((prev) => ({
@@ -914,7 +914,7 @@ export default function TeacherDashboard() {
                               onClick={async () => {
                                 await handleDeleteAssignment(manageDialog.course.id, assignment.id);
                                 // Optionally refresh assignments list after deletion
-                                const res = await fetch(`http://127.0.0.1:8000/assignments/?course_id=${manageDialog.course.id}`);
+                                const res = await fetch(`${API_URL}/assignments/?course_id=${manageDialog.course.id}`);
                                 if (res.ok) {
                                 const assignments = await res.json();
                                 setManageDialog(prev => ({ open: true, course: { ...prev.course, assignments } }));
@@ -1097,7 +1097,7 @@ export default function TeacherDashboard() {
                 variant="contained"
                 onClick={async () => {
                   if (gradeDialog.gradeSub && gradeForm.grade) {
-                    const res = await fetch(`http://127.0.0.1:8000/assignments/submissions/${gradeDialog.gradeSub.id}/review`, {
+                    const res = await fetch(`${API_URL}/assignments/submissions/${gradeDialog.gradeSub.id}/review`, {
                       method: "PUT",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
@@ -1112,7 +1112,7 @@ export default function TeacherDashboard() {
                       let latestSubmissions = [];
                       if (assignmentId) {
                         try {
-                          const resp = await fetch(`http://127.0.0.1:8000/assignments/${assignmentId}/submissions`);
+                          const resp = await fetch(`${API_URL}/assignments/${assignmentId}/submissions`);
                           if (resp.ok) {
                             latestSubmissions = await resp.json();
                           }

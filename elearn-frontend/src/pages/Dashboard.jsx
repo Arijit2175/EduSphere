@@ -138,7 +138,7 @@ export default function Dashboard() {
       await Promise.all(
         teacherCourses.map(async (course) => {
           try {
-            const res = await fetch(`http://127.0.0.1:8000/enrollments/course/${course.id}/students`);
+            const res = await fetch(`${API_URL}/enrollments/course/${course.id}/students`);
             if (res.ok) {
               const students = await res.json();
               newEnrolled[course.id] = students;

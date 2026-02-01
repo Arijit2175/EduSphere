@@ -136,9 +136,13 @@ export const FormalEducationProvider = ({ children }) => {
   // Student: Enroll in course
   const enrollStudent = useCallback(async (userId, courseId) => {
     try {
+      const token = user?.access_token;
       const res = await fetch(`${API_URL}/enrollments/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ student_id: userId, course_id: courseId }),
       });
       const data = await res.json();
@@ -203,7 +207,10 @@ export const FormalEducationProvider = ({ children }) => {
     }
     const res = await fetch(`${API_URL}/resources/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {})
+      },
       body: JSON.stringify({ course_id: courseId, name: material.name, url, type }),
     });
     if (!res.ok) {
@@ -229,7 +236,10 @@ export const FormalEducationProvider = ({ children }) => {
       }
       const res = await fetch(`${API_URL}/assignments/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {})
+        },
         body: JSON.stringify(assignmentData),
       });
       if (!res.ok) {
@@ -251,7 +261,10 @@ export const FormalEducationProvider = ({ children }) => {
       const studentId = user?.id;
       const res = await fetch(`${API_URL}/assignments/${assignmentId}/submit`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {})
+        },
         body: JSON.stringify({
           enrollment_id: enrollmentId,
           student_id: studentId,
@@ -286,7 +299,10 @@ export const FormalEducationProvider = ({ children }) => {
     try {
       const res = await fetch(`${API_URL}/quizzes/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {})
+        },
         body: JSON.stringify({ ...quiz, course_id: courseId }),
       });
       if (!res.ok) {
@@ -306,7 +322,10 @@ export const FormalEducationProvider = ({ children }) => {
     try {
       const res = await fetch(`${API_URL}/quiz_submissions/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {})
+        },
         body: JSON.stringify({ enrollment_id: enrollmentId, quiz_id: quizId, answers, score }),
       });
       if (!res.ok) {
@@ -327,7 +346,10 @@ export const FormalEducationProvider = ({ children }) => {
     try {
       const res = await fetch(`${API_URL}/class-schedules/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {})
+        },
         body: JSON.stringify({
           course_id: courseId,
           title: schedule.title || "Live Class",
