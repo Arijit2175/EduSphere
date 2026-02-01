@@ -201,6 +201,7 @@ async def list_submissions(request: Request, assignment_id: int, user=Depends(ge
 @limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
 async def submit_assignment(request: Request, assignment_id: int, user=Depends(get_current_user)):
     """Student endpoint - submit assignment"""
+    from datetime import datetime
     data = await request.json()
     enrollment_id = data.get("enrollment_id")
     content = sanitize_string(data.get("content"), max_length=10000)
@@ -209,6 +210,26 @@ async def submit_assignment(request: Request, assignment_id: int, user=Depends(g
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
+    cursor.execute("SELECT * FROM assignments WHERE id=%s", (assignment_id,))
+    assignment = cursor.fetchone()
+    if not assignment:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    # Check if assignment due date has passed
+    if assignment.get("due_date"):
+        try:
+            due_date = assignment["due_date"]
+            if isinstance(due_date, str):
+                due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
+            if datetime.now(due_date.tzinfo if due_date.tzinfo else None) > due_date:
+                cursor.close()
+                conn.close()
+                raise HTTPException(status_code=400, detail="Assignment submission deadline has passed")
+        except ValueError:
+            pass
+    
     cursor.execute("SELECT * FROM enrollments WHERE id=%s", (enrollment_id,))
     enrollment_row = cursor.fetchone()
     if not enrollment_row:

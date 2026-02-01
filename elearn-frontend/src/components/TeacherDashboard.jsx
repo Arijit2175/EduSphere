@@ -885,7 +885,7 @@ export default function TeacherDashboard() {
                           <Box>
                             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>{assignment.title}</Typography>
                             <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 1 }}>{assignment.description}</Typography>
-                            <Typography variant="caption" sx={{ display: "block", mb: 2, color: "#ef4444" }}>Due: {assignment.dueDate || assignment.due_date}</Typography>
+                            <Typography variant="caption" sx={{ display: "block", mb: 2, color: "#ef4444" }}>Due: {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString() : (assignment.due_date ? new Date(assignment.due_date).toLocaleDateString() : 'N/A')}</Typography>
                             <Typography
                               variant="caption"
                               sx={{ color: "#6366f1", display: "block", mt: 1, cursor: submissions.length > 0 ? 'pointer' : 'default', textDecoration: submissions.length > 0 ? 'underline' : 'none' }}
