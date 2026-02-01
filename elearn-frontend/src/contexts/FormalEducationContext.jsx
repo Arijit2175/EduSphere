@@ -112,9 +112,13 @@ export const FormalEducationProvider = ({ children }) => {
   // Teacher: Create course
   const createCourse = async (courseData) => {
     try {
+      const token = user?.access_token;
       const res = await fetch(`${API_URL}/courses/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(courseData),
       });
       if (!res.ok) {
