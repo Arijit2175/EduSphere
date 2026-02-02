@@ -106,20 +106,65 @@ const AppShell = () => {
                 element={
                   <ProtectedRoute>
                     <Suspense fallback={<div />}>
-                    <ProtectedRoute>
-                      <CourseDetailPage />
-                    </ProtectedRoute>
-                  }
-                />
+                      <NonFormalHome />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
 
-                <Route
-                  path="/course/:courseId/quiz/:quizId"
-                  element={
-                    <ProtectedRoute>
-                      <QuizPage />
-                    </ProtectedRoute>
-                  }
-                />
+              <Route
+                path="/nonformal/course/:courseId"
+                element={
+                  <ProtectedRoute>
+                    <NonFormalCourseDetail />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/nonformal/learn/:courseId"
+                element={
+                  <ProtectedRoute>
+                    <NonFormalLearner />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/informal"
+                element={
+                  <ProtectedRoute>
+                    <InformalLearning />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/ai"
+                element={
+                  <ProtectedRoute>
+                    <AITutor />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/course/:courseId"
+                element={
+                  <ProtectedRoute>
+                    <CourseDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/course/:courseId/quiz/:quizId"
+                element={
+                  <ProtectedRoute>
+                    <QuizPage />
+                  </ProtectedRoute>
+                }
+              />
 
                 {/* Footer Pages - Public Access */}
                 <Route path="/about" element={<AboutUs />} />
