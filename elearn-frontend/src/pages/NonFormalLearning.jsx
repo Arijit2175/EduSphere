@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
+import AnimationPlayer from "../components/AnimationPlayer";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useNonFormal } from "../contexts/NonFormalContext";
@@ -13,7 +14,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 export default function NonFormalLearning() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
-  const { courses, getEnrolledCourses, getCourseProgress, certificates, resetAllData } = useNonFormal();
+  const { courses, getEnrolledCourses, getCourseProgress, certificates, resetAllData, isLoading } = useNonFormal();
   const navigate = useNavigate();
 
   const enrolledCourses = getEnrolledCourses(user?.id);
@@ -22,6 +23,20 @@ export default function NonFormalLearning() {
   const inProgressCourses = enrolledCourses.filter(
     (course) => !userCertificates.some((cert) => cert.courseId === course.id)
   );
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <Sidebar />
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <AnimationPlayer path="/Spinnerdots.json" style={{ width: 200, height: 200 }} />
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>

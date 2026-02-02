@@ -1,7 +1,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import AnimationPlayer from "../components/AnimationPlayer";
 import Navbar from "../components/Navbar";
+import AnimationPlayer from "../components/AnimationPlayer";
 
 export default function NotFound() {
   const navigate = useNavigate();
@@ -20,12 +20,15 @@ export default function NotFound() {
           px: 2,
         }}
       >
-        <AnimationPlayer path="/404.json" style={{ width: 420, maxWidth: "90%" }} />
+        <AnimationPlayer 
+          path="/404.json" 
+          style={{ width: 400, maxWidth: "90%", height: 400 }} 
+        />
         <Typography variant="h4" sx={{ fontWeight: 800, mt: 2 }}>
           Page not found
         </Typography>
         <Typography sx={{ color: "#6b7280", mt: 1, mb: 3 }}>
-          The page you’re looking for doesn’t exist or was moved.
+          The page you're looking for doesn't exist or was moved.
         </Typography>
         <Button
           variant="contained"

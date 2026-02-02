@@ -19,6 +19,7 @@ export const FormalEducationProvider = ({ children }) => {
   const [courses, setCourses] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [submissions, setSubmissions] = useState([]);
+  const [loading, setLocalLoading] = useState(true);
 
   // Fetch courses and enrollments from backend on mount
   useEffect(() => {
@@ -102,9 +103,14 @@ export const FormalEducationProvider = ({ children }) => {
         // handle error
       } finally {
         setLoading("formalCourses", false);
+        setLocalLoading(false);
       }
     };
-    fetchData();
+    if (user) {
+      fetchData();
+    } else {
+      setLocalLoading(false);
+    }
   }, [user, setLoading]);
   // Get all assignments for an enrollment (helper)
   const getAssignmentsForEnrollment = (enrollmentId) => {
@@ -558,6 +564,7 @@ export const FormalEducationProvider = ({ children }) => {
     courses,
     enrollments,
     submissions,
+    loading,
     createCourse,
     enrollStudent,
     addMaterial,
@@ -580,7 +587,7 @@ export const FormalEducationProvider = ({ children }) => {
     getSubmission,
     getAssignmentsForEnrollment,
     deleteMaterial,
-  }), [courses, enrollments, submissions, enrollStudent]);
+  }), [courses, enrollments, submissions, loading, enrollStudent]);
 
   return (
     <FormalEducationContext.Provider value={value}>

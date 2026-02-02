@@ -6,6 +6,7 @@ import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
 import SectionTitle from "../components/SectionTitle";
 import CourseCardAdvanced from "../components/CourseCardAdvanced";
+import AnimationPlayer from "../components/AnimationPlayer";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import TeacherDashboard from "../components/TeacherDashboard";
@@ -15,13 +16,28 @@ import { useFormalEducation } from "../contexts/FormalEducationContext";
 export default function FormalLearning() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
-  const { courses, enrollStudent, getStudentEnrollments } = useFormalEducation();
+  const { courses, enrollStudent, getStudentEnrollments, loading } = useFormalEducation();
   const [tabValue, setTabValue] = useState(0);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, course: null });
   const [enrollmentMessage, setEnrollmentMessage] = useState({ type: "", message: "" });
 
   // Detect if user is a teacher based on explicit role
   const isTeacher = user?.role === "teacher";
+  
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex" }}>
+        <Sidebar />
+        <Box sx={{ flexGrow: 1, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <AnimationPlayer path="/Spinnerdots.json" style={{ width: 200, height: 200 }} />
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+  
   if (isTeacher) {
     return (
       <Box sx={{ display: "flex" }}>
