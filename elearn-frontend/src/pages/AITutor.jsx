@@ -888,7 +888,7 @@ export default function AITutor() {
                 }}
               >
                 {loading ? (
-                  <AnimationPlayer path="/Spinnerdots.json" style={{ width: 36, height: 36 }} />
+                  <AnimationPlayer path="/Spinnerdots.json" style={{ width: 24, height: 24 }} />
                 ) : (
                   <>
                     Send

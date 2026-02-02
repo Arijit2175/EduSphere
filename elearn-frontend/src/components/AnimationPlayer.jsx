@@ -26,11 +26,11 @@ export default function AnimationPlayer({ path, loop = true, style }) {
     };
   }, [resolvedPath]);
 
+  if (!animationData) return "...";
+
   return (
     <div style={style}>
-      {animationData ? (
-        <Lottie animationData={animationData} loop={loop} style={{ width: "100%", height: "100%" }} />
-      ) : null}
+      <Lottie animationData={animationData} loop={loop} style={{ width: "100%", height: "100%" }} />
     </div>
   );
 }
