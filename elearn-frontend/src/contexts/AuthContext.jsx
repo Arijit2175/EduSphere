@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import API_URL from "../config";
 
 const buildUser = (data) => {
@@ -25,6 +24,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   // Restore user from localStorage on app load for persistent login
   useEffect(() => {
@@ -86,6 +86,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("enrolledCourses");
+    setSessionExpired(false);
     sessionExpiredShown = false; // Reset flag on manual logout
   }, []);
 
@@ -98,12 +99,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("enrolledCourses");
-    
-    // Show message
-    alert("Session has expired. Please log in again.");
-    
-    // Redirect to login
-    window.location.href = "/login";
+    setSessionExpired(true);
+  }, []);
+
+  const clearSessionExpired = useCallback(() => {
+    setSessionExpired(false);
+    sessionExpiredShown = false;
   }, []);
 
   // Expose global error handler
@@ -152,8 +153,10 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     handleSessionExpired,
+    sessionExpired,
+    clearSessionExpired,
     isAuthenticated: !!user,
-  }), [user, loading, login, register, logout, updateUser, handleSessionExpired]);
+  }), [user, loading, login, register, logout, updateUser, handleSessionExpired, sessionExpired, clearSessionExpired]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

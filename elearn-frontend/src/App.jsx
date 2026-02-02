@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
-import { AuthProvider } from "./contexts/AuthContext";
+import { Alert, Snackbar } from "@mui/material";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CoursesProvider } from "./contexts/CoursesContext";
 import { SidebarProvider } from "./contexts/SidebarContext";
 import { FormalEducationProvider } from "./contexts/FormalEducationContext";
@@ -29,6 +30,32 @@ import DataProtection from "./pages/DataProtection";
 import TermsOfService from "./pages/TermsOfService";
 import CookieSettings from "./pages/CookieSettings";
 import ContactUs from "./pages/ContactUs";
+
+const SessionExpiredToast = () => {
+  const { sessionExpired, clearSessionExpired } = useAuth();
+
+  useEffect(() => {
+    if (!sessionExpired) return;
+    const timer = setTimeout(() => {
+      clearSessionExpired();
+      window.location.href = "/login";
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [sessionExpired, clearSessionExpired]);
+
+  return (
+    <Snackbar
+      open={sessionExpired}
+      onClose={clearSessionExpired}
+      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      autoHideDuration={2000}
+    >
+      <Alert onClose={clearSessionExpired} severity="warning" variant="filled">
+        Session has expired. Please log in again.
+      </Alert>
+    </Snackbar>
+  );
+};
 
 export default function App() {
   // Global fetch interceptor for session expiration
@@ -75,6 +102,7 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <AuthProvider>
+          <SessionExpiredToast />
           <CoursesProvider>
             <FormalEducationProvider>
               <NonFormalProvider>
