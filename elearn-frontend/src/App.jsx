@@ -47,20 +47,7 @@ export default function App() {
         const userLoggedIn = localStorage.getItem("user");
         
         if (response.status === 401 && hasAuthHeader && userLoggedIn && window.handleAuthError) {
-          // Clone response to read body without consuming it
-          const clonedResponse = response.clone();
-          try {
-            const errorData = await clonedResponse.json();
-            // Check if it's specifically a token expiration error
-            if (errorData.detail?.toLowerCase().includes("expired") || 
-                errorData.detail?.toLowerCase().includes("invalid") ||
-                errorData.detail?.toLowerCase().includes("token")) {
-              window.handleAuthError(response);
-            }
-          } catch {
-            // If can't parse response, assume session expired for 401 with auth header
-            window.handleAuthError(response);
-          }
+          window.handleAuthError(response);
         }
         
         return response;
