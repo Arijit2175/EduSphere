@@ -22,7 +22,7 @@ export default function NotFound() {
         }}
       >
         <AnimationPlayer 
-          path="/elearn-frontend/public/404.json" 
+          path="/404.json" 
           style={{ width: 400, maxWidth: "90%", height: 400 }} 
         />
         <Typography variant="h4" sx={{ fontWeight: 800, mt: 2 }}>
