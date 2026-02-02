@@ -21,9 +21,9 @@ export default function NotFound() {
           px: 2,
         }}
       >
-        <AnimationPlayer 
-          path="/404.json" 
-          style={{ width: 400, maxWidth: "90%", height: 400 }} 
+        <AnimationPlayer
+          type="404"
+          style={{ width: 400, maxWidth: "90%", height: 400 }}
         />
         <Typography variant="h4" sx={{ fontWeight: 800, mt: 2 }}>
           Page not found

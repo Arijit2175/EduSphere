@@ -1,20 +1,14 @@
-import { useMemo } from "react";
-import { Lottie } from "lottie-react";
+import Lottie from "lottie-react";
+import NotFoundAnim from "../assets/404.json";
+import SpinnerAnim from "../assets/Spinnerdots.json";
 
-const animationMap = {
-  "/Spinnerdots.json": "/Spinnerdots.json",
-  "/404.json": "/404.json",
-};
-
-export default function AnimationPlayer({ path, loop = true, style }) {
-  const animationPath = useMemo(() => animationMap[path] || null, [path]);
-
-  if (!animationPath) return "...";
+export default function AnimationPlayer({ type = "404", loop = true, style }) {
+  const animationData = type === "spinner" ? SpinnerAnim : NotFoundAnim;
 
   return (
     <div style={style}>
       <Lottie
-        path={animationPath}
+        animationData={animationData}
         loop={loop}
         style={{ width: "100%", height: "100%" }}
       />
