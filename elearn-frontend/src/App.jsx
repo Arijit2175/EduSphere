@@ -105,52 +105,7 @@ const AppShell = () => {
                 path="/nonformal"
                 element={
                   <ProtectedRoute>
-                    <Suspense fallback={<FullPageLoader open={true} label="Loading..." />}>
-                      <NonFormalHome />
-                    </Suspense>
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/nonformal/course/:courseId"
-                element={
-                  <ProtectedRoute>
-                    <NonFormalCourseDetail />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/nonformal/learn/:courseId"
-                element={
-                  <ProtectedRoute>
-                    <NonFormalLearner />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/informal"
-                element={
-                  <ProtectedRoute>
-                    <InformalLearning />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/ai"
-                element={
-                  <ProtectedRoute>
-                    <AITutor />
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/course/:courseId"
-                  element={
+                    <Suspense fallback={<div />}>
                     <ProtectedRoute>
                       <CourseDetailPage />
                     </ProtectedRoute>

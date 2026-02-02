@@ -6,10 +6,8 @@ import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
 import SectionTitle from "../components/SectionTitle";
 import CourseCardAdvanced from "../components/CourseCardAdvanced";
-import ComponentLoader from "../components/ComponentLoader";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
-import { useLoading } from "../contexts/LoadingContext";
 import TeacherDashboard from "../components/TeacherDashboard";
 import StudentFormalDashboard from "../components/StudentFormalDashboard";
 import { useFormalEducation } from "../contexts/FormalEducationContext";
@@ -17,7 +15,6 @@ import { useFormalEducation } from "../contexts/FormalEducationContext";
 export default function FormalLearning() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
-  const { isLoading } = useLoading();
   const { courses, enrollStudent, getStudentEnrollments } = useFormalEducation();
   const [tabValue, setTabValue] = useState(0);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, course: null });
@@ -28,7 +25,6 @@ export default function FormalLearning() {
   if (isTeacher) {
     return (
       <Box sx={{ display: "flex" }}>
-        <ComponentLoader loading={isLoading("formalCourses")} />
         <Sidebar />
         <Box
           sx={{
@@ -86,7 +82,6 @@ export default function FormalLearning() {
   // Student view
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      <ComponentLoader loading={isLoading("formalCourses")} />
       <Sidebar />
       <Box
         sx={{

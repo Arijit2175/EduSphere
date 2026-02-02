@@ -4,10 +4,8 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
-import ComponentLoader from "../components/ComponentLoader";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
-import { useLoading } from "../contexts/LoadingContext";
 import { useNonFormal } from "../contexts/NonFormalContext";
 import StarIcon from "@mui/icons-material/Star";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -15,7 +13,6 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 export default function NonFormalLearning() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
-  const { isLoading } = useLoading();
   const { courses, getEnrolledCourses, getCourseProgress, certificates, resetAllData } = useNonFormal();
   const navigate = useNavigate();
 
@@ -28,7 +25,6 @@ export default function NonFormalLearning() {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      <ComponentLoader loading={isLoading("nonFormalCourses")} />
       <Sidebar />
       <Box
         sx={{

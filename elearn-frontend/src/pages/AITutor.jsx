@@ -20,7 +20,6 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import ComponentLoader from "../components/ComponentLoader";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EmojiEmotionsOutlinedIcon from '@mui/icons-material/EmojiEmotionsOutlined';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -34,7 +33,6 @@ import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import Sidebar from "../components/Sidebar.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
-import { useLoading } from "../contexts/LoadingContext.jsx";
 
 const emojiList = [
   "😀", "😃", "😄", "😁", "😆", "😅", "😂", "😊",
@@ -64,7 +62,6 @@ export default function AITutor() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const { user } = useAuth();
-  const { isLoading, setLoading: setContextLoading } = useLoading();
 
   const [question, setQuestion] = useState("");
   const [chats, setChats] = useState([]);
@@ -84,7 +81,6 @@ export default function AITutor() {
 
   useEffect(() => {
     if (!user) return;
-    setContextLoading("aiTutorPage", true);
     fetch(`${API_URL}/ai-tutor-chats/`, {
       headers: {
         'Authorization': user?.access_token ? `Bearer ${user.access_token}` : ''
@@ -553,7 +549,6 @@ export default function AITutor() {
           position: 'relative',
         }}
       >
-      <ComponentLoader loading={isLoading("aiTutorPage")} />
       {/* Animated Background */}
       <AnimatedBackground />
 
