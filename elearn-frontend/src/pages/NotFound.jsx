@@ -7,9 +7,6 @@ import AnimationPlayer from "../components/AnimationPlayer";
 export default function NotFound() {
   const navigate = useNavigate();
 
-console.log("Navbar:", Navbar);
-console.log("AnimationPlayer:", AnimationPlayer);
-
   return (
     <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Navbar />
