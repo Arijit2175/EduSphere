@@ -21,6 +21,14 @@ export default function FormalLearning() {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, course: null });
   const [enrollmentMessage, setEnrollmentMessage] = useState({ type: "", message: "" });
 
+  // Only show formal courses with an instructor_id - memoized to prevent re-renders
+  const catalogCourses = useMemo(() => 
+    courses.filter(course => course.type === 'formal' && !!course.instructor_id), 
+    [courses]
+  );
+  // Recompute on every render so new enrollments are immediately reflected
+  const studentEnrollments = getStudentEnrollments(user?.id);
+
   // Detect if user is a teacher based on explicit role
   const isTeacher = user?.role === "teacher";
   
@@ -64,14 +72,6 @@ export default function FormalLearning() {
       </Box>
     );
   }
-
-  // Only show formal courses with an instructor_id - memoized to prevent re-renders
-  const catalogCourses = useMemo(() => 
-    courses.filter(course => course.type === 'formal' && !!course.instructor_id), 
-    [courses]
-  );
-  // Recompute on every render so new enrollments are immediately reflected
-  const studentEnrollments = getStudentEnrollments(user?.id);
 
   const handleEnroll = (course) => {
     // Reset any prior enrollment status when opening dialog

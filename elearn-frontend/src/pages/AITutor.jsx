@@ -87,10 +87,9 @@ export default function AITutor() {
       }
     })
       .then(res => res.ok ? res.json() : [])
-      .then(data => setChats(Array.isArray(data) ? data : []))
-      .catch(() => setChats([]))
-      .finally(() => setContextLoading("aiTutorPage", false));
-  }, [user, setContextLoading]);
+        .then(data => setChats(Array.isArray(data) ? data : []))
+        .catch(() => setChats([]));
+      }, [user]);
 
   useEffect(() => {
     if (currentChatId && user) {
@@ -897,11 +896,11 @@ export default function AITutor() {
                   </>
                 )}
               </Button>
+              </Box>
             </Box>
           </Box>
         </Box>
       </Box>
     </Box>
-    </Box>
   );
-  }
+}

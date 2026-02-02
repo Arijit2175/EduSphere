@@ -619,5 +619,4 @@ export const NonFormalProvider = ({ children }) => {
       {children}
     </NonFormalContext.Provider>
   );
-  }
-  export default NonFormalProvider;
+};
