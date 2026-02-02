@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import Lottie from "lottie-react";
+import { Lottie } from "lottie-react";
 import Spinnerdots from "../../public/Spinnerdots.json";
 import NotFound from "../../public/404.json";
 
