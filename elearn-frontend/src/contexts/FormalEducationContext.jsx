@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import API_URL from "../config";
 import { useAuth } from "./AuthContext";
+import { useLoading } from "./LoadingContext";
 
 const FormalEducationContext = createContext();
 
@@ -14,6 +15,7 @@ export const useFormalEducation = () => {
 
 export const FormalEducationProvider = ({ children }) => {
   const { user } = useAuth();
+  const { setLoading } = useLoading();
   const [courses, setCourses] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [submissions, setSubmissions] = useState([]);
@@ -25,6 +27,7 @@ export const FormalEducationProvider = ({ children }) => {
         if (!user || !user.access_token) {
           return; // Wait until we have an authenticated user
         }
+        setLoading("formalCourses", true);
         const coursesRes = await fetch(`${API_URL}/courses/`);
         let coursesData = [];
         if (coursesRes.ok) {
@@ -97,10 +100,12 @@ export const FormalEducationProvider = ({ children }) => {
         setEnrollments(mapped);
       } catch (err) {
         // handle error
+      } finally {
+        setLoading("formalCourses", false);
       }
     };
     fetchData();
-  }, [user]);
+  }, [user, setLoading]);
   // Get all assignments for an enrollment (helper)
   const getAssignmentsForEnrollment = (enrollmentId) => {
     const enrollment = enrollments.find(e => e.id === enrollmentId);

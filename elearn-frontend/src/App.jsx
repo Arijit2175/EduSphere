@@ -3,6 +3,7 @@ import { Suspense, lazy, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { Alert, Snackbar } from "@mui/material";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { LoadingProvider } from "./contexts/LoadingContext";
 import { CoursesProvider } from "./contexts/CoursesContext";
 import { SidebarProvider } from "./contexts/SidebarContext";
 import { FormalEducationProvider } from "./contexts/FormalEducationContext";
@@ -233,8 +234,10 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <AuthProvider>
-          <SessionExpiredToast />
-          <AppShell />
+          <LoadingProvider>
+            <SessionExpiredToast />
+            <AppShell />
+          </LoadingProvider>
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
