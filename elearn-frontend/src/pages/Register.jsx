@@ -4,6 +4,7 @@ import { useNavigate, Link as RouterLink } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import FormInput from "../components/FormInput";
 import PageHeader from "../components/PageHeader";
+import FullPageLoader from "../components/FullPageLoader";
 import { useAuth } from "../contexts/AuthContext";
 import { useState, useEffect } from "react";
 
@@ -82,8 +83,7 @@ export default function Register() {
   };
 
   return (
-    <Box sx={{ position: "relative", minHeight: "100vh" }}>
-      {/* Background Video */}
+    <Box sx={{ position: "relative", minHeight: "100vh" }}>      <FullPageLoader open={loading} label="Creating account..." />      {/* Background Video */}
       <Box
         sx={{
           position: "fixed",

@@ -9,6 +9,7 @@ import { FormalEducationProvider } from "./contexts/FormalEducationContext";
 import { NonFormalProvider } from "./contexts/NonFormalContext";
 import theme from "./theme";
 import ProtectedRoute from "./components/ProtectedRoute";
+import FullPageLoader from "./components/FullPageLoader";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -30,6 +31,7 @@ import DataProtection from "./pages/DataProtection";
 import TermsOfService from "./pages/TermsOfService";
 import CookieSettings from "./pages/CookieSettings";
 import ContactUs from "./pages/ContactUs";
+import NotFound from "./pages/NotFound";
 
 const SessionExpiredToast = () => {
   const { sessionExpired, clearSessionExpired } = useAuth();
@@ -57,57 +59,17 @@ const SessionExpiredToast = () => {
   );
 };
 
-export default function App() {
-  // Global fetch interceptor for session expiration
-  useEffect(() => {
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      try {
-        const response = await originalFetch(...args);
-        
-        // Only handle session expiration if:
-        // 1. User is authenticated (has a token)
-        // 2. Response is 401 Unauthorized
-        // 3. Request had Authorization header (was an authenticated request)
-        const [url, options] = args;
-        const hasAuthHeader = options?.headers?.Authorization || options?.headers?.authorization;
-        const userLoggedIn = localStorage.getItem("user");
-        
-        if (response.status === 401 && hasAuthHeader && userLoggedIn && window.handleAuthError) {
-          window.handleAuthError(response);
-        }
-        
-        return response;
-      } catch (error) {
-        throw error;
-      }
-    };
-    
-    return () => {
-      window.fetch = originalFetch;
-    };
-  }, []);
+const AppShell = () => {
+  const { loading } = useAuth();
 
-  // Global demo reset for Informal Learning data on app startup
-  useEffect(() => {
-    try {
-      localStorage.removeItem("informalPosts");
-      localStorage.removeItem("informalSaved");
-      localStorage.removeItem("informalFollowingTopics");
-      localStorage.removeItem("informalFollowingCreators");
-      localStorage.removeItem("informalBadges");
-    } catch {}
-  }, []);
   return (
-    <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <AuthProvider>
-          <SessionExpiredToast />
-          <CoursesProvider>
-            <FormalEducationProvider>
-              <NonFormalProvider>
-                <SidebarProvider>
-                <Routes>
+    <>
+      <FullPageLoader open={loading} label="Loading..." />
+      <CoursesProvider>
+        <FormalEducationProvider>
+          <NonFormalProvider>
+            <SidebarProvider>
+              <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/login" element={<Login />} />
@@ -146,7 +108,7 @@ export default function App() {
                   path="/nonformal"
                   element={
                     <ProtectedRoute>
-                      <Suspense fallback={<div />}> 
+                      <Suspense fallback={<FullPageLoader open label="Loading..." />}>
                         <NonFormalHome />
                       </Suspense>
                     </ProtectedRoute>
@@ -215,13 +177,64 @@ export default function App() {
                 <Route path="/cookie-settings" element={<CookieSettings />} />
                 <Route path="/contact" element={<ContactUs />} />
 
-                {/* Default entry fallback */}
-                <Route path="*" element={<Login />} />
+                {/* 404 Page */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
-              </SidebarProvider>
-              </NonFormalProvider>
-            </FormalEducationProvider>
-          </CoursesProvider>
+            </SidebarProvider>
+          </NonFormalProvider>
+        </FormalEducationProvider>
+      </CoursesProvider>
+    </>
+  );
+};
+
+export default function App() {
+  // Global fetch interceptor for session expiration
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      try {
+        const response = await originalFetch(...args);
+        
+        // Only handle session expiration if:
+        // 1. User is authenticated (has a token)
+        // 2. Response is 401 Unauthorized
+        // 3. Request had Authorization header (was an authenticated request)
+        const [url, options] = args;
+        const hasAuthHeader = options?.headers?.Authorization || options?.headers?.authorization;
+        const userLoggedIn = localStorage.getItem("user");
+        
+        if (response.status === 401 && hasAuthHeader && userLoggedIn && window.handleAuthError) {
+          window.handleAuthError(response);
+        }
+        
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    };
+    
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
+
+  // Global demo reset for Informal Learning data on app startup
+  useEffect(() => {
+    try {
+      localStorage.removeItem("informalPosts");
+      localStorage.removeItem("informalSaved");
+      localStorage.removeItem("informalFollowingTopics");
+      localStorage.removeItem("informalFollowingCreators");
+      localStorage.removeItem("informalBadges");
+    } catch {}
+  }, []);
+  return (
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <AuthProvider>
+          <SessionExpiredToast />
+          <AppShell />
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
