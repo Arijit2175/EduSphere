@@ -61,93 +61,89 @@ const SessionExpiredToast = () => {
 };
 
 const AppShell = () => {
-  const { loading } = useAuth();
-
   return (
-    <>
-      <FullPageLoader open={loading} label="Loading..." />
-      <CoursesProvider>
-        <FormalEducationProvider>
-          <NonFormalProvider>
-            <SidebarProvider>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
+    <CoursesProvider>
+      <FormalEducationProvider>
+        <NonFormalProvider>
+          <SidebarProvider>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
 
-                {/* Protected Routes */}
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
+              {/* Protected Routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
 
-                <Route
-                  path="/formal"
-                  element={
-                    <ProtectedRoute>
-                      <FormalLearning />
-                    </ProtectedRoute>
-                  }
-                />
+              <Route
+                path="/formal"
+                element={
+                  <ProtectedRoute>
+                    <FormalLearning />
+                  </ProtectedRoute>
+                }
+              />
 
-                <Route
-                  path="/nonformal"
-                  element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<FullPageLoader open label="Loading..." />}>
-                        <NonFormalHome />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
+              <Route
+                path="/nonformal"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<FullPageLoader open={true} label="Loading..." />}>
+                      <NonFormalHome />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
 
-                <Route
-                  path="/nonformal/course/:courseId"
-                  element={
-                    <ProtectedRoute>
-                      <NonFormalCourseDetail />
-                    </ProtectedRoute>
-                  }
-                />
+              <Route
+                path="/nonformal/course/:courseId"
+                element={
+                  <ProtectedRoute>
+                    <NonFormalCourseDetail />
+                  </ProtectedRoute>
+                }
+              />
 
-                <Route
-                  path="/nonformal/learn/:courseId"
-                  element={
-                    <ProtectedRoute>
-                      <NonFormalLearner />
-                    </ProtectedRoute>
-                  }
-                />
+              <Route
+                path="/nonformal/learn/:courseId"
+                element={
+                  <ProtectedRoute>
+                    <NonFormalLearner />
+                  </ProtectedRoute>
+                }
+              />
 
-                <Route
-                  path="/informal"
-                  element={
-                    <ProtectedRoute>
-                      <InformalLearning />
-                    </ProtectedRoute>
-                  }
-                />
+              <Route
+                path="/informal"
+                element={
+                  <ProtectedRoute>
+                    <InformalLearning />
+                  </ProtectedRoute>
+                }
+              />
 
-                <Route
-                  path="/ai"
-                  element={
-                    <ProtectedRoute>
-                      <AITutor />
+              <Route
+                path="/ai"
+                element={
+                  <ProtectedRoute>
+                    <AITutor />
                     </ProtectedRoute>
                   }
                 />
@@ -185,7 +181,6 @@ const AppShell = () => {
           </NonFormalProvider>
         </FormalEducationProvider>
       </CoursesProvider>
-    </>
   );
 };
 
