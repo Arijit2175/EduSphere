@@ -31,6 +31,49 @@ import CookieSettings from "./pages/CookieSettings";
 import ContactUs from "./pages/ContactUs";
 
 export default function App() {
+  // Global fetch interceptor for session expiration
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      try {
+        const response = await originalFetch(...args);
+        
+        // Only handle session expiration if:
+        // 1. User is authenticated (has a token)
+        // 2. Response is 401 Unauthorized
+        // 3. Request had Authorization header (was an authenticated request)
+        const [url, options] = args;
+        const hasAuthHeader = options?.headers?.Authorization || options?.headers?.authorization;
+        const userLoggedIn = localStorage.getItem("user");
+        
+        if (response.status === 401 && hasAuthHeader && userLoggedIn && window.handleAuthError) {
+          // Clone response to read body without consuming it
+          const clonedResponse = response.clone();
+          try {
+            const errorData = await clonedResponse.json();
+            // Check if it's specifically a token expiration error
+            if (errorData.detail?.toLowerCase().includes("expired") || 
+                errorData.detail?.toLowerCase().includes("invalid") ||
+                errorData.detail?.toLowerCase().includes("token")) {
+              window.handleAuthError(response);
+            }
+          } catch {
+            // If can't parse response, assume session expired for 401 with auth header
+            window.handleAuthError(response);
+          }
+        }
+        
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    };
+    
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
+
   // Global demo reset for Informal Learning data on app startup
   useEffect(() => {
     try {

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import API_URL from "../config";
 
 const buildUser = (data) => {
@@ -7,6 +8,9 @@ const buildUser = (data) => {
   const name = data.name || `${first_name} ${last_name}`.trim() || data.email || "Learner";
   return { ...data, first_name, last_name, name };
 };
+
+// Global flag to prevent multiple session expired alerts
+let sessionExpiredShown = false;
 
 const AuthContext = createContext();
 
@@ -82,7 +86,38 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("enrolledCourses");
+    sessionExpiredShown = false; // Reset flag on manual logout
   }, []);
+
+  // Global function to handle session expiration
+  const handleSessionExpired = useCallback(() => {
+    if (sessionExpiredShown) return; // Prevent multiple alerts
+    sessionExpiredShown = true;
+    
+    // Clear user data
+    setUser(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("enrolledCourses");
+    
+    // Show message
+    alert("Session has expired. Please log in again.");
+    
+    // Redirect to login
+    window.location.href = "/login";
+  }, []);
+
+  // Expose global error handler
+  useEffect(() => {
+    window.handleAuthError = (response) => {
+      if (response?.status === 401) {
+        handleSessionExpired();
+      }
+    };
+    
+    return () => {
+      delete window.handleAuthError;
+    };
+  }, [handleSessionExpired]);
 
   // Add updateUser to allow profile editing (now updates backend too)
   const updateUser = useCallback(async (updatedFields) => {
@@ -116,8 +151,9 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUser,
+    handleSessionExpired,
     isAuthenticated: !!user,
-  }), [user, loading, login, register, logout, updateUser]);
+  }), [user, loading, login, register, logout, updateUser, handleSessionExpired]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
