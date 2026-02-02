@@ -31,7 +31,7 @@ export default function NonFormalLearning() {
         <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Navbar />
           <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <AnimationPlayer path="/Spinnerdots.json" style={{ width: 200, height: 200 }} />
+            <CircularProgress />
           </Box>
         </Box>
       </Box>

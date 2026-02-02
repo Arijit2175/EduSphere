@@ -107,9 +107,9 @@ const AppShell = () => {
                   <ProtectedRoute>
                     <Suspense
                       fallback={
-                        <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <AnimationPlayer path="/Spinnerdots.json" style={{ width: 160, height: 160 }} />
-                        </div>
+                        <Box sx={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <CircularProgress />
+                        </Box>
                       }
                     >
                       <NonFormalHome />

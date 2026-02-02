@@ -1,5 +1,4 @@
-import { Box } from "@mui/material";
-import AnimationPlayer from "./AnimationPlayer";
+import { Box, CircularProgress } from "@mui/material";
 
 export default function ComponentLoader({ loading }) {
   if (!loading) return null;
@@ -17,7 +16,7 @@ export default function ComponentLoader({ loading }) {
         backdropFilter: "blur(4px)",
       }}
     >
-      <AnimationPlayer path="/Spinnerdots.json" style={{ width: 120, height: 120 }} />
+      <CircularProgress />
     </Box>
   );
 }

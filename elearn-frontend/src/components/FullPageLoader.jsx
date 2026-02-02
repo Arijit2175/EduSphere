@@ -1,5 +1,4 @@
-import { Box, Typography } from "@mui/material";
-import AnimationPlayer from "./AnimationPlayer";
+import { Box, Typography, CircularProgress } from "@mui/material";
 
 export default function FullPageLoader({ open, label = "Loading..." }) {
   if (!open) return null;
@@ -18,7 +17,7 @@ export default function FullPageLoader({ open, label = "Loading..." }) {
         backdropFilter: "blur(4px)",
       }}
     >
-      <AnimationPlayer path="/Spinnerdots.json" style={{ width: 120, height: 120 }} />
+      <CircularProgress />
       <Typography sx={{ mt: 1, fontWeight: 600, color: "#4b5563" }}>{label}</Typography>
     </Box>
   );
