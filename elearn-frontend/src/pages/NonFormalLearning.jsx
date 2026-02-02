@@ -1,10 +1,10 @@
-import { Box, Container, Grid, Card, CardContent, Typography, Button, Stack, Chip, LinearProgress } from "@mui/material";
+import { Box, Container, Grid, Card, CardContent, Typography, Button, Stack, Chip, LinearProgress, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
-import AnimationPlayer from "../components/AnimationPlayer";
+
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useNonFormal } from "../contexts/NonFormalContext";

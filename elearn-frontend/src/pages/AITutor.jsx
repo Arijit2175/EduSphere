@@ -32,7 +32,7 @@ import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import Sidebar from "../components/Sidebar.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
-import AnimationPlayer from "../components/AnimationPlayer";
+
 
 const emojiList = [
   "😀", "😃", "😄", "😁", "😆", "😅", "😂", "😊",
@@ -887,14 +887,8 @@ export default function AITutor() {
                   },
                 }}
               >
-                {loading ? (
-                  <AnimationPlayer path="/Spinnerdots.json" style={{ width: 24, height: 24 }} />
-                ) : (
-                  <>
-                    Send
-                    <SendRoundedIcon sx={{ ml: 1, fontSize: 18 }} />
-                  </>
-                )}
+                {loading ? "Sending..." : "Send"}
+                {!loading && <SendRoundedIcon sx={{ ml: 1, fontSize: 18 }} />}
               </Button>
               </Box>
             </Box>

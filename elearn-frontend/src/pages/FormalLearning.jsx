@@ -1,4 +1,4 @@
-import { Box, Container, Tabs, Tab, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
+import { Box, Container, Tabs, Tab, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress } from "@mui/material";
 import { useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -6,7 +6,7 @@ import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
 import SectionTitle from "../components/SectionTitle";
 import CourseCardAdvanced from "../components/CourseCardAdvanced";
-import AnimationPlayer from "../components/AnimationPlayer";
+
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import TeacherDashboard from "../components/TeacherDashboard";
