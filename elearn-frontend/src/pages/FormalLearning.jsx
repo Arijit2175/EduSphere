@@ -37,7 +37,6 @@ export default function FormalLearning() {
       </Box>
     );
   }
-  
   if (isTeacher) {
     return (
       <Box sx={{ display: "flex" }}>

@@ -10,7 +10,7 @@ import { FormalEducationProvider } from "./contexts/FormalEducationContext";
 import { NonFormalProvider } from "./contexts/NonFormalContext";
 import theme from "./theme";
 import ProtectedRoute from "./components/ProtectedRoute";
-import FullPageLoader from "./components/FullPageLoader";
+import AnimationPlayer from "./components/AnimationPlayer";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -105,7 +105,13 @@ const AppShell = () => {
                 path="/nonformal"
                 element={
                   <ProtectedRoute>
-                    <Suspense fallback={<div />}>
+                    <Suspense
+                      fallback={
+                        <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <AnimationPlayer path="/Spinnerdots.json" style={{ width: 160, height: 160 }} />
+                        </div>
+                      }
+                    >
                       <NonFormalHome />
                     </Suspense>
                   </ProtectedRoute>

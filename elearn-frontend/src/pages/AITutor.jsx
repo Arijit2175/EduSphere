@@ -5,7 +5,6 @@ import {
   Typography,
   IconButton,
   Avatar,
-  CircularProgress,
   Tooltip,
   Button,
   List,
@@ -33,6 +32,7 @@ import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import Sidebar from "../components/Sidebar.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import AnimationPlayer from "../components/AnimationPlayer";
 
 const emojiList = [
   "😀", "😃", "😄", "😁", "😆", "😅", "😂", "😊",
@@ -889,7 +889,7 @@ export default function AITutor() {
                 }}
               >
                 {loading ? (
-                  <CircularProgress size={24} sx={{ color: '#fff' }} />
+                  <AnimationPlayer path="/Spinnerdots.json" style={{ width: 36, height: 36 }} />
                 ) : (
                   <>
                     Send

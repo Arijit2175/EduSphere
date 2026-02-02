@@ -24,8 +24,10 @@ export const FormalEducationProvider = ({ children }) => {
   // Fetch courses and enrollments from backend on mount
   useEffect(() => {
     const fetchData = async () => {
+      setLocalLoading(true);
       try {
         if (!user || !user.access_token) {
+          setLocalLoading(false);
           return; // Wait until we have an authenticated user
         }
         setLoading("formalCourses", true);
