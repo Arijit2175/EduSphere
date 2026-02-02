@@ -1,30 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import Lottie from "lottie-react";
+import Spinnerdots from "../../public/Spinnerdots.json";
+import NotFound from "../../public/404.json";
+
+const animationMap = {
+  "/Spinnerdots.json": Spinnerdots,
+  "/404.json": NotFound,
+};
 
 export default function AnimationPlayer({ path, loop = true, style }) {
-  const [animationData, setAnimationData] = useState(null);
-
-  const resolvedPath = useMemo(() => {
-    const base = import.meta?.env?.BASE_URL || "/";
-    if (!path) return null;
-    if (path.startsWith("http")) return path;
-    if (path.startsWith("/")) return `${base}${path.slice(1)}`;
-    return `${base}${path}`;
+  const animationData = useMemo(() => {
+    return animationMap[path] || null;
   }, [path]);
-
-  useEffect(() => {
-    let isMounted = true;
-    if (!resolvedPath) return;
-    fetch(resolvedPath)
-      .then((res) => res.ok ? res.json() : null)
-      .then((data) => {
-        if (isMounted && data) setAnimationData(data);
-      })
-      .catch(() => {});
-    return () => {
-      isMounted = false;
-    };
-  }, [resolvedPath]);
 
   if (!animationData) return "...";
 
