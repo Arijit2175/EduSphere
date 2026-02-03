@@ -63,7 +63,7 @@ export default function AITutor() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const { user } = useAuth();
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(user ? true : false);
 
   const [question, setQuestion] = useState("");
   const [chats, setChats] = useState([]);
@@ -81,7 +81,29 @@ export default function AITutor() {
     setShuffledPrompts(shuffled.slice(0, 3));
   }, []);
 
-  if (initialLoading) {
+  useEffect(() => {
+    if (!user) {
+      setInitialLoading(false);
+      return;
+    }
+    setInitialLoading(true);
+    fetch(`${API_URL}/ai-tutor-chats/`, {
+      headers: {
+        'Authorization': user?.access_token ? `Bearer ${user.access_token}` : ''
+      }
+    })
+      .then(res => res.ok ? res.json() : [])
+        .then(data => {
+          setChats(Array.isArray(data) ? data : []);
+          setInitialLoading(false);
+        })
+        .catch(() => {
+          setChats([]);
+          setInitialLoading(false);
+        });
+      }, [user]);
+
+  if (initialLoading && user) {
     return (
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
         <Sidebar />
@@ -99,25 +121,6 @@ export default function AITutor() {
       </Box>
     );
   }
-
-  useEffect(() => {
-    if (!user) return;
-    setInitialLoading(true);
-    fetch(`${API_URL}/ai-tutor-chats/`, {
-      headers: {
-        'Authorization': user?.access_token ? `Bearer ${user.access_token}` : ''
-      }
-    })
-      .then(res => res.ok ? res.json() : [])
-        .then(data => {
-          setChats(Array.isArray(data) ? data : []);
-          setInitialLoading(false);
-        })
-        .catch(() => {
-          setChats([]);
-          setInitialLoading(false);
-        });
-      }, [user]);
 
   useEffect(() => {
     if (currentChatId && user) {

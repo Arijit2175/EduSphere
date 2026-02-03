@@ -73,7 +73,6 @@ const topicIcon = {
 export default function InformalLearning() {
     // State for delete dialog
     const [deleteDialog, setDeleteDialog] = useState({ open: false, postId: null });
-    const [initialLoading, setInitialLoading] = useState(true);
 
     // Handler to delete post (frontend + backend)
     const handleDeletePost = async (postId) => {
@@ -105,6 +104,21 @@ export default function InformalLearning() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
 
+  const [posts, setPosts] = useState([]);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [topics, setTopics] = useState(DEFAULT_TOPICS);
+  const [followingTopics, setFollowingTopics] = useState([]);
+  const [followingCreators, setFollowingCreators] = useState(() => {
+    const stored = localStorage.getItem("informalFollowCreators");
+    return stored ? JSON.parse(stored) : [];
+  });
+  const [filterTopic, setFilterTopic] = useState("All");
+  const [sortBy, setSortBy] = useState("recent");
+  const [search, setSearch] = useState("");
+  const [composer, setComposer] = useState({ title: "", body: "", topic: "Tech", type: "post", tagsInput: "", media: null });
+  const [commentDraft, setCommentDraft] = useState({});
+  const [aiResponses, setAiResponses] = useState({});
+
   if (initialLoading) {
     return (
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
@@ -123,51 +137,6 @@ export default function InformalLearning() {
       </Box>
     );
   }
-
-  const [posts, setPosts] = useState([]);
-
-  // Fetch posts from backend on mount and when user changes
-  useEffect(() => {
-    setInitialLoading(true);
-    axios.get(`${API_URL}/informal-posts/`)
-      .then(res => {
-        const posts = (res.data || []).map(post => ({
-          ...post,
-          comments: typeof post.comments === 'string' ? (() => { try { return JSON.parse(post.comments); } catch { return []; } })() : (post.comments || []),
-          savers: Array.isArray(post.savers)
-            ? post.savers
-            : post.savers == null
-              ? []
-              : [post.savers]
-        }));
-        setPosts(posts);
-        setInitialLoading(false);
-        posts.forEach((p, i) => {
-          console.log(`Post[${i}] id:`, p.id, 'savers:', p.savers);
-        });
-        if (user) {
-          console.log('Current user id:', user.id, 'type:', typeof user.id);
-        } else {
-          console.log('No user logged in');
-        }
-      })
-      .catch(() => {
-        setPosts([]);
-        setInitialLoading(false);
-      });
-  }, [user]);
-  const [topics, setTopics] = useState(DEFAULT_TOPICS);
-  const [followingTopics, setFollowingTopics] = useState([]);
-  const [followingCreators, setFollowingCreators] = useState(() => {
-    const stored = localStorage.getItem("informalFollowCreators");
-    return stored ? JSON.parse(stored) : [];
-  });
-  const [filterTopic, setFilterTopic] = useState("All");
-  const [sortBy, setSortBy] = useState("recent");
-  const [search, setSearch] = useState("");
-  const [composer, setComposer] = useState({ title: "", body: "", topic: "Tech", type: "post", tagsInput: "", media: null });
-  const [commentDraft, setCommentDraft] = useState({});
-  const [aiResponses, setAiResponses] = useState({});
 
   useEffect(() => {
     localStorage.setItem("informalPosts", JSON.stringify(posts));
