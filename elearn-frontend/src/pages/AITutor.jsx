@@ -32,6 +32,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import Sidebar from "../components/Sidebar.jsx";
+import Navbar from "../components/Navbar.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
 
@@ -61,10 +62,11 @@ const examplePrompts = [
 export default function AITutor() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const { user } = useAuth();
+  
+  // ALL STATE DECLARATIONS FIRST
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [initialLoading, setInitialLoading] = useState(user ? true : false);
-
   const [question, setQuestion] = useState("");
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
@@ -72,10 +74,30 @@ export default function AITutor() {
   const [loading, setLoading] = useState(false);
   const [showEmojis, setShowEmojis] = useState(false);
   const [rateLimitError, setRateLimitError] = useState("");
+  const [shuffledPrompts, setShuffledPrompts] = useState([]);
   const chatEndRef = useRef(null);
 
-  const [shuffledPrompts, setShuffledPrompts] = useState([]);
+  // LOADING CHECK AFTER ALL STATE
+  if (initialLoading && user) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <Sidebar />
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Box sx={{ textAlign: "center" }}>
+              <CircularProgress sx={{ mb: 2 }} />
+              <Typography variant="h6" sx={{ color: "#666" }}>
+                Loading AI Tutor...
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
+  // THEN ALL useEffect HOOKS
   useEffect(() => {
     const shuffled = [...examplePrompts].sort(() => Math.random() - 0.5);
     setShuffledPrompts(shuffled.slice(0, 3));
@@ -102,25 +124,6 @@ export default function AITutor() {
           setInitialLoading(false);
         });
       }, [user]);
-
-  if (initialLoading && user) {
-    return (
-      <Box sx={{ display: "flex", minHeight: "100vh" }}>
-        <Sidebar />
-        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-          <Navbar />
-          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Box sx={{ textAlign: "center" }}>
-              <CircularProgress sx={{ mb: 2 }} />
-              <Typography variant="h6" sx={{ color: "#666" }}>
-                Loading AI Tutor...
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      </Box>
-    );
-  }
 
   useEffect(() => {
     if (currentChatId && user) {

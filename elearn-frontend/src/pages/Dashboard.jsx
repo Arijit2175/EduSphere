@@ -27,6 +27,20 @@ export default function Dashboard() {
   const { isOpen } = useSidebar();
   const navigate = useNavigate();
   
+  // ALL STATE DECLARATIONS FIRST (before conditional returns)
+  const [tabValue, setTabValue] = useState(0);
+  const [statsModalOpen, setStatsModalOpen] = useState(false);
+  const [certModalOpen, setCertModalOpen] = useState(false);
+  const [studentsModalOpen, setStudentsModalOpen] = useState(false);
+  // Store enrolled students for each course (id -> array of students)
+  const [enrolledStudentsByCourse, setEnrolledStudentsByCourse] = useState({});
+  // Teacher: schedule dialog state
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [scheduleCourseId, setScheduleCourseId] = useState("");
+  const [scheduleForm, setScheduleForm] = useState({ title: "Live Class", startTime: "", duration: 60, meetLink: "" });
+  // Certificate view dialog state
+  const [viewCert, setViewCert] = useState(null);
+
   // Show loading screen until both formal and non-formal data are loaded
   const isLoading = formalLoading || nonFormalLoading;
   
@@ -48,18 +62,6 @@ export default function Dashboard() {
       </Box>
     );
   }
-  const [tabValue, setTabValue] = useState(0);
-  const [statsModalOpen, setStatsModalOpen] = useState(false);
-  const [certModalOpen, setCertModalOpen] = useState(false);
-  const [studentsModalOpen, setStudentsModalOpen] = useState(false);
-  // Store enrolled students for each course (id -> array of students)
-  const [enrolledStudentsByCourse, setEnrolledStudentsByCourse] = useState({});
-  // Teacher: schedule dialog state
-  const [scheduleOpen, setScheduleOpen] = useState(false);
-  const [scheduleCourseId, setScheduleCourseId] = useState("");
-  const [scheduleForm, setScheduleForm] = useState({ title: "Live Class", startTime: "", duration: 60, meetLink: "" });
-  // Certificate view dialog state
-  const [viewCert, setViewCert] = useState(null);
 
   const displayName = user?.name || `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || "Learner";
   // Only show formal courses assigned by a teacher (from enrollments)
