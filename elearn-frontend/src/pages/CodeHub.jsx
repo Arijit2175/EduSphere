@@ -90,7 +90,7 @@ class Program {
 ];
 
 const LanguageIcon = ({ icon }) => (
-  <div className="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-500">
+  <div className="w-8 h-8 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-bold text-primary">
     {icon}
   </div>
 );
@@ -99,15 +99,15 @@ const LanguageSelector = ({ languages, selectedLanguage, onSelectLanguage, isOpe
   <div className="relative">
     <button
       onClick={() => setIsOpen(!isOpen)}
-      className="flex items-center gap-3 px-4 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 rounded-lg transition-all"
+      className="flex items-center gap-3 px-4 py-2 bg-secondary/50 hover:bg-secondary border border-border/50 rounded-lg transition-all"
     >
       <LanguageIcon icon={selectedLanguage.icon} />
-      <span className="font-medium text-slate-100">{selectedLanguage.name}</span>
-      <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      <span className="font-medium text-foreground">{selectedLanguage.name}</span>
+      <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
     </button>
 
     {isOpen && (
-      <div className="absolute top-full left-0 mt-2 w-56 bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
+      <div className="absolute top-full left-0 mt-2 w-56 bg-card border border-border/50 rounded-xl shadow-2xl shadow-black/20 overflow-hidden z-50">
         {languages.map((lang) => (
           <button
             key={lang.id}
@@ -115,12 +115,12 @@ const LanguageSelector = ({ languages, selectedLanguage, onSelectLanguage, isOpe
               onSelectLanguage(lang);
               setIsOpen(false);
             }}
-            className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-700 transition-colors ${
-              selectedLanguage.id === lang.id ? "bg-blue-500/10 border-l-2 border-blue-500" : ""
+            className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors ${
+              selectedLanguage.id === lang.id ? "bg-primary/10 border-l-2 border-primary" : ""
             }`}
           >
             <LanguageIcon icon={lang.icon} />
-            <span className="font-medium text-slate-100">{lang.name}</span>
+            <span className="font-medium text-foreground">{lang.name}</span>
           </button>
         ))}
       </div>
@@ -129,8 +129,8 @@ const LanguageSelector = ({ languages, selectedLanguage, onSelectLanguage, isOpe
 );
 
 const CodeEditor = ({ code, setCode, lineNumbers }) => (
-  <div className="flex-1 flex overflow-hidden bg-slate-950 rounded-lg">
-    <div className="w-12 bg-slate-900/50 border-r border-slate-700/30 py-4 flex flex-col items-end pr-3 text-xs font-mono text-slate-500 select-none overflow-hidden">
+  <div className="flex-1 flex overflow-hidden bg-card rounded-lg border border-border/50">
+    <div className="w-12 bg-muted/30 border-r border-border/30 py-4 flex flex-col items-end pr-3 text-xs font-mono text-muted-foreground select-none overflow-hidden">
       {lineNumbers.map((num) => (
         <div key={num} className="h-6 leading-6">
           {num}
@@ -142,35 +142,35 @@ const CodeEditor = ({ code, setCode, lineNumbers }) => (
       value={code}
       onChange={(e) => setCode(e.target.value)}
       spellCheck={false}
-      className="flex-1 bg-transparent p-4 font-mono text-sm text-slate-100 leading-6 resize-none focus:outline-none placeholder:text-slate-500"
+      className="flex-1 bg-transparent p-4 font-mono text-sm text-foreground leading-6 resize-none focus:outline-none placeholder:text-muted-foreground/50"
       placeholder="Start coding here..."
     />
   </div>
 );
 
 const InputPanel = ({ input, setInput }) => (
-  <div className="flex-1 flex flex-col bg-slate-950 rounded-lg border border-slate-700/30 overflow-hidden">
-    <div className="h-12 bg-slate-900/50 border-b border-slate-700/30 flex items-center px-4">
-      <span className="font-medium text-sm text-slate-100">📥 Input (stdin)</span>
+  <div className="flex-1 flex flex-col bg-card rounded-lg border border-border/50 overflow-hidden">
+    <div className="h-12 bg-muted/30 border-b border-border/50 flex items-center px-4">
+      <span className="font-medium text-sm text-foreground">📥 Input (stdin)</span>
     </div>
     <textarea
       value={input}
       onChange={(e) => setInput(e.target.value)}
       placeholder="Provide input for your program (if needed)..."
-      className="flex-1 bg-transparent p-4 font-mono text-sm text-slate-100 resize-none focus:outline-none placeholder:text-slate-500"
+      className="flex-1 bg-transparent p-4 font-mono text-sm text-foreground resize-none focus:outline-none placeholder:text-muted-foreground/50"
     />
   </div>
 );
 
 const OutputPanel = ({ output, isRunning, executionTime }) => (
-  <div className="flex-1 flex flex-col bg-slate-950 rounded-lg border border-slate-700/30 overflow-hidden">
-    <div className="h-12 bg-slate-900/50 border-b border-slate-700/30 flex items-center justify-between px-4">
+  <div className="flex-1 flex flex-col bg-card rounded-lg border border-border/50 overflow-hidden">
+    <div className="h-12 bg-muted/30 border-b border-border/50 flex items-center justify-between px-4">
       <div className="flex items-center gap-2">
-        <Terminal className="w-4 h-4 text-blue-500" />
-        <span className="font-medium text-sm text-slate-100">📤 Output (stdout)</span>
+        <Terminal className="w-4 h-4 text-primary" />
+        <span className="font-medium text-sm text-foreground">📤 Output (stdout)</span>
       </div>
       {executionTime !== null && (
-        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Clock className="w-3 h-3" />
           <span>{executionTime}ms</span>
         </div>
@@ -179,14 +179,14 @@ const OutputPanel = ({ output, isRunning, executionTime }) => (
 
     <div className="flex-1 p-4 font-mono text-sm overflow-auto">
       {isRunning ? (
-        <div className="flex items-center gap-3 text-blue-500">
-          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="flex items-center gap-3 text-primary">
+          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           <span>Running code...</span>
         </div>
       ) : output ? (
-        <pre className="whitespace-pre-wrap text-slate-100">{output}</pre>
+        <pre className="whitespace-pre-wrap text-foreground">{output}</pre>
       ) : (
-        <div className="text-slate-500/50 flex items-center gap-2">
+        <div className="text-muted-foreground/50 flex items-center gap-2">
           <Zap className="w-4 h-4" />
           <span>Click "Run Code" to see output</span>
         </div>
@@ -199,21 +199,21 @@ const ActionButtons = ({ onRun, onReset, onCopy, onDownload, copied, isRunning }
   <div className="flex items-center gap-2">
     <button
       onClick={onCopy}
-      className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-slate-100"
+      className="p-2 hover:bg-secondary/50 rounded-lg transition-colors text-muted-foreground hover:text-foreground"
       title="Copy code"
     >
       {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
     </button>
     <button
       onClick={onDownload}
-      className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-slate-100"
+      className="p-2 hover:bg-secondary/50 rounded-lg transition-colors text-muted-foreground hover:text-foreground"
       title="Download code"
     >
       <Download className="w-4 h-4" />
     </button>
     <button
       onClick={onReset}
-      className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-slate-100"
+      className="p-2 hover:bg-secondary/50 rounded-lg transition-colors text-muted-foreground hover:text-foreground"
       title="Reset code"
     >
       <RotateCcw className="w-4 h-4" />
@@ -221,7 +221,7 @@ const ActionButtons = ({ onRun, onReset, onCopy, onDownload, copied, isRunning }
     <button
       onClick={onRun}
       disabled={isRunning}
-      className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25"
+      className="flex items-center gap-2 px-5 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25"
     >
       <Play className="w-4 h-4" />
       <span>Run Code</span>
@@ -296,7 +296,7 @@ export default function CodeHub() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 to-slate-900">
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Navbar />
@@ -308,14 +308,14 @@ export default function CodeHub() {
         >
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-white mb-2">CodeHub</h1>
-            <p className="text-slate-400">Practice coding with our online compiler. Write, run, and test code in multiple languages.</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">CodeHub</h1>
+            <p className="text-muted-foreground">Practice coding with our online compiler. Write, run, and test code in multiple languages.</p>
           </div>
 
           {/* Main Editor Area */}
           <div className="flex flex-col gap-4 h-full overflow-hidden">
             {/* Editor Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-slate-900/50 border border-slate-700/30 rounded-lg">
+            <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border border-border/50 rounded-lg">
               <LanguageSelector
                 languages={languages}
                 selectedLanguage={selectedLanguage}
@@ -337,7 +337,7 @@ export default function CodeHub() {
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-hidden min-h-0">
               {/* Left Column - Code Editor */}
               <div className="flex flex-col overflow-hidden min-h-0">
-                <div className="text-slate-300 text-sm font-medium mb-2">💻 Code Editor</div>
+                <div className="text-muted-foreground text-sm font-medium mb-2">💻 Code Editor</div>
                 <CodeEditor code={code} setCode={setCode} lineNumbers={lineNumbers} />
               </div>
 
@@ -345,13 +345,13 @@ export default function CodeHub() {
               <div className="flex flex-col gap-4 overflow-hidden min-h-0">
                 {/* Input Box */}
                 <div className="flex-1 flex flex-col min-h-0">
-                  <div className="text-slate-300 text-sm font-medium mb-2">Input</div>
+                  <div className="text-muted-foreground text-sm font-medium mb-2">Input</div>
                   <InputPanel input={input} setInput={setInput} />
                 </div>
 
                 {/* Output Box */}
                 <div className="flex-1 flex flex-col min-h-0">
-                  <div className="text-slate-300 text-sm font-medium mb-2">Output</div>
+                  <div className="text-muted-foreground text-sm font-medium mb-2">Output</div>
                   <OutputPanel output={output} isRunning={isRunning} executionTime={executionTime} />
                 </div>
               </div>
@@ -359,12 +359,12 @@ export default function CodeHub() {
           </div>
 
           {/* Info Section */}
-          <div className="mt-6 p-4 bg-slate-900/50 border border-slate-700/30 rounded-lg">
+          <div className="mt-6 p-4 bg-card border border-border/50 rounded-lg">
             <div className="flex items-start gap-3">
-              <Zap className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+              <Zap className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-semibold text-slate-100 mb-1">Features</h3>
-                <ul className="text-sm text-slate-400 space-y-1">
+                <h3 className="font-semibold text-foreground mb-1">Features</h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• Support for JavaScript, Python, Java, C++, and C#</li>
                   <li>• Real-time code execution with input/output handling</li>
                   <li>• Copy and download your code snippets with proper file extensions</li>
