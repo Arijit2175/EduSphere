@@ -1,7 +1,6 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import AnimationPlayer from "../components/AnimationPlayer";
 
 
 export default function NotFound() {
@@ -21,10 +20,9 @@ export default function NotFound() {
           px: 2,
         }}
       >
-        <AnimationPlayer
-          type="404"
-          style={{ width: 400, maxWidth: "90%", height: 400 }}
-        />
+        <Typography variant="h1" sx={{ fontWeight: 800, mb: 2, fontSize: "120px" }}>
+          404
+        </Typography>
         <Typography variant="h4" sx={{ fontWeight: 800, mt: 2 }}>
           Page not found
         </Typography>
