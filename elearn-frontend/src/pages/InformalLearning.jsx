@@ -28,6 +28,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  CircularProgress,
 } from "@mui/material";
 
 
@@ -72,6 +73,7 @@ const topicIcon = {
 export default function InformalLearning() {
     // State for delete dialog
     const [deleteDialog, setDeleteDialog] = useState({ open: false, postId: null });
+    const [initialLoading, setInitialLoading] = useState(true);
 
     // Handler to delete post (frontend + backend)
     const handleDeletePost = async (postId) => {
@@ -103,10 +105,30 @@ export default function InformalLearning() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
 
+  if (initialLoading) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <Sidebar />
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Box sx={{ textAlign: "center" }}>
+              <CircularProgress sx={{ mb: 2 }} />
+              <Typography variant="h6" sx={{ color: "#666" }}>
+                Loading discussions...
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
   const [posts, setPosts] = useState([]);
 
   // Fetch posts from backend on mount and when user changes
   useEffect(() => {
+    setInitialLoading(true);
     axios.get(`${API_URL}/informal-posts/`)
       .then(res => {
         const posts = (res.data || []).map(post => ({
@@ -119,8 +141,7 @@ export default function InformalLearning() {
               : [post.savers]
         }));
         setPosts(posts);
-        // Debug log: posts and user
-        // Log each post's id, savers, and the user id for debugging
+        setInitialLoading(false);
         posts.forEach((p, i) => {
           console.log(`Post[${i}] id:`, p.id, 'savers:', p.savers);
         });
@@ -132,6 +153,7 @@ export default function InformalLearning() {
       })
       .catch(() => {
         setPosts([]);
+        setInitialLoading(false);
       });
   }, [user]);
   const [topics, setTopics] = useState(DEFAULT_TOPICS);

@@ -18,6 +18,7 @@ import {
   Drawer,
   useMediaQuery,
   useTheme,
+  CircularProgress,
 } from "@mui/material";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EmojiEmotionsOutlinedIcon from '@mui/icons-material/EmojiEmotionsOutlined';
@@ -62,6 +63,7 @@ export default function AITutor() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const { user } = useAuth();
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const [question, setQuestion] = useState("");
   const [chats, setChats] = useState([]);
@@ -79,16 +81,42 @@ export default function AITutor() {
     setShuffledPrompts(shuffled.slice(0, 3));
   }, []);
 
+  if (initialLoading) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <Sidebar />
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Box sx={{ textAlign: "center" }}>
+              <CircularProgress sx={{ mb: 2 }} />
+              <Typography variant="h6" sx={{ color: "#666" }}>
+                Loading AI Tutor...
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
   useEffect(() => {
     if (!user) return;
+    setInitialLoading(true);
     fetch(`${API_URL}/ai-tutor-chats/`, {
       headers: {
         'Authorization': user?.access_token ? `Bearer ${user.access_token}` : ''
       }
     })
       .then(res => res.ok ? res.json() : [])
-        .then(data => setChats(Array.isArray(data) ? data : []))
-        .catch(() => setChats([]));
+        .then(data => {
+          setChats(Array.isArray(data) ? data : []);
+          setInitialLoading(false);
+        })
+        .catch(() => {
+          setChats([]);
+          setInitialLoading(false);
+        });
       }, [user]);
 
   useEffect(() => {

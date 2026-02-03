@@ -1,5 +1,5 @@
 import API_URL from "../config";
-import { Box, Grid, Card, CardContent, Typography, Button, Stack, LinearProgress, Chip, Tab, Tabs, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import { Box, Grid, Card, CardContent, Typography, Button, Stack, LinearProgress, Chip, Tab, Tabs, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress } from "@mui/material";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Section from "../components/Section";
@@ -21,11 +21,33 @@ import EditIcon from "@mui/icons-material/Edit";
 
 export default function Dashboard() {
   const { enrolledCourses } = useCourses();
-  const { getEnrolledCourses: getNonFormalCourses, getCourseProgress: getNonFormalProgress, certificates, courses: nonFormalCoursesList } = useNonFormal();
-  const { getStudentEnrollments, getCourseById, getCourseSchedules, getTeacherCourses, getCourseStudents, scheduleClass } = useFormalEducation();
+  const { getEnrolledCourses: getNonFormalCourses, getCourseProgress: getNonFormalProgress, certificates, courses: nonFormalCoursesList, isLoading: nonFormalLoading } = useNonFormal();
+  const { getStudentEnrollments, getCourseById, getCourseSchedules, getTeacherCourses, getCourseStudents, scheduleClass, loading: formalLoading } = useFormalEducation();
   const { user } = useAuth();
   const { isOpen } = useSidebar();
   const navigate = useNavigate();
+  
+  // Show loading screen until both formal and non-formal data are loaded
+  const isLoading = formalLoading || nonFormalLoading;
+  
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <Sidebar />
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Box sx={{ textAlign: "center" }}>
+              <CircularProgress sx={{ mb: 2 }} />
+              <Typography variant="h6" sx={{ color: "#666" }}>
+                Loading your dashboard...
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
   const [tabValue, setTabValue] = useState(0);
   const [statsModalOpen, setStatsModalOpen] = useState(false);
   const [certModalOpen, setCertModalOpen] = useState(false);
