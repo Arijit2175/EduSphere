@@ -1,6 +1,10 @@
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
 import PersonIcon from "@mui/icons-material/Person";
+  
+  useEffect(() => {
+    localStorage.setItem("informalPosts", JSON.stringify(posts));
+  }, [posts]);
 import axios from "axios";
 import API_URL from "../config";
 import ImageIcon from "@mui/icons-material/Image";
@@ -118,25 +122,6 @@ export default function InformalLearning() {
   const [composer, setComposer] = useState({ title: "", body: "", topic: "Tech", type: "post", tagsInput: "", media: null });
   const [commentDraft, setCommentDraft] = useState({});
   const [aiResponses, setAiResponses] = useState({});
-
-  if (initialLoading) {
-    return (
-      <Box sx={{ display: "flex", minHeight: "100vh" }}>
-        <Sidebar />
-        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-          <Navbar />
-          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Box sx={{ textAlign: "center" }}>
-              <CircularProgress sx={{ mb: 2 }} />
-              <Typography variant="h6" sx={{ color: "#666" }}>
-                Loading discussions...
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      </Box>
-    );
-  }
 
   useEffect(() => {
     localStorage.setItem("informalPosts", JSON.stringify(posts));
@@ -503,6 +488,25 @@ export default function InformalLearning() {
   const formatDate = (iso) => new Date(iso).toLocaleString();
 
 
+
+  if (initialLoading) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <Sidebar />
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Box sx={{ textAlign: "center" }}>
+              <CircularProgress sx={{ mb: 2 }} />
+              <Typography variant="h6" sx={{ color: "#666" }}>
+                Loading discussions...
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>

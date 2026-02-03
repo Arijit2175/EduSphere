@@ -77,26 +77,6 @@ export default function AITutor() {
   const [shuffledPrompts, setShuffledPrompts] = useState([]);
   const chatEndRef = useRef(null);
 
-  // LOADING CHECK AFTER ALL STATE
-  if (initialLoading && user) {
-    return (
-      <Box sx={{ display: "flex", minHeight: "100vh" }}>
-        <Sidebar />
-        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-          <Navbar />
-          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Box sx={{ textAlign: "center" }}>
-              <CircularProgress sx={{ mb: 2 }} />
-              <Typography variant="h6" sx={{ color: "#666" }}>
-                Loading AI Tutor...
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      </Box>
-    );
-  }
-
   // THEN ALL useEffect HOOKS
   useEffect(() => {
     const shuffled = [...examplePrompts].sort(() => Math.random() - 0.5);
@@ -606,6 +586,25 @@ export default function AITutor() {
       </Box>
     </Box>
   );
+
+  if (initialLoading && user) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <Sidebar />
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Box sx={{ textAlign: "center" }}>
+              <CircularProgress sx={{ mb: 2 }} />
+              <Typography variant="h6" sx={{ color: "#666" }}>
+                Loading AI Tutor...
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
