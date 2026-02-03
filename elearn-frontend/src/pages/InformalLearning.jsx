@@ -119,6 +119,53 @@ export default function InformalLearning() {
   const [commentDraft, setCommentDraft] = useState({});
   const [aiResponses, setAiResponses] = useState({});
 
+  const normalizePost = (post) => {
+    const parsedComments = typeof post.comments === "string"
+      ? (() => { try { return JSON.parse(post.comments); } catch { return []; } })()
+      : (post.comments || []);
+    const parsedTags = Array.isArray(post.tags)
+      ? post.tags
+      : typeof post.tags === "string"
+        ? post.tags.split(",").map((t) => t.trim()).filter(Boolean)
+        : [];
+    const parsedLikers = Array.isArray(post.likers)
+      ? post.likers
+      : typeof post.likers === "string"
+        ? post.likers.split(",").map((x) => x.trim()).filter(Boolean).map(Number)
+        : (post.likers || []);
+    const parsedSavers = Array.isArray(post.savers)
+      ? post.savers
+      : typeof post.savers === "string"
+        ? post.savers.split(",").map((x) => x.trim()).filter(Boolean).map(Number)
+        : (post.savers || []);
+
+    const createdAt = post.created_at || post.createdAt || new Date().toISOString();
+    const authorId = post.author_id ?? post.authorId ?? post.userId;
+
+    return {
+      ...post,
+      id: post.id,
+      title: post.title,
+      content: post.content || post.body || "",
+      body: post.content || post.body || "",
+      topic: post.topic || "Tech",
+      type: post.type || "post",
+      author_id: authorId,
+      authorId,
+      author: post.author_name || post.userName || post.creator || "Anonymous",
+      creator_email: post.creator_email || post.email || post.author_name || post.userName || post.creator,
+      creator_role: post.creator_role || post.role,
+      created_at: createdAt,
+      createdAt,
+      likes: post.likes_count ?? post.likes ?? 0,
+      likers: parsedLikers,
+      comments: parsedComments,
+      tags: parsedTags,
+      savers: parsedSavers,
+      media_url: post.media_url || post.mediaUrl,
+    };
+  };
+
   useEffect(() => {
     localStorage.setItem("informalPosts", JSON.stringify(posts));
   }, [posts]);
@@ -128,23 +175,7 @@ export default function InformalLearning() {
     setInitialLoading(true);
     axios.get(`${API_URL}/informal-posts/`)
       .then(res => {
-        const posts = (res.data || []).map(post => ({
-          id: post.id,
-          title: post.title,
-          content: post.content || post.body || "",
-          body: post.content || post.body || "",
-          topic: post.topic || "Tech",
-          type: post.type || "post",
-          authorId: post.author_id || post.userId,
-          author: post.author_name || post.userName || "Anonymous",
-          avatar: post.author_avatar || "",
-          createdAt: post.created_at || post.createdAt || new Date().toISOString(),
-          likes: post.likes_count || 0,
-          likers: post.likers || [],
-          comments: post.comments || [],
-          tags: post.tags || [],
-          media: post.media || null,
-        }));
+        const posts = (res.data || []).map(normalizePost);
         setPosts(posts);
         setInitialLoading(false);
       })
@@ -258,15 +289,7 @@ export default function InformalLearning() {
         // Re-fetch all posts to guarantee sync with DB
         axios.get(`${API_URL}/informal-posts/`)
           .then(res2 => {
-            const posts = (res2.data || []).map(post => ({
-              ...post,
-              comments: typeof post.comments === 'string' ? (() => { try { return JSON.parse(post.comments); } catch { return []; } })() : (post.comments || []),
-              savers: Array.isArray(post.savers)
-                ? post.savers
-                : post.savers == null
-                  ? []
-                  : [post.savers]
-            }));
+            const posts = (res2.data || []).map(normalizePost);
             setPosts(posts);
           })
           .catch(() => {
@@ -418,15 +441,7 @@ export default function InformalLearning() {
         // After creating, re-fetch all posts for instant sync
         axios.get(`${API_URL}/informal-posts/`)
           .then(res2 => {
-            const posts = (res2.data || []).map(post => ({
-              ...post,
-              comments: typeof post.comments === 'string' ? (() => { try { return JSON.parse(post.comments); } catch { return []; } })() : (post.comments || []),
-              savers: Array.isArray(post.savers)
-                ? post.savers
-                : post.savers == null
-                  ? []
-                  : [post.savers]
-            }));
+            const posts = (res2.data || []).map(normalizePost);
             setPosts(posts);
           })
           .catch(() => {
@@ -763,34 +778,36 @@ export default function InformalLearning() {
                               {post.title}
                             </Typography>
                             <Typography variant="caption" sx={{ color: "#6b7280", fontSize: "0.8rem" }}>
-                              {/* Always show email and role if present, else fallback to 'Unknown' */}
+                              {/* Always show email and role if present, else fallback to author/creator */}
                               {post.creator_email
                                 ? `${post.creator_email} (${post.creator_role || "role unknown"})`
-                                : post.email
-                                  ? `${post.email} (${post.role || "role unknown"})`
-                                  : "Unknown"}
+                                : post.author
+                                  ? post.author
+                                  : post.creator
+                                    ? post.creator
+                                    : "Unknown"}
                               {post.created_at || post.createdAt ? (
                                 <> • {formatDate(post.created_at || post.createdAt)}</>
                               ) : null}
                             </Typography>
-                                                  {/* Show tags if present */}
-                                                  {post.tags && (
-                                                    <Stack direction="row" spacing={1} sx={{ mt: 1, mb: 1 }}>
-                                                      {post.tags.split(",").map((tag, idx) => (
-                                                        <Chip key={idx} label={tag.trim()} size="small" />
-                                                      ))}
-                                                    </Stack>
-                                                  )}
-                                                  {/* Show media if present */}
-                                                  {post.media_url && (
-                                                    <Box sx={{ mt: 1, mb: 1 }}>
-                                                      {post.media_url.startsWith("data:image") ? (
-                                                        <img src={post.media_url} alt="uploaded" style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }} />
-                                                      ) : post.media_url.startsWith("data:video") ? (
-                                                        <video src={post.media_url} controls style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }} />
-                                                      ) : null}
-                                                    </Box>
-                                                  )}
+                            {/* Show tags if present */}
+                            {Array.isArray(post.tags) && post.tags.length > 0 && (
+                              <Stack direction="row" spacing={1} sx={{ mt: 1, mb: 1 }}>
+                                {post.tags.map((tag, idx) => (
+                                  <Chip key={idx} label={tag} size="small" />
+                                ))}
+                              </Stack>
+                            )}
+                            {/* Show media if present */}
+                            {post.media_url && (
+                              <Box sx={{ mt: 1, mb: 1 }}>
+                                {post.media_url.startsWith("data:image") ? (
+                                  <img src={post.media_url} alt="uploaded" style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }} />
+                                ) : post.media_url.startsWith("data:video") ? (
+                                  <video src={post.media_url} controls style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }} />
+                                ) : null}
+                              </Box>
+                            )}
                           </Box>
                           <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
                             <Chip size="small" label={post.topic} icon={topicIcon[post.topic]} />
