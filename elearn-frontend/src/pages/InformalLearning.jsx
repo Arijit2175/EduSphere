@@ -142,7 +142,37 @@ export default function InformalLearning() {
     localStorage.setItem("informalPosts", JSON.stringify(posts));
   }, [posts]);
 
-
+  // Fetch initial posts from backend
+  useEffect(() => {
+    setInitialLoading(true);
+    axios.get(`${API_URL}/informal-posts/`)
+      .then(res => {
+        const posts = (res.data || []).map(post => ({
+          id: post.id,
+          title: post.title,
+          content: post.content || post.body || "",
+          body: post.content || post.body || "",
+          topic: post.topic || "Tech",
+          type: post.type || "post",
+          authorId: post.author_id || post.userId,
+          author: post.author_name || post.userName || "Anonymous",
+          avatar: post.author_avatar || "",
+          createdAt: post.created_at || post.createdAt || new Date().toISOString(),
+          likes: post.likes_count || 0,
+          likers: post.likers || [],
+          comments: post.comments || [],
+          tags: post.tags || [],
+          media: post.media || null,
+        }));
+        setPosts(posts);
+        setInitialLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching posts:", err);
+        setPosts([]);
+        setInitialLoading(false);
+      });
+  }, [user]);
 
   // Fetch topics and followed topics from backend
   useEffect(() => {

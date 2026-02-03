@@ -114,16 +114,27 @@ export default function AITutor() {
         'Authorization': user?.access_token ? `Bearer ${user.access_token}` : ''
       }
     })
-      .then(res => res.ok ? res.json() : [])
-        .then(data => {
-          setChats(Array.isArray(data) ? data : []);
-          setInitialLoading(false);
-        })
-        .catch(() => {
+      .then(res => {
+        if (!res.ok) {
+          console.error('Failed to fetch chats:', res.status);
           setChats([]);
           setInitialLoading(false);
-        });
-      }, [user]);
+          return;
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data) {
+          setChats(Array.isArray(data) ? data : []);
+        }
+        setInitialLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching chats:', err);
+        setChats([]);
+        setInitialLoading(false);
+      });
+  }, [user]);
 
   useEffect(() => {
     if (currentChatId && user) {
