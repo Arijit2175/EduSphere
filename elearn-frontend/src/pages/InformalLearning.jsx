@@ -1,10 +1,6 @@
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
 import PersonIcon from "@mui/icons-material/Person";
-  
-  useEffect(() => {
-    localStorage.setItem("informalPosts", JSON.stringify(posts));
-  }, [posts]);
 import axios from "axios";
 import API_URL from "../config";
 import ImageIcon from "@mui/icons-material/Image";
