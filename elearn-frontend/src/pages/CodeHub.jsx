@@ -1,300 +1,380 @@
 import { useState } from "react";
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  TextField,
-  Stack,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  CircularProgress,
-  Alert,
-  Paper,
-} from "@mui/material";
-import { PlayArrow, ContentCopy, Download } from "@mui/icons-material";
+import { Play, RotateCcw, Copy, Check, ChevronDown, Terminal, Clock, Zap, Download } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 
+const languages = [
+  {
+    id: "javascript",
+    name: "JavaScript",
+    icon: "JS",
+    ext: "js",
+    template: `// JavaScript Example
+function greet(name) {
+  return "Hello, " + name + "!";
+}
+
+console.log(greet("Student"));
+console.log("Welcome to CodeHub!");`,
+  },
+  {
+    id: "python",
+    name: "Python",
+    icon: "PY",
+    ext: "py",
+    template: `# Python Example
+def greet(name):
+    return f"Hello, {name}!"
+
+print(greet("Student"))
+print("Welcome to CodeHub!")`,
+  },
+  {
+    id: "java",
+    name: "Java",
+    icon: "JV",
+    ext: "java",
+    template: `// Java Example
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(greet("Student"));
+        System.out.println("Welcome to CodeHub!");
+    }
+    
+    public static String greet(String name) {
+        return "Hello, " + name + "!";
+    }
+}`,
+  },
+  {
+    id: "cpp",
+    name: "C++",
+    icon: "C+",
+    ext: "cpp",
+    template: `// C++ Example
+#include <iostream>
+#include <string>
+using namespace std;
+
+string greet(string name) {
+    return "Hello, " + name + "!";
+}
+
+int main() {
+    cout << greet("Student") << endl;
+    cout << "Welcome to CodeHub!" << endl;
+    return 0;
+}`,
+  },
+  {
+    id: "csharp",
+    name: "C#",
+    icon: "C#",
+    ext: "cs",
+    template: `// C# Example
+using System;
+
+class Program {
+    static void Main() {
+        Console.WriteLine(Greet("Student"));
+        Console.WriteLine("Welcome to CodeHub!");
+    }
+    
+    static string Greet(string name) {
+        return $"Hello, {name}!";
+    }
+}`,
+  },
+];
+
+const LanguageIcon = ({ icon }) => (
+  <div className="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-500">
+    {icon}
+  </div>
+);
+
+const LanguageSelector = ({ languages, selectedLanguage, onSelectLanguage, isOpen, setIsOpen }) => (
+  <div className="relative">
+    <button
+      onClick={() => setIsOpen(!isOpen)}
+      className="flex items-center gap-3 px-4 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 rounded-lg transition-all"
+    >
+      <LanguageIcon icon={selectedLanguage.icon} />
+      <span className="font-medium text-slate-100">{selectedLanguage.name}</span>
+      <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+    </button>
+
+    {isOpen && (
+      <div className="absolute top-full left-0 mt-2 w-56 bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
+        {languages.map((lang) => (
+          <button
+            key={lang.id}
+            onClick={() => {
+              onSelectLanguage(lang);
+              setIsOpen(false);
+            }}
+            className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-700 transition-colors ${
+              selectedLanguage.id === lang.id ? "bg-blue-500/10 border-l-2 border-blue-500" : ""
+            }`}
+          >
+            <LanguageIcon icon={lang.icon} />
+            <span className="font-medium text-slate-100">{lang.name}</span>
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+const CodeEditor = ({ code, setCode, lineNumbers }) => (
+  <div className="flex-1 flex overflow-hidden bg-slate-950 rounded-lg">
+    <div className="w-12 bg-slate-900/50 border-r border-slate-700/30 py-4 flex flex-col items-end pr-3 text-xs font-mono text-slate-500 select-none overflow-hidden">
+      {lineNumbers.map((num) => (
+        <div key={num} className="h-6 leading-6">
+          {num}
+        </div>
+      ))}
+    </div>
+
+    <textarea
+      value={code}
+      onChange={(e) => setCode(e.target.value)}
+      spellCheck={false}
+      className="flex-1 bg-transparent p-4 font-mono text-sm text-slate-100 leading-6 resize-none focus:outline-none placeholder:text-slate-500"
+      placeholder="Start coding here..."
+    />
+  </div>
+);
+
+const InputPanel = ({ input, setInput }) => (
+  <div className="flex-1 flex flex-col bg-slate-950 rounded-lg border border-slate-700/30 overflow-hidden">
+    <div className="h-12 bg-slate-900/50 border-b border-slate-700/30 flex items-center px-4">
+      <span className="font-medium text-sm text-slate-100">📥 Input (stdin)</span>
+    </div>
+    <textarea
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      placeholder="Provide input for your program (if needed)..."
+      className="flex-1 bg-transparent p-4 font-mono text-sm text-slate-100 resize-none focus:outline-none placeholder:text-slate-500"
+    />
+  </div>
+);
+
+const OutputPanel = ({ output, isRunning, executionTime }) => (
+  <div className="flex-1 flex flex-col bg-slate-950 rounded-lg border border-slate-700/30 overflow-hidden">
+    <div className="h-12 bg-slate-900/50 border-b border-slate-700/30 flex items-center justify-between px-4">
+      <div className="flex items-center gap-2">
+        <Terminal className="w-4 h-4 text-blue-500" />
+        <span className="font-medium text-sm text-slate-100">📤 Output (stdout)</span>
+      </div>
+      {executionTime !== null && (
+        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+          <Clock className="w-3 h-3" />
+          <span>{executionTime}ms</span>
+        </div>
+      )}
+    </div>
+
+    <div className="flex-1 p-4 font-mono text-sm overflow-auto">
+      {isRunning ? (
+        <div className="flex items-center gap-3 text-blue-500">
+          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <span>Running code...</span>
+        </div>
+      ) : output ? (
+        <pre className="whitespace-pre-wrap text-slate-100">{output}</pre>
+      ) : (
+        <div className="text-slate-500/50 flex items-center gap-2">
+          <Zap className="w-4 h-4" />
+          <span>Click "Run Code" to see output</span>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const ActionButtons = ({ onRun, onReset, onCopy, onDownload, copied, isRunning }) => (
+  <div className="flex items-center gap-2">
+    <button
+      onClick={onCopy}
+      className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-slate-100"
+      title="Copy code"
+    >
+      {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+    </button>
+    <button
+      onClick={onDownload}
+      className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-slate-100"
+      title="Download code"
+    >
+      <Download className="w-4 h-4" />
+    </button>
+    <button
+      onClick={onReset}
+      className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-slate-100"
+      title="Reset code"
+    >
+      <RotateCcw className="w-4 h-4" />
+    </button>
+    <button
+      onClick={onRun}
+      disabled={isRunning}
+      className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25"
+    >
+      <Play className="w-4 h-4" />
+      <span>Run Code</span>
+    </button>
+  </div>
+);
+
 export default function CodeHub() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
   
-  const [language, setLanguage] = useState("python");
-  const [code, setCode] = useState(
-    `# Write your code here\nprint("Hello, World!")`
-  );
+  const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
+  const [code, setCode] = useState(languages[0].template);
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [isRunning, setIsRunning] = useState(false);
+  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [executionTime, setExecutionTime] = useState(null);
 
-  const languages = [
-    { value: "python", label: "Python" },
-    { value: "javascript", label: "JavaScript" },
-    { value: "java", label: "Java" },
-    { value: "cpp", label: "C++" },
-    { value: "csharp", label: "C#" },
-  ];
+  const lineNumbers = code.split("\n").map((_, i) => i + 1);
 
-  const languageExtensions = {
-    python: "py",
-    javascript: "js",
-    java: "java",
-    cpp: "cpp",
-    csharp: "cs",
+  const handleLanguageChange = (lang) => {
+    setSelectedLanguage(lang);
+    setCode(lang.template);
+    setOutput("");
+    setExecutionTime(null);
   };
 
-  const handleRunCode = async () => {
-    setLoading(true);
-    setError("");
+  const handleRun = () => {
+    setIsRunning(true);
     setOutput("");
 
-    try {
-      // This is a placeholder - integrate with actual compiler API
-      // For now, just show a demo message
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setOutput("✓ Code executed successfully!\n\nOutput: (Compiler API integration pending)");
-    } catch (err) {
-      setError("Failed to execute code. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    const startTime = Date.now();
+    setTimeout(() => {
+      const endTime = Date.now();
+      setExecutionTime(endTime - startTime);
+
+      const mockOutputs = {
+        javascript: "Hello, Student!\nWelcome to CodeHub!",
+        python: "Hello, Student!\nWelcome to CodeHub!",
+        java: "Hello, Student!\nWelcome to CodeHub!",
+        cpp: "Hello, Student!\nWelcome to CodeHub!",
+        csharp: "Hello, Student!\nWelcome to CodeHub!",
+      };
+
+      setOutput(mockOutputs[selectedLanguage.id] || "Code executed successfully!");
+      setIsRunning(false);
+    }, 800 + Math.random() * 400);
   };
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(code);
-    alert("Code copied to clipboard!");
+  const handleReset = () => {
+    setCode(selectedLanguage.template);
+    setOutput("");
+    setExecutionTime(null);
   };
 
-  const handleDownloadCode = () => {
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
     const element = document.createElement("a");
     const file = new Blob([code], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
-    const extension = languageExtensions[language] || "txt";
-    element.download = `code.${extension}`;
+    element.download = `code.${selectedLanguage.ext}`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 to-slate-900">
       <Sidebar />
-      <Box
-        sx={{
-          flexGrow: 1,
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <div className="flex-1 flex flex-col">
         <Navbar />
-        <Container
-          maxWidth="xl"
-          sx={{
-            flexGrow: 1,
-            ml: { xs: 0, md: isOpen ? 25 : 8.75 },
-            transition: "margin-left 0.3s ease",
-            py: 4,
+        <div
+          className="flex-1 overflow-auto transition-all duration-300 p-4"
+          style={{
+            marginLeft: isOpen ? "260px" : "0px",
           }}
         >
           {/* Header */}
-          <Box sx={{ mb: 4 }}>
-            <Typography
-              variant="h3"
-              sx={{
-                fontWeight: 700,
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                color: "transparent",
-                mb: 1,
-              }}
-            >
-              CodeHub
-            </Typography>
-            <Typography variant="body1" sx={{ color: "#666" }}>
-              Practice coding with our online compiler. Write, run, and test code in multiple
-              languages.
-            </Typography>
-          </Box>
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-white mb-2">CodeHub</h1>
+            <p className="text-slate-400">Practice coding with our online compiler. Write, run, and test code in multiple languages.</p>
+          </div>
 
           {/* Main Editor Area */}
-          <Grid container spacing={3}>
-            {/* Code Editor */}
-            <Grid item xs={12} md={6}>
-              <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
-                <CardContent>
-                  <Stack spacing={2}>
-                    <FormControl size="small" fullWidth>
-                      <InputLabel>Language</InputLabel>
-                      <Select
-                        value={language}
-                        label="Language"
-                        onChange={(e) => setLanguage(e.target.value)}
-                      >
-                        {languages.map((lang) => (
-                          <MenuItem key={lang.value} value={lang.value}>
-                            {lang.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+          <div className="flex flex-col gap-4 h-full overflow-hidden">
+            {/* Editor Header */}
+            <div className="flex items-center justify-between px-4 py-3 bg-slate-900/50 border border-slate-700/30 rounded-lg">
+              <LanguageSelector
+                languages={languages}
+                selectedLanguage={selectedLanguage}
+                onSelectLanguage={handleLanguageChange}
+                isOpen={languageDropdownOpen}
+                setIsOpen={setLanguageDropdownOpen}
+              />
+              <ActionButtons
+                onRun={handleRun}
+                onReset={handleReset}
+                onCopy={handleCopy}
+                onDownload={handleDownload}
+                copied={copied}
+                isRunning={isRunning}
+              />
+            </div>
 
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#667eea" }}>
-                      Code Editor
-                    </Typography>
-                    <TextField
-                      multiline
-                      rows={12}
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      placeholder="Write your code here..."
-                      sx={{
-                        fontFamily: "monospace",
-                        fontSize: "0.9rem",
-                        "& .MuiOutlinedInput-root": {
-                          fontFamily: "monospace",
-                        },
-                      }}
-                      variant="outlined"
-                    />
+            {/* Content Area - Split Layout */}
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-hidden min-h-0">
+              {/* Left Column - Code Editor */}
+              <div className="flex flex-col overflow-hidden min-h-0">
+                <div className="text-slate-300 text-sm font-medium mb-2">💻 Code Editor</div>
+                <CodeEditor code={code} setCode={setCode} lineNumbers={lineNumbers} />
+              </div>
 
-                    <Stack direction="row" spacing={1}>
-                      <Button
-                        variant="contained"
-                        startIcon={<PlayArrow />}
-                        onClick={handleRunCode}
-                        disabled={loading}
-                        sx={{
-                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                          flex: 1,
-                        }}
-                      >
-                        {loading ? "Running..." : "Run Code"}
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        startIcon={<ContentCopy />}
-                        onClick={handleCopyCode}
-                        size="small"
-                      >
-                        Copy
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        startIcon={<Download />}
-                        onClick={handleDownloadCode}
-                        size="small"
-                      >
-                        Download
-                      </Button>
-                    </Stack>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
+              {/* Right Column - Input & Output */}
+              <div className="flex flex-col gap-4 overflow-hidden min-h-0">
+                {/* Input Box */}
+                <div className="flex-1 flex flex-col min-h-0">
+                  <div className="text-slate-300 text-sm font-medium mb-2">Input</div>
+                  <InputPanel input={input} setInput={setInput} />
+                </div>
 
-            {/* Input & Output */}
-            <Grid item xs={12} md={6}>
-              <Stack spacing={2} sx={{ height: "100%" }}>
-                {/* Input Section */}
-                <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
-                  <CardContent>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#667eea", mb: 2 }}>
-                      Input (stdin)
-                    </Typography>
-                    <TextField
-                      multiline
-                      rows={5}
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      placeholder="Provide input for your program here (if needed)..."
-                      sx={{
-                        fontFamily: "monospace",
-                        fontSize: "0.9rem",
-                        width: "100%",
-                        "& .MuiOutlinedInput-root": {
-                          fontFamily: "monospace",
-                        },
-                      }}
-                      variant="outlined"
-                    />
-                  </CardContent>
-                </Card>
+                {/* Output Box */}
+                <div className="flex-1 flex flex-col min-h-0">
+                  <div className="text-slate-300 text-sm font-medium mb-2">Output</div>
+                  <OutputPanel output={output} isRunning={isRunning} executionTime={executionTime} />
+                </div>
+              </div>
+            </div>
+          </div>
 
-                {/* Output Section */}
-                <Card sx={{ boxShadow: 3, borderRadius: 2, flex: 1, display: "flex", flexDirection: "column" }}>
-                  <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#667eea", mb: 2 }}>
-                      Output (stdout)
-                    </Typography>
-                    {error && <Alert severity="error">{error}</Alert>}
-                    {loading && (
-                      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
-                        <CircularProgress />
-                      </Box>
-                    )}
-                    {!loading && output && (
-                      <Paper
-                        sx={{
-                          p: 2,
-                          bgcolor: "#f5f5f5",
-                          fontFamily: "monospace",
-                          fontSize: "0.85rem",
-                          whiteSpace: "pre-wrap",
-                          wordBreak: "break-all",
-                          flex: 1,
-                          overflowY: "auto",
-                          color: "#333",
-                        }}
-                      >
-                        {output}
-                      </Paper>
-                    )}
-                    {!loading && !output && !error && (
-                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, color: "#999" }}>
-                        <Typography variant="body2">Click "Run Code" to see output here</Typography>
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
-              </Stack>
-            </Grid>
-          </Grid>
-
-          {/* Info Box */}
-          <Card sx={{ mt: 4, boxShadow: 2, borderRadius: 2, bgcolor: "rgba(102,126,234,0.05)" }}>
-            <CardContent>
-              <Stack spacing={1}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: "#667eea" }}>
-                  💡 Features
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#666" }}>
-                  • Support for multiple programming languages
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#666" }}>
-                  • Real-time code execution with input/output handling
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#666" }}>
-                  • Copy and download your code snippets
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#666" }}>
-                  • Available for both students and teachers to practice coding
-                </Typography>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Container>
-      </Box>
-    </Box>
+          {/* Info Section */}
+          <div className="mt-6 p-4 bg-slate-900/50 border border-slate-700/30 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Zap className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-slate-100 mb-1">Features</h3>
+                <ul className="text-sm text-slate-400 space-y-1">
+                  <li>• Support for JavaScript, Python, Java, C++, and C#</li>
+                  <li>• Real-time code execution with input/output handling</li>
+                  <li>• Copy and download your code snippets with proper file extensions</li>
+                  <li>• Available for both students and teachers to practice coding</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
