@@ -23,6 +23,7 @@ import NonFormalCourseDetail from "./pages/NonFormalCourseDetail";
 import NonFormalLearner from "./pages/NonFormalLearner";
 import InformalLearning from "./pages/InformalLearning";
 import AITutor from "./pages/AITutor";
+import CodeHub from "./pages/CodeHub";
 import CourseDetailPage from "./pages/CourseDetailPage";
 import QuizPage from "./pages/QuizPage";
 import Profile from "./pages/Profile";
@@ -150,6 +151,15 @@ const AppShell = () => {
                 element={
                   <ProtectedRoute>
                     <AITutor />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/codehub"
+                element={
+                  <ProtectedRoute>
+                    <CodeHub />
                   </ProtectedRoute>
                 }
               />

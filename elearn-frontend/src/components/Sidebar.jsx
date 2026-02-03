@@ -22,6 +22,7 @@ import {
   Groups,
   SchoolOutlined,
   SmartToy,
+  Code,
 } from "@mui/icons-material";
   // (removed duplicate import)
 import { useAuth } from "../contexts/AuthContext";
@@ -40,6 +41,7 @@ function Sidebar() {
     ...(user?.role === "teacher" ? [] : [{ to: "/nonformal", label: "Courses", icon: MenuBook }]),
     { to: "/informal", label: "Community", icon: Groups },
     { to: "/ai", label: "Lumina", icon: SmartToy },
+    { to: "/codehub", label: "CodeHub", icon: Code },
   ];
 
   return (
