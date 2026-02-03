@@ -20,9 +20,11 @@ export default function NotFound() {
           px: 2,
         }}
       >
-        <Typography variant="h1" sx={{ fontWeight: 800, mb: 2, fontSize: "120px" }}>
-          404
-        </Typography>
+        <img 
+          src="/404.png" 
+          alt="404" 
+          style={{ width: 400, maxWidth: "90%", height: "auto", marginBottom: 24 }}
+        />
         <Typography variant="h4" sx={{ fontWeight: 800, mt: 2 }}>
           Page not found
         </Typography>
