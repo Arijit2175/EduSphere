@@ -136,6 +136,34 @@ export default function AITutor() {
       });
   }, [user]);
 
+    // Fetch chats on mount immediately
+    useEffect(() => {
+      setInitialLoading(true);
+      fetch(`${API_URL}/ai-tutor-chats/`, {
+        headers: user?.access_token ? { 'Authorization': `Bearer ${user.access_token}` } : {}
+      })
+        .then(res => {
+          if (!res.ok) {
+            console.error('Failed to fetch chats:', res.status);
+            setChats([]);
+            setInitialLoading(false);
+            return;
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data) {
+            setChats(Array.isArray(data) ? data : []);
+          }
+          setInitialLoading(false);
+        })
+        .catch((err) => {
+          console.error('Error fetching chats:', err);
+          setChats([]);
+          setInitialLoading(false);
+        });
+    }, []);
+
   useEffect(() => {
     if (currentChatId && user) {
       fetch(`${API_URL}/ai-tutor-chats/${currentChatId}`, {

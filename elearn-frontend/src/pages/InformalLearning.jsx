@@ -172,7 +172,7 @@ export default function InformalLearning() {
         setPosts([]);
         setInitialLoading(false);
       });
-  }, [user]);
+    }, []);
 
   // Fetch topics and followed topics from backend
   useEffect(() => {
