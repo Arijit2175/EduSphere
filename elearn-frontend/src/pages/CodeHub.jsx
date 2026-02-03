@@ -378,5 +378,3 @@ export default function CodeHub() {
     </div>
   );
 }
-
-export default CodeHub;
