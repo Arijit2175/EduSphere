@@ -3,6 +3,7 @@ import { Code2, Play, RotateCcw, Copy, Check, Download, ChevronDown, Terminal, C
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { useSidebar } from "../contexts/SidebarContext";
+import LetterGlitchBackground from "../components/LetterGlitchBackground";
 import API_URL from "../config";
 import "./CodeHub.css";
 
@@ -325,6 +326,15 @@ export default function CodeHub() {
         <Sidebar />
         <div className={`main-content-wrapper ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
           <div className="codehub-container">
+            <div className="glitch-bg-container">
+              <LetterGlitchBackground
+                glitchColors={["#4a3a5c", "#d4a5e8", "#6b5b7f"]}
+                glitchSpeed={40}
+                smooth={true}
+                outerVignette={true}
+                centerVignette={false}
+              />
+            </div>
             {/* Header */}
             <header className="codehub-header">
               <div className="header-left">

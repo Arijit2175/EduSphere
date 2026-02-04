@@ -26,6 +26,18 @@
   background-color: var(--ch-bg);
   font-family: var(--ch-font-sans);
   color: var(--ch-text);
+  position: relative;
+}
+
+/* Glitch background layer */
+.glitch-bg-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* Header */
