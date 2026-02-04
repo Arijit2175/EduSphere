@@ -10,6 +10,7 @@ const languages = [
     id: "javascript",
     name: "JavaScript",
     icon: "JS",
+    logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg",
     ext: "js",
     template: `// JavaScript Example
 function greet(name) {
@@ -23,6 +24,7 @@ console.log("Welcome to CodeHub!");`,
     id: "python",
     name: "Python",
     icon: "PY",
+    logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg",
     ext: "py",
     template: `# Python Example
 def greet(name):
@@ -35,6 +37,7 @@ print("Welcome to CodeHub!")`,
     id: "java",
     name: "Java",
     icon: "JV",
+    logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg",
     ext: "java",
     template: `// Java Example
 public class Main {
@@ -52,6 +55,7 @@ public class Main {
     id: "cpp",
     name: "C++",
     icon: "C+",
+    logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg",
     ext: "cpp",
     template: `// C++ Example
 #include <iostream>
@@ -72,6 +76,7 @@ int main() {
     id: "csharp",
     name: "C#",
     icon: "C#",
+    logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg",
     ext: "cs",
     template: `// C# Example
 using System;
@@ -89,14 +94,24 @@ class Program {
   },
 ];
 
-const LanguageIcon = ({ icon }) => (
-  <div className="language-icon">{icon}</div>
-);
+const LanguageIcon = ({ icon, logo, name }) => {
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <div className="language-icon">
+      {logo && !imageError ? (
+        <img src={logo} alt={`${name} logo`} onError={() => setImageError(true)} loading="lazy" />
+      ) : (
+        <span>{icon}</span>
+      )}
+    </div>
+  );
+};
 
 const LanguageSelector = ({ languages, selectedLanguage, onSelectLanguage, isOpen, setIsOpen }) => (
   <div className="language-selector">
     <button className="language-selector-btn" onClick={() => setIsOpen(!isOpen)}>
-      <LanguageIcon icon={selectedLanguage.icon} />
+      <LanguageIcon icon={selectedLanguage.icon} logo={selectedLanguage.logo} name={selectedLanguage.name} />
       <span className="language-name">{selectedLanguage.name}</span>
       <ChevronDown className={`chevron-icon ${isOpen ? "rotated" : ""}`} size={14} />
     </button>
@@ -114,7 +129,7 @@ const LanguageSelector = ({ languages, selectedLanguage, onSelectLanguage, isOpe
               }}
               className={`language-option ${selectedLanguage.id === lang.id ? "selected" : ""}`}
             >
-              <LanguageIcon icon={lang.icon} />
+              <LanguageIcon icon={lang.icon} logo={lang.logo} name={lang.name} />
               <span className="language-name">{lang.name}</span>
             </button>
           ))}

@@ -104,6 +104,16 @@
   color: var(--ch-text);
 }
 
+.language-icon img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.language-icon span {
+  line-height: 1;
+}
+
 .language-name {
   font-weight: 500;
   font-size: 14px;
