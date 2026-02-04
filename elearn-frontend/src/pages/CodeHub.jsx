@@ -151,7 +151,7 @@ const LanguageSelector = ({ languages, selectedLanguage, onSelectLanguage, isOpe
   </div>
 );
 
-const CodeEditor = ({ code, setCode }) => {
+const CodeEditor = ({ code, setCode, fontSize }) => {
   const lineNumbers = code.split("\n").map((_, i) => i + 1);
 
   return (
@@ -168,6 +168,7 @@ const CodeEditor = ({ code, setCode }) => {
         onChange={(e) => setCode(e.target.value)}
         spellCheck={false}
         className="code-textarea"
+        style={{ fontSize: `${fontSize}px` }}
         placeholder="Start coding here..."
       />
     </div>
@@ -250,7 +251,7 @@ export default function CodeHub() {
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [executionTime, setExecutionTime] = useState(null);
-  const [bgFontSize, setBgFontSize] = useState(16);
+  const [codeFontSize, setCodeFontSize] = useState(14);
 
   const handleLanguageChange = (lang) => {
     setSelectedLanguage(lang);
@@ -333,7 +334,6 @@ export default function CodeHub() {
               smooth={true}
               outerVignette={true}
               centerVignette={false}
-              fontSize={bgFontSize}
             />
             {/* Header */}
             <header className="codehub-header">
@@ -345,17 +345,20 @@ export default function CodeHub() {
               </div>
               <div className="header-right">
                 <div className="font-size-control">
-                  <label htmlFor="bg-font-size">BG Size:</label>
-                  <input
-                    id="bg-font-size"
-                    type="range"
-                    min="8"
-                    max="24"
-                    value={bgFontSize}
-                    onChange={(e) => setBgFontSize(Number(e.target.value))}
-                    className="font-size-slider"
-                  />
-                  <span className="font-size-display">{bgFontSize}</span>
+                  <label htmlFor="code-font-size">Font Size:</label>
+                  <select
+                    id="code-font-size"
+                    value={codeFontSize}
+                    onChange={(e) => setCodeFontSize(Number(e.target.value))}
+                    className="font-size-dropdown"
+                  >
+                    <option value={12}>12px</option>
+                    <option value={14}>14px</option>
+                    <option value={16}>16px</option>
+                    <option value={18}>18px</option>
+                    <option value={20}>20px</option>
+                    <option value={24}>24px</option>
+                  </select>
                 </div>
                 <LanguageSelector
                   languages={languages}
@@ -379,7 +382,7 @@ export default function CodeHub() {
             <main className="codehub-main">
               {/* Code Editor - Left Panel */}
               <div className="editor-panel">
-                <CodeEditor code={code} setCode={setCode} />
+                <CodeEditor code={code} setCode={setCode} fontSize={codeFontSize} />
               </div>
 
               {/* Right Panel - Input & Output */}

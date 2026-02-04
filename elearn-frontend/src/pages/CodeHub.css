@@ -87,19 +87,24 @@
   font-weight: 500;
 }
 
-.font-size-slider {
-  width: 80px;
-  height: 4px;
+.font-size-dropdown {
+  padding: 4px 8px;
+  background-color: var(--ch-bg);
+  border: 1px solid var(--ch-border);
+  border-radius: 6px;
+  color: var(--ch-text);
+  font-size: 12px;
   cursor: pointer;
-  accent-color: var(--ch-accent);
+  font-family: var(--ch-font-sans);
 }
 
-.font-size-display {
-  font-size: 12px;
-  color: var(--ch-text);
-  font-weight: 600;
-  min-width: 20px;
-  text-align: center;
+.font-size-dropdown:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.font-size-dropdown:focus {
+  outline: none;
+  border-color: var(--ch-accent);
 }
 
 /* Language Selector */
@@ -361,7 +366,7 @@
 }
 
 .code-textarea::placeholder {
-  color: var(--ch-text-placeholder);
+  color: var(--ch-text);
 }
 
 /* Panels */
@@ -412,7 +417,7 @@
 }
 
 .panel-textarea::placeholder {
-  color: var(--ch-text-placeholder);
+  color: var(--ch-text);
 }
 
 .time-badge {
@@ -454,7 +459,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--ch-text-placeholder);
+  color: var(--ch-text);
   font-size: 12px;
 }
 
@@ -468,7 +473,7 @@
   justify-content: space-between;
   padding: 0 12px;
   font-size: 10px;
-  color: var(--ch-text-muted);
+  color: var(--ch-text);
 }
 
 /* Responsive */
