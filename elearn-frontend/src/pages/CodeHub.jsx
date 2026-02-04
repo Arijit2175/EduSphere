@@ -334,6 +334,7 @@ export default function CodeHub() {
             {/* Footer Status */}
             <footer className="codehub-footer">
               <span>Ready</span>
+              <span>© 2025 EduSphere. All rights reserved.</span>
               <span>{selectedLanguage.name} • UTF-8</span>
             </footer>
           </div>
