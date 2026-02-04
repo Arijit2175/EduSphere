@@ -3,6 +3,7 @@ import { Code2, Play, RotateCcw, Copy, Check, Download, ChevronDown, Terminal, C
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { useSidebar } from "../contexts/SidebarContext";
+import API_URL from "../config";
 import "./CodeHub.css";
 
 const languages = [
@@ -12,6 +13,8 @@ const languages = [
     icon: "JS",
     logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg",
     ext: "js",
+    jdoodleLanguage: "nodejs",
+    jdoodleVersionIndex: "0",
     template: `// JavaScript Example
 function greet(name) {
   return "Hello, " + name + "!";
@@ -26,6 +29,8 @@ console.log("Welcome to CodeHub!");`,
     icon: "PY",
     logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg",
     ext: "py",
+    jdoodleLanguage: "python3",
+    jdoodleVersionIndex: "0",
     template: `# Python Example
 def greet(name):
     return f"Hello, {name}!"
@@ -39,6 +44,8 @@ print("Welcome to CodeHub!")`,
     icon: "JV",
     logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg",
     ext: "java",
+    jdoodleLanguage: "java",
+    jdoodleVersionIndex: "0",
     template: `// Java Example
 public class Main {
     public static void main(String[] args) {
@@ -57,6 +64,8 @@ public class Main {
     icon: "C+",
     logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg",
     ext: "cpp",
+    jdoodleLanguage: "cpp17",
+    jdoodleVersionIndex: "0",
     template: `// C++ Example
 #include <iostream>
 #include <string>
@@ -78,6 +87,8 @@ int main() {
     icon: "C#",
     logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg",
     ext: "cs",
+    jdoodleLanguage: "csharp",
+    jdoodleVersionIndex: "0",
     template: `// C# Example
 using System;
 
@@ -246,27 +257,40 @@ export default function CodeHub() {
     setExecutionTime(null);
   };
 
-  const handleRun = () => {
+  const handleRun = async () => {
     setIsRunning(true);
     setOutput("");
 
     const startTime = Date.now();
-    setTimeout(() => {
+    try {
+      const res = await fetch(`${API_URL}/code-execution/run`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code,
+          language: selectedLanguage.jdoodleLanguage,
+          versionIndex: selectedLanguage.jdoodleVersionIndex,
+          stdin: input,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        const message = data?.detail || "Execution failed.";
+        setOutput(`Error: ${message}`);
+      } else {
+        const finalOutput = data?.output || data?.error || "(No output)";
+        setOutput(finalOutput);
+      }
+    } catch (error) {
+      setOutput(`Error: ${error?.message || "Unable to run code."}`);
+    } finally {
       const endTime = Date.now();
       setExecutionTime(endTime - startTime);
-
-      const mockOutputs = {
-        javascript: "Hello, Student!\nWelcome to CodeHub!",
-        python: "Hello, Student!\nWelcome to CodeHub!",
-        java: "Hello, Student!\nWelcome to CodeHub!",
-        cpp: "Hello, Student!\nWelcome to CodeHub!",
-        csharp: "Hello, Student!\nWelcome to CodeHub!",
-        typescript: "Hello, Student!\nWelcome to CodeHub!",
-      };
-
-      setOutput(mockOutputs[selectedLanguage.id] || "Code executed successfully!");
       setIsRunning(false);
-    }, 600 + Math.random() * 300);
+    }
   };
 
   const handleReset = () => {

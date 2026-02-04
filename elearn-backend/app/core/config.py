@@ -21,6 +21,9 @@ REPLICATE_MODEL = os.getenv("REPLICATE_MODEL", "replicate/mistral-7b-instruct-v0
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "models/gemini-2.5-flash")
 
+JDOODLE_CLIENT_ID = os.getenv("JDOODLE_CLIENT_ID", "")
+JDOODLE_CLIENT_SECRET = os.getenv("JDOODLE_CLIENT_SECRET", "")
+
 RATE_LIMIT_PER_MINUTE = int(os.getenv("RATE_LIMIT_PER_MINUTE", "60"))
 RATE_LIMIT_AUTH_PER_MINUTE = int(os.getenv("RATE_LIMIT_AUTH_PER_MINUTE", "10"))
 

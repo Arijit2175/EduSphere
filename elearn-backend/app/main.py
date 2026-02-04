@@ -6,7 +6,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.api import auth, courses, enrollments, assignments, lessons, attendance, quizzes, resources, certificates, ai_tutor_chats, ai_tutor, class_schedules, contact_messages, nonformal, user, forgot_password, informal_posts, topics
+from app.api import auth, courses, enrollments, assignments, lessons, attendance, quizzes, resources, certificates, ai_tutor_chats, ai_tutor, class_schedules, contact_messages, nonformal, user, forgot_password, informal_posts, topics, code_execution
 from app.core.config import RATE_LIMIT_PER_MINUTE
 from app.db import get_db_connection
 
@@ -66,6 +66,7 @@ app.include_router(class_schedules.router)
 app.include_router(contact_messages.router)
 app.include_router(nonformal.router)
 app.include_router(informal_posts.router)
+app.include_router(code_execution.router)
 
 app.include_router(topics.router)
 
