@@ -326,15 +326,13 @@ export default function CodeHub() {
         <Sidebar />
         <div className={`main-content-wrapper ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
           <div className="codehub-container">
-            <div className="glitch-bg-container">
-              <LetterGlitchBackground
-                glitchColors={["#4a3a5c", "#d4a5e8", "#6b5b7f"]}
-                glitchSpeed={40}
-                smooth={true}
-                outerVignette={true}
-                centerVignette={false}
-              />
-            </div>
+            <LetterGlitchBackground
+              glitchColors={["#4a3a5c", "#d4a5e8", "#6b5b7f"]}
+              glitchSpeed={50}
+              smooth={true}
+              outerVignette={true}
+              centerVignette={false}
+            />
             {/* Header */}
             <header className="codehub-header">
               <div className="header-left">
