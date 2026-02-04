@@ -208,7 +208,7 @@ const LetterGlitchBackground = ({
     overflow: 'hidden',
     zIndex: -1,
     pointerEvents: 'none',
-    filter: 'blur(1.5px)'
+    filter: 'blur(3px)'
   };
 
   const canvasStyle = {
