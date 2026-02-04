@@ -224,23 +224,37 @@ const OutputPanel = ({ output, isRunning, executionTime }) => (
   </div>
 );
 
-const ActionButtons = ({ onRun, onReset, onCopy, onDownload, copied, isRunning }) => (
-  <div className="action-buttons">
-    <button className="icon-btn" onClick={onCopy} title="Copy code">
-      {copied ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
-    </button>
-    <button className="icon-btn" onClick={onDownload} title="Download code">
-      <Download size={16} />
-    </button>
-    <button className="icon-btn" onClick={onReset} title="Reset code">
-      <RotateCcw size={16} />
-    </button>
-    <button className="run-btn" onClick={onRun} disabled={isRunning}>
-      {isRunning ? <div className="spinner" /> : <Play size={16} />}
-      <span>{isRunning ? "Running..." : "Run"}</span>
-    </button>
-  </div>
-);
+const ActionButtons = ({ onRun, onReset, onCopy, onDownload, copied, isRunning, code, lastRunTime, cooldownSeconds }) => {
+  const now = Date.now();
+  const timeSinceLastRun = (now - lastRunTime) / 1000;
+  const isOnCooldown = timeSinceLastRun < cooldownSeconds;
+  const isCodeEmpty = !code.trim();
+  const isDisabled = isRunning || isCodeEmpty || isOnCooldown;
+  const cooldownRemaining = Math.ceil(cooldownSeconds - timeSinceLastRun);
+
+  return (
+    <div className="action-buttons">
+      <button className="icon-btn" onClick={onCopy} title="Copy code">
+        {copied ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
+      </button>
+      <button className="icon-btn" onClick={onDownload} title="Download code">
+        <Download size={16} />
+      </button>
+      <button className="icon-btn" onClick={onReset} title="Reset code">
+        <RotateCcw size={16} />
+      </button>
+      <button 
+        className="run-btn" 
+        onClick={onRun} 
+        disabled={isDisabled}
+        title={isCodeEmpty ? "Code cannot be empty" : isOnCooldown ? `Wait ${cooldownRemaining}s` : "Run code"}
+      >
+        {isRunning ? <div className="spinner" /> : <Play size={16} />}
+        <span>{isRunning ? "Running..." : isOnCooldown ? `Wait ${cooldownRemaining}s` : "Run"}</span>
+      </button>
+    </div>
+  );
+};
 
 export default function CodeHub() {
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
@@ -252,6 +266,9 @@ export default function CodeHub() {
   const [copied, setCopied] = useState(false);
   const [executionTime, setExecutionTime] = useState(null);
   const [codeFontSize, setCodeFontSize] = useState(14);
+  const [lastRunTime, setLastRunTime] = useState(0);
+  const COOLDOWN_SECONDS = 3;
+  const MAX_CODE_SIZE = 10000; // 10KB limit
 
   const handleLanguageChange = (lang) => {
     setSelectedLanguage(lang);
@@ -261,6 +278,33 @@ export default function CodeHub() {
   };
 
   const handleRun = async () => {
+    // Check if code is empty
+    if (!code.trim()) {
+      setOutput("Error: Code cannot be empty.");
+      return;
+    }
+
+    // Check code size limit
+    if (code.length > MAX_CODE_SIZE) {
+      setOutput(`Error: Code size exceeds ${MAX_CODE_SIZE} characters. Current: ${code.length} characters.`);
+      return;
+    }
+
+    // Validate language
+    if (!selectedLanguage || !selectedLanguage.jdoodleLanguage) {
+      setOutput("Error: Invalid language selected.");
+      return;
+    }
+
+    // Check cooldown
+    const now = Date.now();
+    const timeSinceLastRun = (now - lastRunTime) / 1000;
+    if (timeSinceLastRun < COOLDOWN_SECONDS) {
+      const remainingTime = Math.ceil(COOLDOWN_SECONDS - timeSinceLastRun);
+      setOutput(`Error: Please wait ${remainingTime} second${remainingTime > 1 ? 's' : ''} before running again.`);
+      return;
+    }
+
     setIsRunning(true);
     setOutput("");
 
@@ -282,10 +326,17 @@ export default function CodeHub() {
       const data = await res.json();
       if (!res.ok) {
         const message = data?.detail || "Execution failed.";
-        setOutput(`Error: ${message}`);
+        
+        // Handle quota exceeded error
+        if (message.toLowerCase().includes("quota") || message.toLowerCase().includes("limit")) {
+          setOutput(`Error: Execution limit reached. You've exceeded your daily API quota. Please try again tomorrow.`);
+        } else {
+          setOutput(`Error: ${message}`);
+        }
       } else {
         const finalOutput = data?.output || data?.error || "(No output)";
         setOutput(finalOutput);
+        setLastRunTime(now);
       }
     } catch (error) {
       setOutput(`Error: ${error?.message || "Unable to run code."}`);
@@ -374,6 +425,9 @@ export default function CodeHub() {
                   onDownload={handleDownload}
                   copied={copied}
                   isRunning={isRunning}
+                  code={code}
+                  lastRunTime={lastRunTime}
+                  cooldownSeconds={COOLDOWN_SECONDS}
                 />
               </div>
             </header>

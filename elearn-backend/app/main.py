@@ -44,9 +44,9 @@ app.add_middleware(
         "https://edu-sphere-iota.vercel.app",
     ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"]
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+    expose_headers=["Content-Type", "X-Process-Time"]
 )
 
 app.include_router(auth.router)
