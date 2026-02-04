@@ -250,6 +250,7 @@ export default function CodeHub() {
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [executionTime, setExecutionTime] = useState(null);
+  const [bgFontSize, setBgFontSize] = useState(16);
 
   const handleLanguageChange = (lang) => {
     setSelectedLanguage(lang);
@@ -332,6 +333,7 @@ export default function CodeHub() {
               smooth={true}
               outerVignette={true}
               centerVignette={false}
+              fontSize={bgFontSize}
             />
             {/* Header */}
             <header className="codehub-header">
@@ -342,6 +344,19 @@ export default function CodeHub() {
                 <span className="logo-text">CodeHub</span>
               </div>
               <div className="header-right">
+                <div className="font-size-control">
+                  <label htmlFor="bg-font-size">BG Size:</label>
+                  <input
+                    id="bg-font-size"
+                    type="range"
+                    min="8"
+                    max="24"
+                    value={bgFontSize}
+                    onChange={(e) => setBgFontSize(Number(e.target.value))}
+                    className="font-size-slider"
+                  />
+                  <span className="font-size-display">{bgFontSize}</span>
+                </div>
                 <LanguageSelector
                   languages={languages}
                   selectedLanguage={selectedLanguage}

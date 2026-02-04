@@ -7,6 +7,7 @@ const LetterGlitchBackground = ({
   centerVignette = false,
   outerVignette = true,
   smooth = true,
+  fontSize = 16,
   characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789'
 }) => {
   const canvasRef = useRef(null);
@@ -18,9 +19,8 @@ const LetterGlitchBackground = ({
 
   const lettersAndSymbols = Array.from(characters);
 
-  const fontSize = 16;
-  const charWidth = 10;
-  const charHeight = 20;
+  const charWidth = fontSize * 0.6;
+  const charHeight = fontSize * 1.25;
 
   const getRandomChar = () => {
     return lettersAndSymbols[Math.floor(Math.random() * lettersAndSymbols.length)];
@@ -102,7 +102,7 @@ const LetterGlitchBackground = ({
     const ctx = context.current;
     const { width, height } = canvasRef.current.getBoundingClientRect();
     ctx.clearRect(0, 0, width, height);
-    ctx.font = `${fontSize}px monospace`;
+    ctx.font = `bold ${fontSize}px monospace`;
     ctx.textBaseline = 'top';
 
     letters.current.forEach((letter, index) => {
@@ -196,7 +196,7 @@ const LetterGlitchBackground = ({
       window.removeEventListener('resize', handleResize);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [glitchSpeed, smooth]);
+  }, [glitchSpeed, smooth, fontSize]);
 
   const containerStyle = {
     position: 'absolute',
@@ -207,7 +207,8 @@ const LetterGlitchBackground = ({
     backgroundColor: '#4a3a5c',
     overflow: 'hidden',
     zIndex: -1,
-    pointerEvents: 'none'
+    pointerEvents: 'none',
+    filter: 'blur(1.5px)'
   };
 
   const canvasStyle = {
