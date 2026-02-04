@@ -352,6 +352,7 @@
   padding: 12px;
   font-family: var(--ch-font-mono);
   font-size: 14px;
+  font-weight: 600;
   color: var(--ch-text);
   line-height: 20px;
   resize: none;
