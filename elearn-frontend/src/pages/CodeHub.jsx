@@ -300,12 +300,7 @@ export default function CodeHub() {
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Navbar />
-        <div
-          className="flex-1 overflow-auto transition-all duration-300 p-4"
-          style={{
-            marginLeft: isOpen ? "260px" : "0px",
-          }}
-        >
+        <div className="flex-1 overflow-auto p-4 lg:p-6">
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-foreground mb-2">CodeHub</h1>
@@ -313,7 +308,7 @@ export default function CodeHub() {
           </div>
 
           {/* Main Editor Area */}
-          <div className="flex flex-col gap-4 h-full overflow-hidden">
+          <div className="flex flex-col gap-4 h-[calc(100vh-280px)]">
             {/* Editor Header */}
             <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border border-border/50 rounded-lg">
               <LanguageSelector
@@ -334,24 +329,24 @@ export default function CodeHub() {
             </div>
 
             {/* Content Area - Split Layout */}
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-hidden min-h-0">
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-hidden">
               {/* Left Column - Code Editor */}
-              <div className="flex flex-col overflow-hidden min-h-0">
-                <div className="text-muted-foreground text-sm font-medium mb-2">💻 Code Editor</div>
+              <div className="flex flex-col overflow-hidden min-h-0 rounded-lg border border-border/50">
+                <div className="text-muted-foreground text-sm font-medium px-4 py-3 bg-muted/30 border-b border-border/50">💻 Code Editor</div>
                 <CodeEditor code={code} setCode={setCode} lineNumbers={lineNumbers} />
               </div>
 
               {/* Right Column - Input & Output */}
               <div className="flex flex-col gap-4 overflow-hidden min-h-0">
                 {/* Input Box */}
-                <div className="flex-1 flex flex-col min-h-0">
-                  <div className="text-muted-foreground text-sm font-medium mb-2">Input</div>
+                <div className="flex-1 flex flex-col min-h-0 rounded-lg border border-border/50 overflow-hidden">
+                  <div className="text-muted-foreground text-sm font-medium px-4 py-3 bg-muted/30 border-b border-border/50">📥 Input</div>
                   <InputPanel input={input} setInput={setInput} />
                 </div>
 
                 {/* Output Box */}
-                <div className="flex-1 flex flex-col min-h-0">
-                  <div className="text-muted-foreground text-sm font-medium mb-2">Output</div>
+                <div className="flex-1 flex flex-col min-h-0 rounded-lg border border-border/50 overflow-hidden">
+                  <div className="text-muted-foreground text-sm font-medium px-4 py-3 bg-muted/30 border-b border-border/50">📤 Output</div>
                   <OutputPanel output={output} isRunning={isRunning} executionTime={executionTime} />
                 </div>
               </div>
