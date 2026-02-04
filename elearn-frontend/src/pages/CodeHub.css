@@ -28,30 +28,6 @@
   color: var(--ch-text);
 }
 
-/* Sidebar-aware layout */
-.main-content-wrapper {
-  flex: 1;
-  overflow: auto;
-  transition: margin-left 0.3s ease;
-}
-
-.main-content-wrapper.sidebar-open {
-  margin-left: 250px;
-}
-
-.main-content-wrapper.sidebar-closed {
-  margin-left: 60px;
-}
-
-@media (max-width: 768px) {
-  .main-content-wrapper.sidebar-open {
-    margin-left: 0;
-  }
-  .main-content-wrapper.sidebar-closed {
-    margin-left: 0;
-  }
-}
-
 /* Header */
 .codehub-header {
   height: 48px;
