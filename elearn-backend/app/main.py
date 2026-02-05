@@ -32,8 +32,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         
         return response
 
-app.add_middleware(SecurityHeadersMiddleware)
-
+# CORS middleware MUST come before custom middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -44,10 +43,12 @@ app.add_middleware(
         "https://edu-sphere-iota.vercel.app",
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=["*"],
+    allow_headers=["*"],
     expose_headers=["Content-Type", "X-Process-Time"]
 )
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 app.include_router(auth.router)
 app.include_router(user.router)
