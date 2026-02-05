@@ -37,13 +37,15 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
       anchorEl={anchorEl}
       open={open}
       onClose={onClose}
+      disableScrollLock={true}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       PaperProps={{
         sx: {
           p: 0,
           m: 1,
-          minWidth: 'max(250px, 90vw)',
+          minWidth: 280,
+          maxWidth: 280,
           borderRadius: 2.5,
           boxShadow: '0 10px 40px rgba(0, 0, 0, 0.12)',
           background: 'rgba(255, 255, 255, 0.95)',
