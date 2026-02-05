@@ -34,7 +34,9 @@ export const FormalEducationProvider = ({ children }) => {
         const coursesRes = await fetch(`${API_URL}/courses/`);
         let coursesData = [];
         if (coursesRes.ok) {
-          coursesData = await coursesRes.json();
+          const coursesResponse = await coursesRes.json();
+          // Handle both paginated response and direct array
+          coursesData = coursesResponse.data || coursesResponse || [];
           // For each course, fetch its materials, assignments, and schedules
           const coursesWithDetails = await Promise.all(
             coursesData.map(async (course) => {
@@ -44,19 +46,22 @@ export const FormalEducationProvider = ({ children }) => {
               try {
                 const matRes = await fetch(`${API_URL}/resources/?course_id=${course.id}`);
                 if (matRes.ok) {
-                  materials = await matRes.json();
+                  const matData = await matRes.json();
+                  materials = matData.data || matData || [];
                 }
               } catch {}
               try {
                 const assignRes = await fetch(`${API_URL}/assignments/?course_id=${course.id}`);
                 if (assignRes.ok) {
-                  assignments = await assignRes.json();
+                  const assignData = await assignRes.json();
+                  assignments = assignData.data || assignData || [];
                 }
               } catch {}
               try {
                 const schedRes = await fetch(`${API_URL}/class-schedules/?course_id=${course.id}`);
                 if (schedRes.ok) {
-                  schedules = await schedRes.json();
+                  const schedData = await schedRes.json();
+                  schedules = schedData.data || schedData || [];
                 }
               } catch {}
               return { ...course, materials, assignments, schedules };
@@ -67,7 +72,8 @@ export const FormalEducationProvider = ({ children }) => {
         const enrollmentsRes = await fetch(`${API_URL}/enrollments/`);
         let mapped = [];
         if (enrollmentsRes.ok) {
-          const enrollmentsData = await enrollmentsRes.json();
+          const enrollmentsResponse = await enrollmentsRes.json();
+          const enrollmentsData = enrollmentsResponse.data || enrollmentsResponse || [];
           mapped = enrollmentsData.map(e => ({
             id: e.id,
             studentId: e.user_id,
