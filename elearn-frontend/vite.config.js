@@ -17,13 +17,7 @@ export default defineConfig({
   build: {
     // Optimize build output
     target: 'es2020',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
+    minify: 'esbuild',
     // Optimize chunk splitting
     rollupOptions: {
       output: {
