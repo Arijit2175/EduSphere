@@ -175,7 +175,9 @@ export default function InformalLearning() {
     setInitialLoading(true);
     axios.get(`${API_URL}/informal-posts/`)
       .then(res => {
-        const posts = (res.data || []).map(normalizePost);
+        // Backend returns paginated format: {data: [...], total, skip, limit}
+        const postsArray = res.data.data || res.data || [];
+        const posts = (Array.isArray(postsArray) ? postsArray : []).map(normalizePost);
         setPosts(posts);
         setInitialLoading(false);
       })
@@ -289,7 +291,8 @@ export default function InformalLearning() {
         // Re-fetch all posts to guarantee sync with DB
         axios.get(`${API_URL}/informal-posts/`)
           .then(res2 => {
-            const posts = (res2.data || []).map(normalizePost);
+            const postsArray = res2.data.data || res2.data || [];
+            const posts = (Array.isArray(postsArray) ? postsArray : []).map(normalizePost);
             setPosts(posts);
           })
           .catch(() => {
@@ -441,7 +444,8 @@ export default function InformalLearning() {
         // After creating, re-fetch all posts for instant sync
         axios.get(`${API_URL}/informal-posts/`)
           .then(res2 => {
-            const posts = (res2.data || []).map(normalizePost);
+            const postsArray = res2.data.data || res2.data || [];
+            const posts = (Array.isArray(postsArray) ? postsArray : []).map(normalizePost);
             setPosts(posts);
           })
           .catch(() => {
