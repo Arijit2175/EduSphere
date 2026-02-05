@@ -1,13 +1,6 @@
-# REMOVE DUPLICATE IMPORTS AND ROUTER DEFINITIONS
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException, Body, Query
 from typing import Optional
-from app.db import get_db_connection
-from app.api.auth import get_current_user
-
-router = APIRouter(prefix="/informal-posts", tags=["Informal Posts"])
-from fastapi import APIRouter, Depends, HTTPException, Body
-from typing import Optional
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection, cache_get, cache_set, cache_clear
 from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/informal-posts", tags=["Informal Posts"])
@@ -166,43 +159,79 @@ def create_informal_post(post: dict, user=Depends(get_current_user)):
         user["id"],
         user["role"]
     )
-    cursor.execute(sql + " RETURNING id", values)
-    post_id = cursor.fetchone()['id']
-    conn.commit()
-    cursor.execute("SELECT * FROM informal_posts WHERE id=%s", (post_id,))
-    new_post = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    return new_post
+    
+    try:
+        cursor.execute(sql + " RETURNING id", values)
+        post_id = cursor.fetchone()['id']
+        conn.commit()
+        cursor.execute("SELECT * FROM informal_posts WHERE id=%s", (post_id,))
+        new_post = cursor.fetchone()
+        
+        # Clear cache when new post is created
+        cache_clear("informal_posts")
+        
+        return new_post
+    finally:
+        cursor.close()
+        return_db_connection(conn)
 
 @router.get("/")
-def get_informal_posts():
+def get_informal_posts(skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=200), topic: str = None):
+    """Get informal posts with pagination and caching"""
+    cache_key = f"informal_posts:{skip}:{limit}:{topic}"
+    cached_result = cache_get(cache_key)
+    if cached_result:
+        return cached_result
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
-    cursor.execute(
-            """
+    
+    try:
+        cursor = conn.cursor()
+        import json
+        
+        # Build query with optional topic filter
+        where_clause = ""
+        params = []
+        if topic:
+            where_clause = "WHERE p.topic = %s"
+            params.append(topic)
+        
+        # Get total count
+        cursor.execute(f"SELECT COUNT(*) as count FROM informal_posts p {where_clause}", params)
+        total = cursor.fetchone()['count']
+        
+        # Get paginated results
+        query = f"""
             SELECT p.*, u.email AS creator_email, u.role AS creator_role
             FROM informal_posts p
             JOIN users u ON p.author_id = u.id
+            {where_clause}
             ORDER BY p.created_at DESC
-            """
-        )
-    import json
-    posts = cursor.fetchall()
-    for post in posts:
-        savers = post.get("savers")
-        if savers is None or savers == "":
-            post["savers"] = []
-        else:
-            try:
-                if savers.startswith("["):
-                    post["savers"] = json.loads(savers)
-                else:
-                    post["savers"] = [int(x) for x in savers.split(",") if x.strip().isdigit()]
-            except Exception:
+            LIMIT %s OFFSET %s
+        """
+        params.extend([limit, skip])
+        cursor.execute(query, params)
+        posts = cursor.fetchall()
+        
+        # Process savers field
+        for post in posts:
+            savers = post.get("savers")
+            if savers is None or savers == "":
                 post["savers"] = []
-    cursor.close()
-    conn.close()
-    return posts
+            else:
+                try:
+                    if savers.startswith("["):
+                        post["savers"] = json.loads(savers)
+                    else:
+                        post["savers"] = [int(x) for x in savers.split(",") if x.strip().isdigit()]
+                except Exception:
+                    post["savers"] = []
+        
+        result = {"data": posts, "total": total, "skip": skip, "limit": limit}
+        cache_set(cache_key, result, ttl_seconds=120)  # 2 min cache for dynamic content
+        return result
+    finally:
+        cursor.close()
+        return_db_connection(conn)

@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException, Body, Depends, Request
+from fastapi import APIRouter, HTTPException, Body, Depends, Request, Query
 from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection, cache_get, cache_set
 from app.api.auth import get_current_user
 from app.core.security import sanitize_string, validate_url, check_teacher_role
 from app.core.config import RATE_LIMIT_PER_MINUTE
@@ -13,20 +13,35 @@ router = APIRouter(prefix="/resources", tags=["resources"])
 
 @router.get("/")
 @limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
-async def list_resources(request: Request, course_id: int = None):
-    """Public endpoint - accessible to students and teachers"""
+async def list_resources(request: Request, course_id: int = None, skip: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=500)):
+    """Get resources with pagination and caching"""
+    cache_key = f"resources:{course_id}:{skip}:{limit}"
+    cached_result = cache_get(cache_key)
+    if cached_result:
+        return cached_result
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
-    if course_id:
-        cursor.execute("SELECT * FROM resources WHERE course_id=%s", (course_id,))
-    else:
-        cursor.execute("SELECT * FROM resources")
-    resources = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return resources
+    
+    try:
+        cursor = conn.cursor()
+        if course_id:
+            cursor.execute("SELECT COUNT(*) as count FROM resources WHERE course_id=%s", (course_id,))
+            total = cursor.fetchone()['count']
+            cursor.execute("SELECT * FROM resources WHERE course_id=%s ORDER BY id DESC LIMIT %s OFFSET %s", (course_id, limit, skip))
+        else:
+            cursor.execute("SELECT COUNT(*) as count FROM resources")
+            total = cursor.fetchone()['count']
+            cursor.execute("SELECT * FROM resources ORDER BY id DESC LIMIT %s OFFSET %s", (limit, skip))
+        resources = cursor.fetchall()
+        
+        result = {"data": resources, "total": total, "skip": skip, "limit": limit}
+        cache_set(cache_key, result, ttl_seconds=600)
+        return result
+    finally:
+        cursor.close()
+        return_db_connection(conn)
 
 class ResourceCreate(BaseModel):
     course_id: int

@@ -8,7 +8,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api import auth, courses, enrollments, assignments, lessons, attendance, quizzes, resources, certificates, ai_tutor_chats, ai_tutor, class_schedules, contact_messages, nonformal, user, forgot_password, informal_posts, topics, code_execution
 from app.core.config import RATE_LIMIT_PER_MINUTE
-from app.db import get_db_connection
+from app.db import get_db_connection, close_pool
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -101,6 +101,11 @@ def reset_sequences():
 async def startup_event():
     """Initialize sequences on app startup"""
     reset_sequences()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Close database pool on shutdown"""
+    close_pool()
 
 @app.get("/")
 @limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")

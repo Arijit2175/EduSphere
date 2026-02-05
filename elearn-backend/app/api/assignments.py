@@ -1,9 +1,9 @@
 
-from fastapi import APIRouter, HTTPException, Body, Depends, Request
+from fastapi import APIRouter, HTTPException, Body, Depends, Request, Query
 from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection, cache_get, cache_set
 from app.api.auth import get_current_user
 from app.core.security import sanitize_string, check_teacher_role
 from app.core.config import RATE_LIMIT_PER_MINUTE
@@ -14,19 +14,23 @@ router = APIRouter(prefix="/assignments", tags=["assignments"])
 
 @router.get("/assignment_submissions/")
 @limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
-async def list_all_assignment_submissions(request: Request, user=Depends(get_current_user)):
-    """Teachers: all submissions; Students: only their submissions"""
+async def list_all_assignment_submissions(request: Request, user=Depends(get_current_user), skip: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=500)):
+    """Teachers: all submissions; Students: only their submissions with pagination"""
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
-
-    if user.get("role") == "teacher":
-        cursor.execute("SELECT * FROM assignment_submissions")
-        submissions = cursor.fetchall()
+    
+    try:
+        cursor = conn.cursor()
+        if user.get("role") == "teacher":
+            cursor.execute("SELECT COUNT(*) as count FROM assignment_submissions")
+            total = cursor.fetchone()['count']
+            cursor.execute("SELECT * FROM assignment_submissions ORDER BY submitted_at DESC LIMIT %s OFFSET %s", (limit, skip))
+            submissions = cursor.fetchall()
+            return {"data": submissions, "total": total, "skip": skip, "limit": limit}
+    finally:
         cursor.close()
-        conn.close()
-        return submissions
+        return_db_connection(conn)
 
     cursor.execute("SELECT student_id FROM users WHERE id=%s", (user["id"],))
     user_row = cursor.fetchone()

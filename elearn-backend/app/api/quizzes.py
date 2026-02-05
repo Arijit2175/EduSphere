@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi import APIRouter, HTTPException, Depends, Request, Query
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection, cache_get, cache_set, cache_clear
 from app.api.auth import get_current_user
 from app.core.security import sanitize_string, check_teacher_role
 from app.core.config import RATE_LIMIT_PER_MINUTE
@@ -12,20 +12,35 @@ router = APIRouter(prefix="/quizzes", tags=["quizzes"])
 
 @router.get("/")
 @limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
-async def list_quizzes(request: Request, course_id: int = None):
-    """Public endpoint - accessible to students and teachers"""
+async def list_quizzes(request: Request, course_id: int = None, skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=200)):
+    """Public endpoint - Get quizzes with pagination and caching"""
+    cache_key = f"quizzes:{course_id}:{skip}:{limit}"
+    cached_result = cache_get(cache_key)
+    if cached_result:
+        return cached_result
+    
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
-    if course_id:
-        cursor.execute("SELECT * FROM quizzes WHERE course_id=%s", (course_id,))
-    else:
-        cursor.execute("SELECT * FROM quizzes")
-    quizzes = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return quizzes
+    
+    try:
+        cursor = conn.cursor()
+        if course_id:
+            cursor.execute("SELECT COUNT(*) as count FROM quizzes WHERE course_id=%s", (course_id,))
+            total = cursor.fetchone()['count']
+            cursor.execute("SELECT * FROM quizzes WHERE course_id=%s ORDER BY id DESC LIMIT %s OFFSET %s", (course_id, limit, skip))
+        else:
+            cursor.execute("SELECT COUNT(*) as count FROM quizzes")
+            total = cursor.fetchone()['count']
+            cursor.execute("SELECT * FROM quizzes ORDER BY id DESC LIMIT %s OFFSET %s", (limit, skip))
+        quizzes = cursor.fetchall()
+        
+        result = {"data": quizzes, "total": total, "skip": skip, "limit": limit}
+        cache_set(cache_key, result, ttl_seconds=300)
+        return result
+    finally:
+        cursor.close()
+        return_db_connection(conn)
 
 @router.post("/")
 @limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
