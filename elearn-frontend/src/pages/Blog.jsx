@@ -43,11 +43,6 @@ export default function Blog() {
     <Box sx={{ position: "relative", width: "100%", minHeight: "100vh" }}>
       {/* Background Video - Optimized for fast loading */}
       <BackgroundVideo src="/videos/bg-video.mp4" blur="2px" overlay={0.08} />
-            zIndex: 1,
-            pointerEvents: "none",
-          }}
-        />
-      </Box>
 
       {/* All Content - On Top */}
       <Box sx={{ position: "relative", zIndex: 1 }}>
