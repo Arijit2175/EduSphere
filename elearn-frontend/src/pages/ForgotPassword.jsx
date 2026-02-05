@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import FormInput from "../components/FormInput";
+import BackgroundVideo from "../components/BackgroundVideo";
 import { useAuth } from "../contexts/AuthContext";
 import { useState, useEffect } from "react";
 
@@ -87,43 +88,8 @@ export default function ForgotPassword() {
 
   return (
     <Box sx={{ position: "relative", minHeight: "100vh" }}>
-      {/* Background Video */}
-      <Box
-        sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "#1a1a2e",
-          zIndex: -10,
-          pointerEvents: "none",
-        }}
-      >
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            display: "block",
-            filter: "blur(2px)",
-          }}
-        >
-          <source src="/videos/bg-video.mp4" type="video/mp4" />
-        </video>
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            background: "rgba(0, 0, 0, 0.5)",
-            zIndex: 1,
-          }}
-        />
-      </Box>
+      {/* Background Video - Optimized for fast loading */}
+      <BackgroundVideo src="/videos/bg-video.mp4" blur="2px" overlay={0.5} />
 
       {/* Content */}
       <Box sx={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100vh" }}>

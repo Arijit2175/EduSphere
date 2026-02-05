@@ -7,6 +7,7 @@ import SectionTitle from "../components/SectionTitle";
 import StatsGrid from "../components/StatsGrid";
 import EnrolledCoursesList from "../components/EnrolledCoursesList";
 import PageHeader from "../components/PageHeader";
+import BackgroundVideo from "../components/BackgroundVideo";
 import { useCourses } from "../contexts/CoursesContext";
 import { useNonFormal } from "../contexts/NonFormalContext";
 import { useFormalEducation } from "../contexts/FormalEducationContext";
@@ -211,6 +212,9 @@ export default function Dashboard() {
 
   return (
     <Box sx={{ display: "flex" }}>
+      {/* Background Video - Optimized for fast loading */}
+      <BackgroundVideo src="/videos/webpage-video.mp4" blur="6px" brightness={0.8} overlay={0} />
+      
       <Sidebar />
       <Box
         sx={{
@@ -221,38 +225,6 @@ export default function Dashboard() {
           flexDirection: "column",
         }}
       >
-        {/* Background Video with Blur */}
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            zIndex: -2,
-            overflow: "hidden",
-          }}
-        >
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={{
-              width: "100vw",
-              height: "100vh",
-              objectFit: "cover",
-              filter: "blur(6px) brightness(0.8)",
-              position: "absolute",
-              top: 0,
-              left: 0,
-              zIndex: -2,
-            }}
-          >
-            <source src="/videos/webpage-video.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </Box>
         {/* Transparent blurred background overlay for extra softness */}
         <Box
           sx={{

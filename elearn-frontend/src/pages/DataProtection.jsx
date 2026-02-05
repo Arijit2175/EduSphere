@@ -2,53 +2,14 @@ import { Box, Container, Typography, Divider } from "@mui/material";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import HeroSection from "../components/HeroSection";
+import BackgroundVideo from "../components/BackgroundVideo";
 import { motion } from "framer-motion";
 
 export default function DataProtection() {
   return (
     <Box sx={{ position: "relative", width: "100%", minHeight: "100vh" }}>
-      {/* Background Video - Behind Everything */}
-      <Box
-        sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "#1a1a2e",
-          zIndex: -10,
-          pointerEvents: "none",
-        }}
-      >
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            display: "block",
-            filter: "blur(2px)",
-          }}
-          onError={(e) => console.error("Video error:", e)}
-        >
-          <source src="/videos/bg-video.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-
-        {/* Dark Overlay */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            background: "rgba(0, 0, 0, 0.08)",
-            zIndex: 1,
-            pointerEvents: "none",
-          }}
-        />
-      </Box>
+      {/* Background Video - Optimized for fast loading */}
+      <BackgroundVideo src="/videos/bg-video.mp4" blur="2px" overlay={0.08} />
 
       {/* All Content - On Top */}
       <Box sx={{ position: "relative", zIndex: 1 }}>
