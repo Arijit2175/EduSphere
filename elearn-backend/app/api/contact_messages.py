@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/contact-messages", tags=["contact_messages"])
@@ -13,7 +13,7 @@ def list_messages():
     cursor.execute("SELECT * FROM contact_messages ORDER BY created_at DESC")
     messages = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return messages
 
 class ContactMessageRequest(BaseModel):
@@ -35,5 +35,5 @@ def create_message(data: ContactMessageRequest):
     msg_id = cursor.fetchone()['id']
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": msg_id, "name": data.name, "email": data.email, "subject": data.subject}

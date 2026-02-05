@@ -59,11 +59,11 @@ async def create_quiz(request: Request, course_id: int, user=Depends(get_current
     course = cursor.fetchone()
     if not course:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Course not found")
     if course["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to create quizzes for this course")
     
     cursor.execute(
@@ -73,7 +73,7 @@ async def create_quiz(request: Request, course_id: int, user=Depends(get_current
     quiz_id = cursor.fetchone()['id']
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": quiz_id, "course_id": course_id, "title": title}
 
 @router.delete("/{quiz_id}")
@@ -90,18 +90,18 @@ async def delete_quiz(request: Request, quiz_id: int, user=Depends(get_current_u
     quiz = cursor.fetchone()
     if not quiz:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Quiz not found")
     
     if quiz["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to delete this quiz")
     
     cursor.execute("DELETE FROM quizzes WHERE id=%s", (quiz_id,))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": quiz_id, "deleted": True}
 
 @router.get("/{quiz_id}/questions")
@@ -115,7 +115,7 @@ async def list_questions(request: Request, quiz_id: int):
     cursor.execute("SELECT * FROM quiz_questions WHERE quiz_id=%s", (quiz_id,))
     questions = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return questions
 
 @router.post("/{quiz_id}/questions")
@@ -136,11 +136,11 @@ async def create_question(request: Request, quiz_id: int, question: str, options
     quiz = cursor.fetchone()
     if not quiz:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Quiz not found")
     if quiz["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to create questions for this quiz")
     
     cursor.execute(
@@ -150,7 +150,7 @@ async def create_question(request: Request, quiz_id: int, question: str, options
     question_id = cursor.fetchone()['id']
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": question_id, "quiz_id": quiz_id}
 
 @router.delete("/questions/{question_id}")
@@ -173,18 +173,18 @@ async def delete_question(request: Request, question_id: int, user=Depends(get_c
     question = cursor.fetchone()
     if not question:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Question not found")
     
     if question["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to delete this question")
     
     cursor.execute("DELETE FROM quiz_questions WHERE id=%s", (question_id,))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": question_id, "deleted": True}
 
 @router.get("/{quiz_id}/submissions")
@@ -201,17 +201,17 @@ async def list_submissions(request: Request, quiz_id: int, user=Depends(get_curr
     quiz = cursor.fetchone()
     if not quiz:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Quiz not found")
     if quiz["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to view submissions for this quiz")
     
     cursor.execute("SELECT * FROM quiz_submissions WHERE quiz_id=%s", (quiz_id,))
     submissions = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return submissions
 
 @router.post("/{quiz_id}/submit")
@@ -227,14 +227,14 @@ async def submit_quiz(request: Request, quiz_id: int, score: float, user=Depends
     user_row = cursor.fetchone()
     if not user_row or not user_row.get("student_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Student profile not found")
     student_id = user_row["student_id"]
     
     cursor.execute("SELECT id FROM quiz_submissions WHERE quiz_id=%s AND student_id=%s", (quiz_id, student_id))
     if cursor.fetchone():
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Already submitted")
     cursor.execute(
         "INSERT INTO quiz_submissions (quiz_id, student_id, score) VALUES (%s, %s, %s) RETURNING id",
@@ -243,5 +243,5 @@ async def submit_quiz(request: Request, quiz_id: int, score: float, user=Depends
     submission_id = cursor.fetchone()['id']
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": submission_id, "quiz_id": quiz_id, "student_id": student_id}

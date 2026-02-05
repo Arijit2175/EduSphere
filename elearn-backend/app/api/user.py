@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection
 from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -15,7 +15,7 @@ async def get_user_me(current_user: dict = Depends(get_current_user)):
     cursor.execute("SELECT id, email, first_name, last_name, phone, gender, state, city, bio, linkedin, github, avatar, role, teacher_id, student_id FROM users WHERE id=%s", (user_id,))
     user = cursor.fetchone()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -38,5 +38,5 @@ async def update_user(request: Request, current_user: dict = Depends(get_current
     cursor.execute(f"UPDATE users SET {set_clause} WHERE id=%s", values)
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"success": True, "updated": updates}

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection
 from passlib.context import CryptContext
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -24,11 +24,11 @@ async def forgot_password(request: Request):
     user = cursor.fetchone()
     if not user:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="User not found")
     hashed = get_password_hash(new_password)
     cursor.execute("UPDATE users SET password_hash=%s WHERE email=%s", (hashed, email))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"success": True, "message": "Password updated"}

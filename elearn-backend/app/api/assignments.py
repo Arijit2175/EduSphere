@@ -36,13 +36,13 @@ async def list_all_assignment_submissions(request: Request, user=Depends(get_cur
     user_row = cursor.fetchone()
     if not user_row or not user_row.get("student_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         return []
     student_id = user_row["student_id"]
     cursor.execute("SELECT * FROM assignment_submissions WHERE student_id=%s", (student_id,))
     submissions = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return submissions
 
 @router.get("/")
@@ -59,7 +59,7 @@ async def list_assignments(request: Request, course_id: int = None):
         cursor.execute("SELECT * FROM assignments")
     assignments = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return assignments
 
 @router.post("/")
@@ -81,11 +81,11 @@ async def create_assignment(request: Request, data: dict = Body(...), user=Depen
     course = cursor.fetchone()
     if not course:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Course not found")
     if course["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to create assignments for this course")
     
     cursor.execute(
@@ -97,7 +97,7 @@ async def create_assignment(request: Request, data: dict = Body(...), user=Depen
     cursor.execute("SELECT * FROM assignments WHERE id=%s", (assignment_id,))
     new_assignment = cursor.fetchone()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     if not new_assignment:
         raise HTTPException(status_code=500, detail="Failed to fetch new assignment after insert")
     return new_assignment
@@ -116,12 +116,12 @@ async def update_assignment(request: Request, assignment_id: int, user=Depends(g
     assignment = cursor.fetchone()
     if not assignment:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Assignment not found")
     
     if assignment["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to update this assignment")
     
     update_fields = []
@@ -137,13 +137,13 @@ async def update_assignment(request: Request, assignment_id: int, user=Depends(g
         params.append(due_date)
     if not update_fields:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="No fields to update")
     params.append(assignment_id)
     cursor.execute(f"UPDATE assignments SET {', '.join(update_fields)} WHERE id=%s", tuple(params))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": assignment_id, "updated": True}
 
 @router.delete("/{assignment_id}")
@@ -160,18 +160,18 @@ async def delete_assignment(request: Request, assignment_id: int, user=Depends(g
     assignment = cursor.fetchone()
     if not assignment:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Assignment not found")
     
     if assignment["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to delete this assignment")
     
     cursor.execute("DELETE FROM assignments WHERE id=%s", (assignment_id,))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": assignment_id, "deleted": True}
 
 @router.get("/{assignment_id}/submissions")
@@ -188,17 +188,17 @@ async def list_submissions(request: Request, assignment_id: int, user=Depends(ge
     assignment = cursor.fetchone()
     if not assignment:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Assignment not found")
     if assignment["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to view submissions for this assignment")
     
     cursor.execute("SELECT * FROM assignment_submissions WHERE assignment_id=%s", (assignment_id,))
     submissions = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return submissions
 
 @router.post("/{assignment_id}/submit")
@@ -218,7 +218,7 @@ async def submit_assignment(request: Request, assignment_id: int, user=Depends(g
     assignment = cursor.fetchone()
     if not assignment:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Assignment not found")
     
     # Check if assignment due date has passed
@@ -229,7 +229,7 @@ async def submit_assignment(request: Request, assignment_id: int, user=Depends(g
                 due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
             if datetime.now(due_date.tzinfo if due_date.tzinfo else None) > due_date:
                 cursor.close()
-                conn.close()
+                return_db_connection(conn)
                 raise HTTPException(status_code=400, detail="Assignment submission deadline has passed")
         except ValueError:
             pass
@@ -238,12 +238,12 @@ async def submit_assignment(request: Request, assignment_id: int, user=Depends(g
     enrollment_row = cursor.fetchone()
     if not enrollment_row:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Enrollment not found")
     
     if enrollment_row.get("user_id") != user["id"]:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to submit for this enrollment")
     
     user_id = enrollment_row.get("user_id")
@@ -251,13 +251,13 @@ async def submit_assignment(request: Request, assignment_id: int, user=Depends(g
     user_row = cursor.fetchone()
     if not user_row or not user_row.get("student_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Student profile not found for this enrollment")
     student_id = user_row.get("student_id")
     cursor.execute("SELECT id FROM assignment_submissions WHERE assignment_id=%s AND enrollment_id=%s", (assignment_id, enrollment_id))
     if cursor.fetchone():
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Already submitted")
     cursor.execute(
         "INSERT INTO assignment_submissions (assignment_id, enrollment_id, student_id, content) VALUES (%s, %s, %s, %s) RETURNING id",
@@ -266,7 +266,7 @@ async def submit_assignment(request: Request, assignment_id: int, user=Depends(g
     submission_id = cursor.fetchone()['id']
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": submission_id, "assignment_id": assignment_id, "enrollment_id": enrollment_id, "student_id": student_id}
 
 class ReviewSubmissionRequest(BaseModel):
@@ -294,11 +294,11 @@ async def review_submission(request: Request, submission_id: int, review: Review
     submission = cursor.fetchone()
     if not submission:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Submission not found")
     if submission["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to review this submission")
     
     update_fields = []
@@ -314,11 +314,11 @@ async def review_submission(request: Request, submission_id: int, review: Review
         params.append(sanitize_string(review.feedback, max_length=2000))
     if not update_fields:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="No fields to update")
     params.append(submission_id)
     cursor.execute(f"UPDATE assignment_submissions SET {', '.join(update_fields)} WHERE id=%s", tuple(params))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": submission_id, "reviewed": True}

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection
 
 router = APIRouter(prefix="/certificates", tags=["certificates"])
 
@@ -19,7 +19,7 @@ def list_certificates(student_id: int = None, course_id: int = None):
         cursor.execute("SELECT * FROM certificates")
     certificates = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return certificates
 
 @router.post("/")
@@ -31,7 +31,7 @@ def create_certificate(student_id: int, course_id: int, certificate_id: str = No
     cursor.execute("SELECT id FROM certificates WHERE student_id=%s AND course_id=%s", (student_id, course_id))
     if cursor.fetchone():
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Certificate already issued")
     cursor.execute(
         "INSERT INTO certificates (student_id, course_id, certificate_id) VALUES (%s, %s, %s) RETURNING id",
@@ -40,7 +40,7 @@ def create_certificate(student_id: int, course_id: int, certificate_id: str = No
     cert_id = cursor.fetchone()['id']
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": cert_id, "student_id": student_id, "course_id": course_id, "certificate_id": certificate_id}
 
 @router.get("/{certificate_id}")
@@ -52,7 +52,7 @@ def get_certificate_by_code(certificate_id: str):
     cursor.execute("SELECT * FROM certificates WHERE certificate_id=%s", (certificate_id,))
     cert = cursor.fetchone()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     if not cert:
         raise HTTPException(status_code=404, detail="Certificate not found")
     return cert

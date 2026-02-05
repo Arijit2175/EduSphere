@@ -1,6 +1,6 @@
 import uuid
 from fastapi import APIRouter, HTTPException, Depends, Request
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection
 from app.api.auth import get_current_user
 
 from pydantic import BaseModel
@@ -24,7 +24,7 @@ def get_nonformal_progress(user=Depends(get_current_user)):
         WHERE e.user_id = %s AND c.type = 'non-formal'""", (user["id"],))
     progress = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return progress
 
 @router.get("/courses/")
@@ -36,7 +36,7 @@ def list_nonformal_courses():
     cursor.execute("SELECT * FROM courses WHERE type = 'non-formal'")
     courses = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return courses
 
 @router.get("/enrollments/")
@@ -51,7 +51,7 @@ def list_nonformal_enrollments(user=Depends(get_current_user)):
         WHERE e.user_id = %s AND c.type = 'non-formal'""", (user["id"],))
     enrollments = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return enrollments
 
 @router.post("/enrollments/")
@@ -69,12 +69,12 @@ def enroll_nonformal_course(data: EnrollRequest, user=Depends(get_current_user))
     cursor.execute("SELECT id FROM courses WHERE id=%s AND type='non-formal'", (course_id_int,))
     if not cursor.fetchone():
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Course is not non-formal or does not exist")
     cursor.execute("SELECT id FROM enrollments WHERE user_id=%s AND course_id=%s", (user["id"], course_id_int))
     if cursor.fetchone():
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Already enrolled")
     cursor.execute(
         "INSERT INTO enrollments (user_id, course_id, progress) VALUES (%s, %s, %s)",
@@ -82,7 +82,7 @@ def enroll_nonformal_course(data: EnrollRequest, user=Depends(get_current_user))
     )
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"message": "Enrolled successfully, progress initialized"}
 
 @router.put("/progress/")
@@ -112,7 +112,7 @@ def get_nonformal_certificates(user=Depends(get_current_user)):
         WHERE certificates.student_id = %s AND c.type = 'non-formal'""", (user["id"],))
     certificates = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return certificates
 
 @router.post("/certificates/")
@@ -129,7 +129,7 @@ async def claim_nonformal_certificate(request: Request, user=Depends(get_current
     existing = cursor.fetchone()
     if existing:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Certificate already claimed")
     cert_id = str(uuid.uuid4())
     cursor.execute("INSERT INTO certificates (student_id, course_id, certificate_id) VALUES (%s, %s, %s)", (user["id"], course_id, cert_id))
@@ -137,7 +137,7 @@ async def claim_nonformal_certificate(request: Request, user=Depends(get_current
     cursor.execute("SELECT * FROM certificates WHERE student_id=%s AND course_id=%s ORDER BY id DESC LIMIT 1", (user["id"], course_id))
     cert = cursor.fetchone()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return cert
 
 @router.put("/progress/score")
@@ -157,5 +157,5 @@ async def update_nonformal_progress_score(request: Request, user=Depends(get_cur
     )
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"message": "Progress score updated"}

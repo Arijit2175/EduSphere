@@ -67,11 +67,11 @@ async def create_resource(request: Request, resource: ResourceCreate = Body(...)
     course = cursor.fetchone()
     if not course:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Course not found")
     if course["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to create resources for this course")
     
     cursor.execute(
@@ -83,7 +83,7 @@ async def create_resource(request: Request, resource: ResourceCreate = Body(...)
     cursor.execute("SELECT * FROM resources WHERE id=%s", (resource_id,))
     new_resource = cursor.fetchone()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     if not new_resource:
         raise HTTPException(status_code=500, detail="Failed to fetch new resource after insert")
     return new_resource
@@ -102,12 +102,12 @@ async def update_resource(request: Request, resource_id: int, user=Depends(get_c
     resource = cursor.fetchone()
     if not resource:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Resource not found")
     
     if resource["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to update this resource")
     
     update_fields = []
@@ -123,13 +123,13 @@ async def update_resource(request: Request, resource_id: int, user=Depends(get_c
         params.append(sanitize_string(type, max_length=50))
     if not update_fields:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="No fields to update")
     params.append(resource_id)
     cursor.execute(f"UPDATE resources SET {', '.join(update_fields)} WHERE id=%s", tuple(params))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": resource_id, "updated": True}
 
 @router.delete("/{resource_id}")
@@ -146,16 +146,16 @@ async def delete_resource(request: Request, resource_id: int, user=Depends(get_c
     resource = cursor.fetchone()
     if not resource:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Resource not found")
     
     if resource["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to delete this resource")
     
     cursor.execute("DELETE FROM resources WHERE id=%s", (resource_id,))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": resource_id, "deleted": True}

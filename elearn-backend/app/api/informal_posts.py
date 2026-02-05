@@ -15,7 +15,7 @@ def delete_comment(post_id: int, comment_id: str, user=Depends(get_current_user)
     post = cursor.fetchone()
     if not post:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Post not found")
     import json
     comments = post.get("comments")
@@ -27,7 +27,7 @@ def delete_comment(post_id: int, comment_id: str, user=Depends(get_current_user)
     cursor.execute("UPDATE informal_posts SET comments=%s WHERE id=%s", (json.dumps(new_comments), post_id))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"success": True, "comments": new_comments}
 @router.post("/{post_id}/like")
 def like_informal_post(post_id: int, user=Depends(get_current_user)):
@@ -39,7 +39,7 @@ def like_informal_post(post_id: int, user=Depends(get_current_user)):
     post = cursor.fetchone()
     if not post:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Post not found")
     likers = post.get("likers") or ""
     likes = post.get("likes")
@@ -54,7 +54,7 @@ def like_informal_post(post_id: int, user=Depends(get_current_user)):
     cursor.execute("UPDATE informal_posts SET likers=%s, likes=%s WHERE id=%s", (new_likers, likes, post_id))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"success": True, "likes": likes, "likers": liker_list}
 
 @router.post("/{post_id}/comment")
@@ -67,7 +67,7 @@ def comment_informal_post(post_id: int, text: str = Body(...), user=Depends(get_
     post = cursor.fetchone()
     if not post:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Post not found")
     import json
     comments = post.get("comments")
@@ -84,7 +84,7 @@ def comment_informal_post(post_id: int, text: str = Body(...), user=Depends(get_
     cursor.execute("UPDATE informal_posts SET comments=%s WHERE id=%s", (json.dumps(comment_list), post_id))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"success": True, "comments": comment_list}
 
 @router.post("/{post_id}/save")
@@ -97,7 +97,7 @@ def save_informal_post(post_id: int, user=Depends(get_current_user)):
     post = cursor.fetchone()
     if not post:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Post not found")
     savers = post.get("savers") or ""
     saver_list = [int(x) for x in savers.split(",") if x.strip().isdigit()]
@@ -109,7 +109,7 @@ def save_informal_post(post_id: int, user=Depends(get_current_user)):
     cursor.execute("UPDATE informal_posts SET savers=%s WHERE id=%s", (new_savers, post_id))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"success": True, "savers": saver_list}
 
 
@@ -124,16 +124,16 @@ def delete_informal_post(post_id: int, user=Depends(get_current_user)):
     post = cursor.fetchone()
     if not post:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Post not found")
     if post["author_id"] != user["id"]:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to delete this post")
     cursor.execute("DELETE FROM informal_posts WHERE id=%s", (post_id,))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"success": True}
 
 @router.post("/")

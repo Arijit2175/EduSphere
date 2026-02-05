@@ -121,5 +121,5 @@ def delete_lesson(lesson_id: int):
     cursor.execute("DELETE FROM lessons WHERE id=%s", (lesson_id,))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": lesson_id, "deleted": True}

@@ -17,11 +17,10 @@ DB_CONFIG = {
     'sslmode': 'require',
 }
 
-# Connection pool configuration
 try:
     db_pool = psycopg2.pool.SimpleConnectionPool(
-        5,  # min connections
-        20,  # max connections
+        10,  
+        50,  
         **DB_CONFIG,
         cursor_factory=RealDictCursor
     )
@@ -36,7 +35,6 @@ def get_db_connection():
             connection = db_pool.getconn()
             return connection
         else:
-            # Fallback: create connection without pooling
             connection = psycopg2.connect(**DB_CONFIG, cursor_factory=RealDictCursor)
             return connection
     except Exception as e:
@@ -59,7 +57,6 @@ def close_pool():
     except Exception as e:
         print(f"Error closing pool: {e}")
 
-# Simple in-memory cache with TTL
 class CacheItem:
     def __init__(self, data, ttl_seconds=300):
         self.data = data

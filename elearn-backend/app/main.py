@@ -8,7 +8,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api import auth, courses, enrollments, assignments, lessons, attendance, quizzes, resources, certificates, ai_tutor_chats, ai_tutor, class_schedules, contact_messages, nonformal, user, forgot_password, informal_posts, topics, code_execution
 from app.core.config import RATE_LIMIT_PER_MINUTE
-from app.db import get_db_connection, close_pool
+from app.db import get_db_connection, close_pool, return_db_connection
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -95,7 +95,7 @@ def reset_sequences():
         print(f"Warning: Error resetting sequences: {e}")
     finally:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
 
 @app.on_event("startup")
 async def startup_event():

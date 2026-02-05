@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Body, Depends, Request
 from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection
 from app.api.auth import get_current_user
 from app.core.security import sanitize_string
 from app.core.config import RATE_LIMIT_PER_MINUTE
@@ -29,7 +29,7 @@ async def list_chats(request: Request, user=Depends(get_current_user)):
     cursor.execute("SELECT * FROM ai_tutor_chats WHERE student_id=%s ORDER BY last_updated DESC", (user["id"],))
     chats = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return chats
 
 @router.post("/")
@@ -50,7 +50,7 @@ async def create_chat(request: Request, chat: ChatCreate = Body(...), user=Depen
     chat_id = cursor.fetchone()['id']
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": chat_id, "student_id": user["id"], "chat_title": chat_title}
 
 @router.get("/{chat_id}")
@@ -64,7 +64,7 @@ async def get_chat(request: Request, chat_id: int, user=Depends(get_current_user
     cursor.execute("SELECT * FROM ai_tutor_chats WHERE id=%s AND student_id=%s", (chat_id, user["id"]))
     chat = cursor.fetchone()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found")
     return chat
@@ -80,7 +80,7 @@ async def update_chat(request: Request, chat_id: int, update: ChatUpdate = Body(
     cursor.execute("SELECT * FROM ai_tutor_chats WHERE id=%s AND student_id=%s", (chat_id, user["id"]))
     if not cursor.fetchone():
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Chat not found")
     update_fields = []
     params = []
@@ -94,13 +94,13 @@ async def update_chat(request: Request, chat_id: int, update: ChatUpdate = Body(
         params.append(sanitized_title)
     if not update_fields:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="No fields to update")
     params.append(chat_id)
     cursor.execute(f"UPDATE ai_tutor_chats SET {', '.join(update_fields)} WHERE id=%s AND student_id=%s", tuple(params) + (user["id"],))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": chat_id, "updated": True}
 
 @router.delete("/{chat_id}")
@@ -114,10 +114,10 @@ async def delete_chat(request: Request, chat_id: int, user=Depends(get_current_u
     cursor.execute("SELECT * FROM ai_tutor_chats WHERE id=%s AND student_id=%s", (chat_id, user["id"]))
     if not cursor.fetchone():
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Chat not found")
     cursor.execute("DELETE FROM ai_tutor_chats WHERE id=%s AND student_id=%s", (chat_id, user["id"]))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": chat_id, "deleted": True}

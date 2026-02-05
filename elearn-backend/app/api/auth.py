@@ -5,7 +5,7 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection
 from app.core.config import SECRET_KEY, ALGORITHM, RATE_LIMIT_AUTH_PER_MINUTE
 from app.core.security import (
     sanitize_string, 
@@ -37,7 +37,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))
     user = cursor.fetchone()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     if user is None:
         raise credentials_exception
     return user
@@ -85,7 +85,7 @@ async def register(request: Request):
     cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
     if cursor.fetchone():
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Email already registered")
     print(f"[DEBUG] Received password: {password!r} (length: {len(password)})")
     if len(password) > 72:
@@ -112,7 +112,7 @@ async def register(request: Request):
     user_id = cursor.fetchone()['id']
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": user_id, "email": email, "role": role}
 
 from fastapi import Request
@@ -139,7 +139,7 @@ async def login(request: Request):
     cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
     user = cursor.fetchone()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     if not user or not verify_password(password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     if user["role"] != role:

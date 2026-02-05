@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from app.db import get_db_connection
+from app.db import get_db_connection, return_db_connection
 from app.api.auth import get_current_user
 from app.core.security import sanitize_string, check_teacher_role
 from app.core.config import RATE_LIMIT_PER_MINUTE
@@ -30,7 +30,7 @@ async def list_attendance(request: Request, user=Depends(get_current_user), sche
         user_row = cursor.fetchone()
         if not user_row or not user_row.get("student_id"):
             cursor.close()
-            conn.close()
+            return_db_connection(conn)
             return []
         student_id = user_row["student_id"]
         cursor.execute("SELECT * FROM attendance WHERE student_id=%s", (student_id,))
@@ -46,7 +46,7 @@ async def list_attendance(request: Request, user=Depends(get_current_user), sche
     
     records = cursor.fetchall()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return records
 
 @router.post("/")
@@ -76,17 +76,17 @@ async def mark_attendance(request: Request, data: AttendanceRequest, user=Depend
     schedule = cursor.fetchone()
     if not schedule:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Schedule not found")
     if schedule["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to mark attendance for this schedule")
     
     cursor.execute("SELECT id FROM attendance WHERE schedule_id=%s AND student_id=%s", (schedule_id, student_id))
     if cursor.fetchone():
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Attendance already marked")
     cursor.execute(
         "INSERT INTO attendance (schedule_id, student_id, status) VALUES (%s, %s, %s) RETURNING id",
@@ -95,7 +95,7 @@ async def mark_attendance(request: Request, data: AttendanceRequest, user=Depend
     attendance_id = cursor.fetchone()['id']
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": attendance_id, "schedule_id": schedule_id, "student_id": student_id, "status": status}
 
 @router.put("/{attendance_id}")
@@ -123,17 +123,17 @@ async def update_attendance(request: Request, attendance_id: int, status: str, u
     attendance = cursor.fetchone()
     if not attendance:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Attendance record not found")
     if attendance["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to update this attendance record")
     
     cursor.execute("UPDATE attendance SET status=%s WHERE id=%s", (status, attendance_id))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": attendance_id, "updated": True}
 
 @router.delete("/{attendance_id}")
@@ -157,15 +157,15 @@ async def delete_attendance(request: Request, attendance_id: int, user=Depends(g
     attendance = cursor.fetchone()
     if not attendance:
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=404, detail="Attendance record not found")
     if attendance["instructor_id"] != user.get("teacher_id"):
         cursor.close()
-        conn.close()
+        return_db_connection(conn)
         raise HTTPException(status_code=403, detail="Not authorized to delete this attendance record")
     
     cursor.execute("DELETE FROM attendance WHERE id=%s", (attendance_id,))
     conn.commit()
     cursor.close()
-    conn.close()
+    return_db_connection(conn)
     return {"id": attendance_id, "deleted": True}
