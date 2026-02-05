@@ -43,8 +43,8 @@ export default defineConfig({
         },
         // Asset file names for cache busting
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.');
-          const ext = info[info.length - 1];
+          const name = assetInfo?.name || '';
+          const ext = name.includes('.') ? name.split('.').pop() : '';
           if (/png|jpg|jpeg|gif|svg|webp|ico/.test(ext)) {
             return `assets/images/[name]-[hash][extname]`;
           } else if (/woff|woff2|ttf|otf|eot/.test(ext)) {
