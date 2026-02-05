@@ -1,18 +1,19 @@
 
 import { useState } from "react";
-import { Menu, MenuItem, Divider, Box, Typography, Avatar, Button, Stack, Grid, Chip, Card, CardContent } from "@mui/material";
+import { Menu, MenuItem, Divider, Box, Typography, Avatar, Button, Stack, Chip } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useNavigate } from "react-router-dom";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import PersonIcon from "@mui/icons-material/Person";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 export default function ProfileMenu({ anchorEl, open, onClose }) {
   const { user, logout } = useAuth();
   const { setIsOpen } = useSidebar();
   const navigate = useNavigate();
-  const [showDetailsPrompt, setShowDetailsPrompt] = useState(false);
 
-  // Check if student/teacher details are missing (customize as needed)
-  const missingDetails = !user?.firstName || !user?.lastName || !user?.email || !user?.role;
+  const displayName = user?.name || `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || "Learner";
 
   const handleDashboard = () => {
     onClose();
@@ -26,17 +27,10 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
 
   const handleLogout = () => {
     logout();
-    setIsOpen(false); // Close sidebar on logout
+    setIsOpen(false);
     onClose();
     navigate("/");
   };
-
-  const handleFillDetails = () => {
-    setShowDetailsPrompt(false);
-    navigate("/profile");
-  };
-
-
 
   return (
     <Menu
@@ -48,30 +42,155 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
       PaperProps={{
         sx: {
           p: 0,
-          m: 0,
-          minWidth: 320,
-          borderRadius: 3,
-          boxShadow: 6,
-          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          m: 1,
+          minWidth: 'max(250px, 90vw)',
+          borderRadius: 2.5,
+          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.12)',
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(0, 0, 0, 0.05)',
+          animation: 'fadeIn 0.2s ease-in-out',
+          '@keyframes fadeIn': {
+            '0%': { opacity: 0, transform: 'translateY(-8px)' },
+            '100%': { opacity: 1, transform: 'translateY(0)' },
+          }
         }
       }}
     >
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center" sx={{ mb: 2, mt: 2, px: 3 }}>
-        <Avatar src={user?.avatar || undefined} sx={{ bgcolor: "#667eea", width: 80, height: 80, fontSize: 32 }}>
-          {!user?.avatar && (user?.firstName ? user.firstName[0].toUpperCase() : (user?.email ? user.email[0].toUpperCase() : "U"))}
-        </Avatar>
-        <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>{user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.email || "User"}</Typography>
-          <Typography variant="body2" sx={{ color: "#6b7280" }}>{user?.email}</Typography>
-          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-            {user?.role && <Chip label={user.role} size="small" />}
-          </Stack>
-        </Box>
-      </Stack>
-      <Divider />
-      <MenuItem onClick={handleDashboard}>Dashboard</MenuItem>
-      <MenuItem onClick={handleProfile}>Profile</MenuItem>
-      <MenuItem onClick={handleLogout}>Logout</MenuItem>
+      {/* User Info Section */}
+      <Box sx={{ p: 3, pb: 2 }}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Avatar 
+            src={user?.avatar || undefined}
+            sx={{ 
+              width: 50, 
+              height: 50, 
+              bgcolor: "primary.main",
+              fontSize: 18,
+              fontWeight: 600,
+              flexShrink: 0,
+              border: '2px solid rgba(0, 0, 0, 0.06)'
+            }}
+          >
+            {!user?.avatar && displayName.slice(0, 1).toUpperCase()}
+          </Avatar>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography 
+              variant="subtitle2" 
+              sx={{ 
+                fontWeight: 600, 
+                color: '#000',
+                fontSize: '0.95rem',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {displayName}
+            </Typography>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: '#6b7280',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                display: 'block'
+              }}
+            >
+              {user?.email}
+            </Typography>
+            {user?.role && (
+              <Chip 
+                label={user.role} 
+                size="small" 
+                sx={{ 
+                  mt: 0.75,
+                  height: 24,
+                  fontSize: '0.7rem',
+                  fontWeight: 500,
+                  background: 'rgba(99, 102, 241, 0.1)',
+                  color: 'primary.main'
+                }}
+                variant="outlined"
+              />
+            )}
+          </Box>
+        </Stack>
+      </Box>
+
+      <Divider sx={{ my: 1, opacity: 0.5 }} />
+
+      {/* Menu Items */}
+      <Box sx={{ p: 1 }}>
+        <MenuItem 
+          onClick={handleDashboard}
+          sx={{
+            borderRadius: 1.5,
+            mx: 1,
+            mb: 0.5,
+            py: 1.5,
+            px: 2,
+            transition: 'all 0.2s ease',
+            color: '#000',
+            '&:hover': {
+              backgroundColor: 'rgba(99, 102, 241, 0.08)',
+              transform: 'translateX(4px)',
+            },
+            '&:active': {
+              backgroundColor: 'rgba(99, 102, 241, 0.15)',
+            }
+          }}
+        >
+          <DashboardIcon sx={{ mr: 1.5, fontSize: 20, color: 'primary.main' }} />
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>Dashboard</Typography>
+        </MenuItem>
+
+        <MenuItem 
+          onClick={handleProfile}
+          sx={{
+            borderRadius: 1.5,
+            mx: 1,
+            mb: 0.5,
+            py: 1.5,
+            px: 2,
+            transition: 'all 0.2s ease',
+            color: '#000',
+            '&:hover': {
+              backgroundColor: 'rgba(99, 102, 241, 0.08)',
+              transform: 'translateX(4px)',
+            },
+            '&:active': {
+              backgroundColor: 'rgba(99, 102, 241, 0.15)',
+            }
+          }}
+        >
+          <PersonIcon sx={{ mr: 1.5, fontSize: 20, color: 'primary.main' }} />
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>Profile</Typography>
+        </MenuItem>
+
+        <MenuItem 
+          onClick={handleLogout}
+          sx={{
+            borderRadius: 1.5,
+            mx: 1,
+            py: 1.5,
+            px: 2,
+            transition: 'all 0.2s ease',
+            color: '#dc2626',
+            '&:hover': {
+              backgroundColor: 'rgba(220, 38, 38, 0.08)',
+              transform: 'translateX(4px)',
+            },
+            '&:active': {
+              backgroundColor: 'rgba(220, 38, 38, 0.15)',
+            }
+          }}
+        >
+          <LogoutIcon sx={{ mr: 1.5, fontSize: 20, color: '#dc2626' }} />
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>Logout</Typography>
+        </MenuItem>
+      </Box>
     </Menu>
   );
 }
