@@ -66,7 +66,8 @@ export default function TeacherDashboard() {
           try {
             const res = await fetch(`${API_URL}/enrollments/course/${courseId}/students`);
             if (res.ok) {
-              const students = await res.json();
+              const response = await res.json();
+              const students = response.data || response || [];
               setAttendanceDetailsEnrolledStudents(Array.isArray(students) ? students : []);
             } else {
               setAttendanceDetailsEnrolledStudents([]);
@@ -92,7 +93,10 @@ export default function TeacherDashboard() {
     if (attendanceDialog.open && attendanceDialog.courseId) {
       fetch(`${API_URL}/enrollments/course/${attendanceDialog.courseId}/students`)
         .then(res => res.ok ? res.json() : [])
-        .then(data => setEnrolledStudents(Array.isArray(data) ? data : []))
+        .then(response => {
+          const data = response.data || response || [];
+          setEnrolledStudents(Array.isArray(data) ? data : []);
+        })
         .catch(() => setEnrolledStudents([]));
     } else {
       setEnrolledStudents([]);
@@ -126,7 +130,8 @@ export default function TeacherDashboard() {
         try {
           const res = await fetch(`${API_URL}/enrollments/course/${manageDialog.course.id}/students`);
           if (res.ok) {
-            const students = await res.json();
+            const response = await res.json();
+            const students = response.data || response || [];
             setEnrolledStudents(students);
           } else {
             setEnrolledStudents([]);

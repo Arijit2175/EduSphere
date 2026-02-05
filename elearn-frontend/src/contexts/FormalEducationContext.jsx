@@ -69,12 +69,15 @@ export const FormalEducationProvider = ({ children }) => {
           );
           setCourses(coursesWithDetails);
         }
-        const enrollmentsRes = await fetch(`${API_URL}/enrollments/`);
+        // Fetch current user's enrollments only
+        const enrollmentsRes = await fetch(`${API_URL}/enrollments/me`, {
+          headers: { Authorization: `Bearer ${user.access_token}` }
+        });
         let mapped = [];
         if (enrollmentsRes.ok) {
-          const enrollmentsResponse = await enrollmentsRes.json();
-          const enrollmentsData = enrollmentsResponse.data || enrollmentsResponse || [];
-          mapped = enrollmentsData.map(e => ({
+          const enrollmentsData = await enrollmentsRes.json();
+          // enrollments/me returns direct array, not paginated
+          mapped = (Array.isArray(enrollmentsData) ? enrollmentsData : []).map(e => ({
             id: e.id,
             studentId: e.user_id,
             courseId: e.course_id,
@@ -91,7 +94,9 @@ export const FormalEducationProvider = ({ children }) => {
         let mappedSubmissions = [];
         if (submissionsRes.ok) {
           const allSubmissions = await submissionsRes.json();
-          mappedSubmissions = allSubmissions.map(s => ({
+          // Handle both paginated (teacher) and direct array (student) responses
+          const submissionsArray = allSubmissions.data || allSubmissions || [];
+          mappedSubmissions = (Array.isArray(submissionsArray) ? submissionsArray : []).map(s => ({
             ...s,
             submittedAt: s.submitted_at || s.submittedAt
           }));
