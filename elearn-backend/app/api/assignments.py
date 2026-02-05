@@ -28,22 +28,19 @@ async def list_all_assignment_submissions(request: Request, user=Depends(get_cur
             cursor.execute("SELECT * FROM assignment_submissions ORDER BY submitted_at DESC LIMIT %s OFFSET %s", (limit, skip))
             submissions = cursor.fetchall()
             return {"data": submissions, "total": total, "skip": skip, "limit": limit}
+        
+        # Student logic - fetch only their submissions
+        cursor.execute("SELECT student_id FROM users WHERE id=%s", (user["id"],))
+        user_row = cursor.fetchone()
+        if not user_row or not user_row.get("student_id"):
+            return []
+        student_id = user_row["student_id"]
+        cursor.execute("SELECT * FROM assignment_submissions WHERE student_id=%s", (student_id,))
+        submissions = cursor.fetchall()
+        return submissions
     finally:
         cursor.close()
         return_db_connection(conn)
-
-    cursor.execute("SELECT student_id FROM users WHERE id=%s", (user["id"],))
-    user_row = cursor.fetchone()
-    if not user_row or not user_row.get("student_id"):
-        cursor.close()
-        return_db_connection(conn)
-        return []
-    student_id = user_row["student_id"]
-    cursor.execute("SELECT * FROM assignment_submissions WHERE student_id=%s", (student_id,))
-    submissions = cursor.fetchall()
-    cursor.close()
-    return_db_connection(conn)
-    return submissions
 
 @router.get("/")
 @limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
