@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Menu, MenuItem, Divider, Box, Typography, Avatar, Button, Stack, Chip } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { useSidebar } from "../contexts/SidebarContext";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -14,16 +14,6 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
   const navigate = useNavigate();
 
   const displayName = user?.name || `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || "Learner";
-
-  const handleDashboard = () => {
-    onClose();
-    navigate("/dashboard");
-  };
-
-  const handleProfile = () => {
-    onClose();
-    navigate("/profile");
-  };
 
   const handleLogout = () => {
     logout();
@@ -126,7 +116,9 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
       {/* Menu Items */}
       <Box sx={{ p: 1 }}>
         <MenuItem 
-          onClick={handleDashboard}
+          component={RouterLink}
+          to="/dashboard"
+          onClick={onClose}
           sx={{
             borderRadius: 1.5,
             mx: 1,
@@ -149,7 +141,9 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
         </MenuItem>
 
         <MenuItem 
-          onClick={handleProfile}
+          component={RouterLink}
+          to="/profile"
+          onClick={onClose}
           sx={{
             borderRadius: 1.5,
             mx: 1,
