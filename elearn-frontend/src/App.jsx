@@ -10,6 +10,7 @@ import { FormalEducationProvider } from "./contexts/FormalEducationContext";
 import { NonFormalProvider } from "./contexts/NonFormalContext";
 import theme from "./theme";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -247,7 +248,9 @@ export default function App() {
         <AuthProvider>
           <LoadingProvider>
             <SessionExpiredToast />
-            <AppShell />
+            <ErrorBoundary>
+              <AppShell />
+            </ErrorBoundary>
           </LoadingProvider>
         </AuthProvider>
       </BrowserRouter>
