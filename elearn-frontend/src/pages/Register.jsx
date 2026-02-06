@@ -43,7 +43,7 @@ export default function Register() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -57,8 +57,8 @@ export default function Register() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters");
       return;
     }
     if (formData.password.length > 72) {
@@ -67,7 +67,7 @@ export default function Register() {
     }
 
     setLoading(true);
-    setTimeout(() => {
+    try {
       // Map frontend fields to backend expected fields
       const payload = {
         ...formData,
@@ -76,10 +76,13 @@ export default function Register() {
       };
       delete payload.firstName;
       delete payload.lastName;
-      register(payload);
-      setLoading(false);
+      await register(payload);
       navigate("/dashboard");
-    }, 1000);
+    } catch (err) {
+      setError(err.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
