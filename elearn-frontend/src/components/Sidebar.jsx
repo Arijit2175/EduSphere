@@ -12,7 +12,7 @@ import {
   Fade,
   Slide,
 } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Link as RouterLink } from "react-router-dom";
 import {
   Menu,
@@ -31,6 +31,7 @@ import { useAuth } from "../contexts/AuthContext";
 function Sidebar() {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const { isOpen, setIsOpen } = useSidebar();
   const drawerWidth = 260;
 
@@ -192,9 +193,10 @@ function Sidebar() {
                 timeout={300 + index * 50}
               >
                 <ListItemButton
-                  component={RouterLink}
-                  to={item.to}
-                  onClick={() => handleNavClick(item.to)}
+                  onClick={() => {
+                    handleNavClick(item.to);
+                    navigate(item.to);
+                  }}
                   sx={{
                     cursor: "pointer",
                     borderRadius: 2,

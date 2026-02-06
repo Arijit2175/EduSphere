@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Menu, MenuItem, Divider, Box, Typography, Avatar, Button, Stack, Chip } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { useSidebar } from "../contexts/SidebarContext";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -116,11 +116,10 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
       {/* Menu Items */}
       <Box sx={{ p: 1 }}>
         <MenuItem 
-          component={RouterLink}
-          to="/dashboard"
           onClick={() => {
             console.log("[menu-click]", "/dashboard");
             onClose();
+            navigate("/dashboard");
           }}
           sx={{
             borderRadius: 1.5,
@@ -144,11 +143,10 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
         </MenuItem>
 
         <MenuItem 
-          component={RouterLink}
-          to="/profile"
           onClick={() => {
             console.log("[menu-click]", "/profile");
             onClose();
+            navigate("/profile");
           }}
           sx={{
             borderRadius: 1.5,
