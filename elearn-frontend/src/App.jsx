@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { Alert, Snackbar, Box, CircularProgress } from "@mui/material";
@@ -62,14 +62,12 @@ const SessionExpiredToast = () => {
 };
 
 const AppShell = () => {
-  const location = useLocation();
-  
   return (
     <CoursesProvider>
       <FormalEducationProvider>
         <NonFormalProvider>
           <SidebarProvider>
-            <Routes key={location.pathname}>
+            <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/home" element={<Home />} />
               <Route path="/login" element={<Login />} />
