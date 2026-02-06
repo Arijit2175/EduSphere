@@ -67,7 +67,6 @@ const AppShell = () => {
   const appKey = user?.id || user?.email || "guest";
 
   useEffect(() => {
-    if (import.meta?.env?.MODE !== "development") return;
     console.log("[route]", location.pathname, {
       isAuthenticated: !!user,
       userEmail: user?.email || null,
