@@ -117,9 +117,8 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
       <Box sx={{ p: 1 }}>
         <MenuItem 
           onClick={() => {
-            console.log("[menu-click]", "/dashboard");
-            onClose();
             navigate("/dashboard");
+            onClose();
           }}
           sx={{
             borderRadius: 1.5,
@@ -144,9 +143,8 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
 
         <MenuItem 
           onClick={() => {
-            console.log("[menu-click]", "/profile");
-            onClose();
             navigate("/profile");
+            onClose();
           }}
           sx={{
             borderRadius: 1.5,

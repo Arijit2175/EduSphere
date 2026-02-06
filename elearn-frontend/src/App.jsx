@@ -64,17 +64,11 @@ const SessionExpiredToast = () => {
 const AppShell = () => {
   const { user } = useAuth();
   const location = useLocation();
-  const appKey = user?.id || user?.email || "guest";
 
-  useEffect(() => {
-    console.log("[route]", location.pathname, {
-      isAuthenticated: !!user,
-      userEmail: user?.email || null,
-    });
-  }, [location.pathname, user?.email, user]);
+
 
   return (
-    <CoursesProvider key={appKey}>
+    <CoursesProvider>
       <FormalEducationProvider>
         <NonFormalProvider>
           <SidebarProvider>

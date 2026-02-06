@@ -35,20 +35,7 @@ function Sidebar() {
   const { isOpen, setIsOpen } = useSidebar();
   const drawerWidth = 260;
 
-  const handleNavClick = (to) => {
-    console.log("[nav-click]", {
-      to,
-      routerPath: location.pathname,
-      windowPath: window.location.pathname,
-    });
-    setTimeout(() => {
-      console.log("[nav-after]", {
-        to,
-        routerPath: location.pathname,
-        windowPath: window.location.pathname,
-      });
-    }, 0);
-  };
+
 
   // Build links as before, but keep icons as MUI icons
   const links = [
@@ -194,7 +181,6 @@ function Sidebar() {
               >
                 <ListItemButton
                   onClick={() => {
-                    handleNavClick(item.to);
                     navigate(item.to);
                   }}
                   sx={{
