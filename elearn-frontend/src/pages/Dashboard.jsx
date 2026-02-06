@@ -13,7 +13,7 @@ import { useNonFormal } from "../contexts/NonFormalContext";
 import { useFormalEducation } from "../contexts/FormalEducationContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useSidebar } from "../contexts/SidebarContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import StarIcon from "@mui/icons-material/Star";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -37,6 +37,7 @@ export default function Dashboard() {
   const [enrolledStudentsByCourse, setEnrolledStudentsByCourse] = useState({});
   const [teacherStudentCounts, setTeacherStudentCounts] = useState({});
   const [teacherCountsLoading, setTeacherCountsLoading] = useState(false);
+  const lastTeacherCourseIds = useRef("");
   // Teacher: schedule dialog state
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [scheduleCourseId, setScheduleCourseId] = useState("");
@@ -53,8 +54,15 @@ export default function Dashboard() {
     if (user?.role !== "teacher" || teacherCourses.length === 0) {
       setTeacherStudentCounts({});
       setTeacherCountsLoading(false);
+      lastTeacherCourseIds.current = "";
       return;
     }
+
+    const courseIds = teacherCourses.map((course) => course.id).join(",");
+    if (courseIds === lastTeacherCourseIds.current) {
+      return;
+    }
+    lastTeacherCourseIds.current = courseIds;
 
     const fetchStudentCounts = async () => {
       setTeacherCountsLoading(true);
