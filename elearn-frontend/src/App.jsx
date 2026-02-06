@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { Alert, Snackbar, Box, CircularProgress } from "@mui/material";
@@ -63,7 +63,16 @@ const SessionExpiredToast = () => {
 
 const AppShell = () => {
   const { user } = useAuth();
+  const location = useLocation();
   const appKey = user?.id || user?.email || "guest";
+
+  useEffect(() => {
+    if (import.meta?.env?.MODE !== "development") return;
+    console.log("[route]", location.pathname, {
+      isAuthenticated: !!user,
+      userEmail: user?.email || null,
+    });
+  }, [location.pathname, user?.email, user]);
 
   return (
     <CoursesProvider key={appKey}>
