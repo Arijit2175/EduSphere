@@ -1,3 +1,11 @@
+import API_URL from "../config";
+import { Box, Grid, Card, CardContent, Typography, Button, Stack, LinearProgress, Chip, Tab, Tabs, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress } from "@mui/material";
+import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
+import Section from "../components/Section";
+import SectionTitle from "../components/SectionTitle";
+import StatsGrid from "../components/StatsGrid";
+import EnrolledCoursesList from "../components/EnrolledCoursesList";
 import PageHeader from "../components/PageHeader";
 import BackgroundVideo from "../components/BackgroundVideo";
 import { useCourses } from "../contexts/CoursesContext";
