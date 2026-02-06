@@ -35,6 +35,8 @@ export default function Dashboard() {
   const [studentsModalOpen, setStudentsModalOpen] = useState(false);
   // Store enrolled students for each course (id -> array of students)
   const [enrolledStudentsByCourse, setEnrolledStudentsByCourse] = useState({});
+  const [teacherStudentCounts, setTeacherStudentCounts] = useState({});
+  const [teacherCountsLoading, setTeacherCountsLoading] = useState(false);
   // Teacher: schedule dialog state
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [scheduleCourseId, setScheduleCourseId] = useState("");
@@ -125,8 +127,41 @@ export default function Dashboard() {
   const teacherCourses = user?.role === "teacher" && (user?.teacher_id || user?.id)
     ? getTeacherCourses(user.teacher_id || user.id)
     : [];
-  const teacherStudentsCount = teacherCourses.reduce((acc, c) => acc + (getCourseStudents(c.id)?.length || 0), 0);
+  const teacherStudentsCount = teacherCourses.reduce((acc, c) => acc + (teacherStudentCounts[c.id] || 0), 0);
   const teacherUpcomingClasses = teacherCourses.reduce((acc, c) => acc + ((c.schedules || []).filter(s => new Date(s.startTime) > new Date()).length), 0);
+
+  useEffect(() => {
+    if (user?.role !== "teacher" || teacherCourses.length === 0) {
+      setTeacherStudentCounts({});
+      setTeacherCountsLoading(false);
+      return;
+    }
+
+    const fetchStudentCounts = async () => {
+      setTeacherCountsLoading(true);
+      const counts = {};
+      await Promise.all(
+        teacherCourses.map(async (course) => {
+          try {
+            const res = await fetch(`${API_URL}/enrollments/course/${course.id}/students?skip=0&limit=1`);
+            if (res.ok) {
+              const response = await res.json();
+              const total = typeof response.total === "number" ? response.total : (response.data || response || []).length;
+              counts[course.id] = total;
+            } else {
+              counts[course.id] = 0;
+            }
+          } catch {
+            counts[course.id] = 0;
+          }
+        })
+      );
+      setTeacherStudentCounts(counts);
+      setTeacherCountsLoading(false);
+    };
+
+    fetchStudentCounts();
+  }, [user?.role, teacherCourses]);
 
   // Handler functions for stats actions
   const handleBrowseMore = () => {
@@ -162,22 +197,28 @@ export default function Dashboard() {
   const handleViewStudents = async () => {
     if (user?.role === "teacher") {
       const newEnrolled = {};
+      const counts = {};
       await Promise.all(
         teacherCourses.map(async (course) => {
           try {
             const res = await fetch(`${API_URL}/enrollments/course/${course.id}/students`);
             if (res.ok) {
-              const students = await res.json();
-              newEnrolled[course.id] = students;
+              const response = await res.json();
+              const students = response.data || response || [];
+              newEnrolled[course.id] = Array.isArray(students) ? students : [];
+              counts[course.id] = typeof response.total === "number" ? response.total : newEnrolled[course.id].length;
             } else {
               newEnrolled[course.id] = [];
+              counts[course.id] = 0;
             }
           } catch {
             newEnrolled[course.id] = [];
+            counts[course.id] = 0;
           }
         })
       );
       setEnrolledStudentsByCourse(newEnrolled);
+      setTeacherStudentCounts(counts);
       setStudentsModalOpen(true);
     } else {
       setTabValue(1); // Switch to view students for regular users
@@ -200,7 +241,7 @@ export default function Dashboard() {
   const statsData = user?.role === "teacher"
     ? [
         { icon: "📘", value: teacherCourses.length.toString(), label: "Courses Taught", color: "#667eea", actionText: "Create", onAction: handleCreateCourse },
-        { icon: "👩‍🎓", value: teacherStudentsCount.toString(), label: "Enrolled Students", color: "#10b981", actionText: "View", onAction: handleViewStudents },
+        { icon: "👩‍🎓", value: teacherCountsLoading ? "..." : teacherStudentsCount.toString(), label: "Enrolled Students", color: "#10b981", actionText: "View", onAction: handleViewStudents },
         { icon: "📅", value: teacherUpcomingClasses.toString(), label: "Upcoming Classes", color: "#f59e0b", actionText: "Schedule", onAction: handleScheduleClass },
         { icon: "🧪", value: (teacherCourses.reduce((acc,c)=> acc + (c.assignments?.length||0),0)).toString(), label: "Assignments", color: "#f093fb", actionText: "Add", onAction: handleAddAssignment },
       ]
@@ -313,7 +354,7 @@ export default function Dashboard() {
                             <Box sx={{ flex: 1 }}>
                               <Typography variant="h6" sx={{ fontWeight: 700 }}>{course.title}</Typography>
                               <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                                {course.students?.length || getCourseStudents(course.id)?.length || 0} students
+                                {teacherCountsLoading ? "Loading..." : `${teacherStudentCounts[course.id] || 0} students`}
                               </Typography>
                             </Box>
                             <Stack direction="row" spacing={2} sx={{ ml: 2 }}>
