@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
-import { Suspense, lazy, useEffect, useRef } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { Alert, Snackbar, Box, CircularProgress } from "@mui/material";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -65,17 +65,43 @@ const SessionExpiredToast = () => {
 const AppShell = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const lastSyncRef = useRef("|");
+  const [, forceUpdate] = useState(0);
 
+  // Listen to popstate AND watch for URL changes that React Router misses
   useEffect(() => {
-    const target = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-    const current = `${location.pathname}${location.search}${location.hash}`;
-    const key = `${current}|${target}`;
+    let rafId = null;
+    let lastUrl = window.location.pathname + window.location.search + window.location.hash;
 
-    if (current !== target && lastSyncRef.current !== key) {
-      lastSyncRef.current = key;
-      navigate(target, { replace: true });
-    }
+    const syncRouter = () => {
+      const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+      const routerUrl = location.pathname + location.search + location.hash;
+      
+      if (currentUrl !== routerUrl) {
+        navigate(currentUrl, { replace: true });
+        forceUpdate(n => n + 1);
+      }
+      lastUrl = currentUrl;
+    };
+
+    // Check periodically for URL mismatches (handles edge cases)
+    const checkUrl = () => {
+      const newUrl = window.location.pathname + window.location.search + window.location.hash;
+      if (newUrl !== lastUrl) {
+        syncRouter();
+      }
+      rafId = requestAnimationFrame(checkUrl);
+    };
+
+    // Also listen to popstate for back/forward buttons
+    const handlePopState = () => syncRouter();
+    window.addEventListener("popstate", handlePopState);
+    
+    rafId = requestAnimationFrame(checkUrl);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [location.pathname, location.search, location.hash, navigate]);
 
   return (
