@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Menu, MenuItem, Divider, Box, Typography, Avatar, Button, Stack, Chip } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
@@ -14,6 +13,16 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
   const navigate = useNavigate();
 
   const displayName = user?.name || `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || "Learner";
+
+  const handleDashboard = () => {
+    onClose();
+    navigate("/dashboard");
+  };
+
+  const handleProfile = () => {
+    onClose();
+    navigate("/profile");
+  };
 
   const handleLogout = () => {
     logout();
@@ -116,10 +125,7 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
       {/* Menu Items */}
       <Box sx={{ p: 1 }}>
         <MenuItem 
-          onClick={() => {
-            navigate("/dashboard");
-            onClose();
-          }}
+          onClick={handleDashboard}
           sx={{
             borderRadius: 1.5,
             mx: 1,
@@ -142,10 +148,7 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
         </MenuItem>
 
         <MenuItem 
-          onClick={() => {
-            navigate("/profile");
-            onClose();
-          }}
+          onClick={handleProfile}
           sx={{
             borderRadius: 1.5,
             mx: 1,

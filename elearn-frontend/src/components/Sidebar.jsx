@@ -2,7 +2,7 @@ import { useSidebar } from "../contexts/SidebarContext";
 import {
   Drawer,
   List,
-  ListItemButton,
+  ListItem,
   ListItemIcon,
   ListItemText,
   IconButton,
@@ -12,8 +12,7 @@ import {
   Fade,
   Slide,
 } from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Link as RouterLink } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Menu,
   Close,
@@ -31,11 +30,8 @@ import { useAuth } from "../contexts/AuthContext";
 function Sidebar() {
   const { user } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
   const { isOpen, setIsOpen } = useSidebar();
   const drawerWidth = 260;
-
-
 
   // Build links as before, but keep icons as MUI icons
   const links = [
@@ -179,10 +175,9 @@ function Sidebar() {
                 in={isOpen}
                 timeout={300 + index * 50}
               >
-                <ListItemButton
-                  onClick={() => {
-                    navigate(item.to);
-                  }}
+                <ListItem
+                  component={Link}
+                  to={item.to}
                   sx={{
                     cursor: "pointer",
                     borderRadius: 2,
@@ -200,6 +195,7 @@ function Sidebar() {
                     overflow: "hidden",
                   }}
                   selected={isActive}
+                  // Remove any onClick that closes sidebar here
                 >
                   <ListItemIcon
                     sx={{
@@ -236,7 +232,7 @@ function Sidebar() {
                       transition: "all 0.3s ease-out",
                     }}
                   />
-                </ListItemButton>
+                </ListItem>
               </Slide>
             );
           })}
