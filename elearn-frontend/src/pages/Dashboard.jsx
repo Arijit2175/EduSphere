@@ -44,6 +44,11 @@ export default function Dashboard() {
   // Certificate view dialog state
   const [viewCert, setViewCert] = useState(null);
 
+  // Teacher-specific data (needed before effects)
+  const teacherCourses = user?.role === "teacher" && (user?.teacher_id || user?.id)
+    ? getTeacherCourses(user.teacher_id || user.id)
+    : [];
+
   useEffect(() => {
     if (user?.role !== "teacher" || teacherCourses.length === 0) {
       setTeacherStudentCounts({});
@@ -156,10 +161,6 @@ export default function Dashboard() {
   }).length;
   const completedCourses = completedFormal + completedNonFormal;
 
-  // Teacher-specific data
-  const teacherCourses = user?.role === "teacher" && (user?.teacher_id || user?.id)
-    ? getTeacherCourses(user.teacher_id || user.id)
-    : [];
   const teacherStudentsCount = teacherCourses.reduce((acc, c) => acc + (teacherStudentCounts[c.id] || 0), 0);
   const teacherUpcomingClasses = teacherCourses.reduce((acc, c) => acc + ((c.schedules || []).filter(s => new Date(s.startTime) > new Date()).length), 0);
 
