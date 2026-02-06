@@ -62,8 +62,11 @@ const SessionExpiredToast = () => {
 };
 
 const AppShell = () => {
+  const { user } = useAuth();
+  const appKey = user?.id || user?.email || "guest";
+
   return (
-    <CoursesProvider>
+    <CoursesProvider key={appKey}>
       <FormalEducationProvider>
         <NonFormalProvider>
           <SidebarProvider>
