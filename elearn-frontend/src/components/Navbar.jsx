@@ -4,13 +4,11 @@ import { AppBar, Toolbar, Button, Typography, Box, IconButton, Fade } from "@mui
 import { AccountCircle, Menu as MenuIcon } from "@mui/icons-material";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import ProfileMenu from "./ProfileMenu";
 import { useSidebar } from "../contexts/SidebarContext";
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const displayName = user?.name || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || user?.email;
   const { toggleSidebar, setIsOpen } = useSidebar();
@@ -27,11 +25,11 @@ export default function Navbar() {
     logout();
     setIsOpen(false); // Close sidebar on logout
     handleClose();
-    navigate("/");
+    window.location.href = "/";
   };
 
   const handleHomeClick = () => {
-    navigate("/home");
+    window.location.href = "/home";
   };
 
   return (

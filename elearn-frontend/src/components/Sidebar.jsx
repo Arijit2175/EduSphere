@@ -12,7 +12,7 @@ import {
   Fade,
   Slide,
 } from "@mui/material";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
   Menu,
   Close,
@@ -176,8 +176,8 @@ function Sidebar() {
                 timeout={300 + index * 50}
               >
                 <ListItemButton
-                  component={Link}
-                  to={item.to}
+                  component="a"
+                  href={item.to}
                   sx={{
                     cursor: "pointer",
                     borderRadius: 2,
