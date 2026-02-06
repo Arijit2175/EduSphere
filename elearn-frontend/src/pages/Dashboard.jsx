@@ -44,6 +44,39 @@ export default function Dashboard() {
   // Certificate view dialog state
   const [viewCert, setViewCert] = useState(null);
 
+  useEffect(() => {
+    if (user?.role !== "teacher" || teacherCourses.length === 0) {
+      setTeacherStudentCounts({});
+      setTeacherCountsLoading(false);
+      return;
+    }
+
+    const fetchStudentCounts = async () => {
+      setTeacherCountsLoading(true);
+      const counts = {};
+      await Promise.all(
+        teacherCourses.map(async (course) => {
+          try {
+            const res = await fetch(`${API_URL}/enrollments/course/${course.id}/students?skip=0&limit=1`);
+            if (res.ok) {
+              const response = await res.json();
+              const total = typeof response.total === "number" ? response.total : (response.data || response || []).length;
+              counts[course.id] = total;
+            } else {
+              counts[course.id] = 0;
+            }
+          } catch {
+            counts[course.id] = 0;
+          }
+        })
+      );
+      setTeacherStudentCounts(counts);
+      setTeacherCountsLoading(false);
+    };
+
+    fetchStudentCounts();
+  }, [user?.role, teacherCourses]);
+
   // Show loading screen until both formal and non-formal data are loaded
   const isLoading = formalLoading || nonFormalLoading;
   
@@ -129,39 +162,6 @@ export default function Dashboard() {
     : [];
   const teacherStudentsCount = teacherCourses.reduce((acc, c) => acc + (teacherStudentCounts[c.id] || 0), 0);
   const teacherUpcomingClasses = teacherCourses.reduce((acc, c) => acc + ((c.schedules || []).filter(s => new Date(s.startTime) > new Date()).length), 0);
-
-  useEffect(() => {
-    if (user?.role !== "teacher" || teacherCourses.length === 0) {
-      setTeacherStudentCounts({});
-      setTeacherCountsLoading(false);
-      return;
-    }
-
-    const fetchStudentCounts = async () => {
-      setTeacherCountsLoading(true);
-      const counts = {};
-      await Promise.all(
-        teacherCourses.map(async (course) => {
-          try {
-            const res = await fetch(`${API_URL}/enrollments/course/${course.id}/students?skip=0&limit=1`);
-            if (res.ok) {
-              const response = await res.json();
-              const total = typeof response.total === "number" ? response.total : (response.data || response || []).length;
-              counts[course.id] = total;
-            } else {
-              counts[course.id] = 0;
-            }
-          } catch {
-            counts[course.id] = 0;
-          }
-        })
-      );
-      setTeacherStudentCounts(counts);
-      setTeacherCountsLoading(false);
-    };
-
-    fetchStudentCounts();
-  }, [user?.role, teacherCourses]);
 
   // Handler functions for stats actions
   const handleBrowseMore = () => {
