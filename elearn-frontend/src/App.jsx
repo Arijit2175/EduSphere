@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense, lazy, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Suspense, lazy, useEffect, useRef } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { Alert, Snackbar, Box, CircularProgress } from "@mui/material";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -63,6 +63,21 @@ const SessionExpiredToast = () => {
 };
 
 const AppShell = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const lastSyncRef = useRef("|");
+
+  useEffect(() => {
+    const target = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    const current = `${location.pathname}${location.search}${location.hash}`;
+    const key = `${current}|${target}`;
+
+    if (current !== target && lastSyncRef.current !== key) {
+      lastSyncRef.current = key;
+      navigate(target, { replace: true });
+    }
+  }, [location.pathname, location.search, location.hash, navigate]);
+
   return (
     <CoursesProvider>
       <FormalEducationProvider>
