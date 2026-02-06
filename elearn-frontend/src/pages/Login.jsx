@@ -21,12 +21,12 @@ function Login() {
   const { setIsOpen } = useSidebar();
   const navigate = useNavigate();
 
-  // Redirect if already logged in (when directly accessing /login while authenticated)
+  // Redirect if already logged in
   useEffect(() => {
-    if (isAuthenticated && !loading) {
-      window.location.href = "/dashboard";
+    if (isAuthenticated) {
+      navigate("/dashboard");
     }
-  }, [isAuthenticated, loading]);
+  }, [isAuthenticated, navigate]);
 
   const validateEmail = (email) => {
     // Simple email regex for validation
@@ -53,8 +53,7 @@ function Login() {
       const user = await login(email, password, role);
       console.log("Login success", user);
       setIsOpen(false);
-      // Force full page reload to properly initialize all contexts
-      window.location.href = "/dashboard";
+      navigate("/dashboard");
     } catch (err) {
       console.error("Login error", err);
       setError(err.message || "Login failed");

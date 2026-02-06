@@ -111,6 +111,10 @@ export default function Profile() {
 
   const [editForm, setEditForm] = React.useState(form);
 
+  React.useEffect(() => {
+    setEditForm(form);
+  }, [form]);
+
   const handleEditOpen = () => {
     setEditForm(form);
     setEditOpen(true);
