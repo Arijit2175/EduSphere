@@ -116,9 +116,7 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
       {/* Menu Items */}
       <Box sx={{ p: 1 }}>
         <MenuItem 
-          component={RouterLink}
-          to="/dashboard"
-          onClick={onClose}
+          onClick={handleDashboard}
           sx={{
             borderRadius: 1.5,
             mx: 1,
@@ -141,9 +139,7 @@ export default function ProfileMenu({ anchorEl, open, onClose }) {
         </MenuItem>
 
         <MenuItem 
-          component={RouterLink}
-          to="/profile"
-          onClick={onClose}
+          onClick={handleProfile}
           sx={{
             borderRadius: 1.5,
             mx: 1,
