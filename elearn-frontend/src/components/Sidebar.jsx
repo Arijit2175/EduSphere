@@ -12,7 +12,7 @@ import {
   Fade,
   Slide,
 } from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import {
   Menu,
   Close,
@@ -30,7 +30,6 @@ import { useAuth } from "../contexts/AuthContext";
 function Sidebar() {
   const { user } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
   const { isOpen, setIsOpen } = useSidebar();
   const drawerWidth = 260;
 
@@ -177,7 +176,8 @@ function Sidebar() {
                 timeout={300 + index * 50}
               >
                 <ListItemButton
-                  onClick={() => navigate(item.to)}
+                  component={Link}
+                  to={item.to}
                   sx={{
                     cursor: "pointer",
                     borderRadius: 2,
