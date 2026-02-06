@@ -34,6 +34,10 @@ function Sidebar() {
   const { isOpen, setIsOpen } = useSidebar();
   const drawerWidth = 260;
 
+  const handleNavClick = (to) => {
+    console.log("[nav-click]", to);
+  };
+
   // Build links as before, but keep icons as MUI icons
   const links = [
     { to: "/dashboard", label: "Dashboard", icon: Dashboard },
@@ -179,6 +183,7 @@ function Sidebar() {
                 <ListItemButton
                   component={RouterLink}
                   to={item.to}
+                  onClick={() => handleNavClick(item.to)}
                   sx={{
                     cursor: "pointer",
                     borderRadius: 2,
