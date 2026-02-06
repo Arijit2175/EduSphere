@@ -361,49 +361,48 @@ export default function Profile() {
       </Box>
 
       {/* Edit Dialog */}
-      <Dialog open={editOpen} onClose={handleEditClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
-        <DialogTitle sx={{ fontWeight: 600, fontSize: '1.25rem' }}>Edit Profile</DialogTitle>
-        <DialogContent sx={{ mt: 2 }}>
-          <Grid container spacing={3} sx={{ mt: 0.5 }}>
-            <Grid item xs={12} sm={6}>
-              <TextField 
-                label="First Name" 
-                name="firstName" 
-                value={editForm.first_name} 
-                onChange={handleEditFormChange} 
-                fullWidth 
+      <Dialog open={editOpen} onClose={handleEditClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: "0 24px 80px rgba(0, 0, 0, 0.12)" } }}>
+        <DialogTitle sx={{ fontWeight: 700, fontSize: "1.2rem", pb: 1 }}>Edit Profile</DialogTitle>
+        <DialogContent sx={{ pt: 1, pb: 0, maxHeight: "90vh", overflowY: "auto" }}>
+          <Box sx={{ display: "grid", gap: 2, py: 1 }}>
+            <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
+              <TextField
+                label="First Name"
+                name="firstName"
+                value={editForm.first_name}
+                onChange={handleEditFormChange}
+                fullWidth
                 variant="outlined"
                 size="small"
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField 
-                label="Last Name" 
-                name="lastName" 
-                value={editForm.last_name} 
-                onChange={handleEditFormChange} 
-                fullWidth 
+              <TextField
+                label="Last Name"
+                name="lastName"
+                value={editForm.last_name}
+                onChange={handleEditFormChange}
+                fullWidth
                 variant="outlined"
                 size="small"
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField 
-                label="Email" 
-                name="email" 
-                value={editForm.email} 
-                onChange={handleEditFormChange} 
-                fullWidth 
-                variant="outlined"
-                size="small"
-              />
-            </Grid>
-            <Grid item xs={6} sm={3}>
+            </Box>
+
+            <TextField
+              label="Email"
+              name="email"
+              value={editForm.email}
+              onChange={handleEditFormChange}
+              fullWidth
+              variant="outlined"
+              size="small"
+              type="email"
+            />
+
+            <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 2fr" } }}>
               <TextField
                 select
                 label="Country Code"
                 name="countryCode"
-                value={editForm.countryCode || '+91'}
+                value={editForm.countryCode || "+91"}
                 onChange={(e) => setEditForm({ ...editForm, countryCode: e.target.value })}
                 fullWidth
                 variant="outlined"
@@ -417,19 +416,18 @@ export default function Profile() {
                 <option value="+81">+81 JP</option>
                 <option value="+49">+49 DE</option>
               </TextField>
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <TextField 
-                label="Phone" 
-                name="phone" 
-                value={editForm.phone} 
-                onChange={handleEditFormChange} 
-                fullWidth 
+              <TextField
+                label="Phone"
+                name="phone"
+                value={editForm.phone}
+                onChange={handleEditFormChange}
+                fullWidth
                 variant="outlined"
                 size="small"
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
+            </Box>
+
+            <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
               <TextField
                 select
                 label="Gender"
@@ -447,55 +445,53 @@ export default function Profile() {
                 <option value="female">Female</option>
                 <option value="other">Other</option>
               </TextField>
-            </Grid>
-            <Grid item xs={12} sm={6}></Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField 
-                label="State" 
-                name="state" 
-                value={editForm.state} 
-                onChange={handleEditFormChange} 
-                fullWidth 
+            </Box>
+
+            <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
+              <TextField
+                label="State"
+                name="state"
+                value={editForm.state}
+                onChange={handleEditFormChange}
+                fullWidth
                 variant="outlined"
                 size="small"
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField 
-                label="City" 
-                name="city" 
-                value={editForm.city} 
-                onChange={handleEditFormChange} 
-                fullWidth 
+              <TextField
+                label="City"
+                name="city"
+                value={editForm.city}
+                onChange={handleEditFormChange}
+                fullWidth
                 variant="outlined"
                 size="small"
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField 
-                label="LinkedIn" 
-                name="linkedin" 
-                value={editForm.linkedin} 
-                onChange={handleEditFormChange} 
-                fullWidth 
-                variant="outlined"
-                size="small"
-                placeholder="username"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField 
-                label="GitHub" 
-                name="github" 
-                value={editForm.github} 
-                onChange={handleEditFormChange} 
-                fullWidth 
+            </Box>
+
+            <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
+              <TextField
+                label="LinkedIn"
+                name="linkedin"
+                value={editForm.linkedin}
+                onChange={handleEditFormChange}
+                fullWidth
                 variant="outlined"
                 size="small"
                 placeholder="username"
               />
-            </Grid>
-            <Grid item xs={12}>
+              <TextField
+                label="GitHub"
+                name="github"
+                value={editForm.github}
+                onChange={handleEditFormChange}
+                fullWidth
+                variant="outlined"
+                size="small"
+                placeholder="username"
+              />
+            </Box>
+
+            <Box sx={{ width: "100%", maxWidth: 640 }}>
               <TextField
                 label="About / Bio"
                 name="bio"
@@ -503,15 +499,22 @@ export default function Profile() {
                 onChange={handleEditFormChange}
                 fullWidth
                 multiline
-                minRows={4}
-                maxRows={6}
+                minRows={3}
+                maxRows={4}
                 variant="outlined"
                 placeholder="Tell us about yourself..."
+                sx={{
+                  "& textarea": {
+                    resize: "vertical",
+                    minHeight: 84,
+                    maxHeight: 140,
+                  }
+                }}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
+        <DialogActions sx={{ p: 2, pt: 1, gap: 1 }}>
           <Button onClick={handleEditClose} variant="outlined">Cancel</Button>
           <Button onClick={handleFormSubmit} variant="contained">Save Changes</Button>
         </DialogActions>
