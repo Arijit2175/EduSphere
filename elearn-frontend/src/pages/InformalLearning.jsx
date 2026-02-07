@@ -532,17 +532,25 @@ export default function InformalLearning() {
       { id: "code2", node: <CodeIcon fontSize="medium" /> },
       { id: "brush2", node: <BrushIcon fontSize="medium" /> },
       { id: "science2", node: <ScienceIcon fontSize="medium" /> },
+      { id: "mind2", node: <PsychologyIcon fontSize="medium" /> },
+      { id: "tips2", node: <TipsAndUpdatesIcon fontSize="medium" /> },
+      { id: "code3", node: <CodeIcon fontSize="medium" /> },
+      { id: "brush3", node: <BrushIcon fontSize="medium" /> },
+      { id: "science3", node: <ScienceIcon fontSize="medium" /> },
+      { id: "mind3", node: <PsychologyIcon fontSize="medium" /> },
     ];
     return icons.map((icon) => ({
       id: icon.id,
       icon: icon.node,
-      left: `${rand(6, 90).toFixed(1)}%`,
-      top: `${rand(8, 86).toFixed(1)}%`,
-      size: Math.round(rand(40, 64)),
-      delay: `${rand(0, 3).toFixed(1)}s`,
-      duration: `${rand(14, 22).toFixed(1)}s`,
-      rotate: `${rand(-18, 18).toFixed(1)}deg`,
-      floatDistance: Math.round(rand(14, 28)),
+      left: `${rand(4, 92).toFixed(1)}%`,
+      top: `${rand(6, 90).toFixed(1)}%`,
+      size: Math.round(rand(42, 72)),
+      delay: `${rand(0, 4).toFixed(1)}s`,
+      duration: `${rand(16, 26).toFixed(1)}s`,
+      rotate: `${rand(-22, 22).toFixed(1)}deg`,
+      floatDistance: Math.round(rand(18, 34)),
+      driftX: Math.round(rand(12, 28)) * (Math.random() > 0.5 ? 1 : -1),
+      driftY: Math.round(rand(8, 22)) * (Math.random() > 0.5 ? 1 : -1),
     }));
   }, []);
 
@@ -587,9 +595,9 @@ export default function InformalLearning() {
           }}
         >
           <Grainient
-            color1="#0b1f5e"
-            color2="#1d4ed8"
-            color3="#e0e7ff"
+            color1="#6d28d9"
+            color2="#2563eb"
+            color3="#ffffff"
             timeSpeed={1}
             colorBalance={0}
             warpStrength={1}
@@ -619,8 +627,8 @@ export default function InformalLearning() {
             pointerEvents: "none",
             "@keyframes floatSymbol": {
               "0%": { transform: "translate3d(0, 0, 0) rotate(var(--rotate))" },
-              "50%": { transform: "translate3d(0, calc(-1 * var(--float)), 0) rotate(var(--rotate))" },
-              "100%": { transform: "translate3d(0, 0, 0) rotate(var(--rotate))" },
+              "50%": { transform: "translate3d(var(--drift-x), calc(-1 * var(--float)), 0) rotate(var(--rotate))" },
+              "100%": { transform: "translate3d(0, var(--drift-y), 0) rotate(var(--rotate))" },
             },
           }}
         >
@@ -643,6 +651,8 @@ export default function InformalLearning() {
                 animation: `floatSymbol ${symbol.duration} ease-in-out ${symbol.delay} infinite`,
                 "--rotate": symbol.rotate,
                 "--float": `${symbol.floatDistance}px`,
+                "--drift-x": `${symbol.driftX}px`,
+                "--drift-y": `${symbol.driftY}px`,
               }}
             >
               {symbol.icon}
