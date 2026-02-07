@@ -521,6 +521,31 @@ export default function InformalLearning() {
     setFollowingCreators((prev) => [...prev, creator]);
   };
 
+  const floatingSymbols = useMemo(() => {
+    const rand = (min, max) => Math.random() * (max - min) + min;
+    const icons = [
+      { id: "code", node: <CodeIcon fontSize="medium" /> },
+      { id: "brush", node: <BrushIcon fontSize="medium" /> },
+      { id: "science", node: <ScienceIcon fontSize="medium" /> },
+      { id: "mind", node: <PsychologyIcon fontSize="medium" /> },
+      { id: "tips", node: <TipsAndUpdatesIcon fontSize="medium" /> },
+      { id: "code2", node: <CodeIcon fontSize="medium" /> },
+      { id: "brush2", node: <BrushIcon fontSize="medium" /> },
+      { id: "science2", node: <ScienceIcon fontSize="medium" /> },
+    ];
+    return icons.map((icon) => ({
+      id: icon.id,
+      icon: icon.node,
+      left: `${rand(6, 90).toFixed(1)}%`,
+      top: `${rand(8, 86).toFixed(1)}%`,
+      size: Math.round(rand(40, 64)),
+      delay: `${rand(0, 3).toFixed(1)}s`,
+      duration: `${rand(14, 22).toFixed(1)}s`,
+      rotate: `${rand(-18, 18).toFixed(1)}deg`,
+      floatDistance: Math.round(rand(14, 28)),
+    }));
+  }, []);
+
 
   if (initialLoading) {
     return (
@@ -540,31 +565,6 @@ export default function InformalLearning() {
       </Box>
     );
   }
-
-  const floatingSymbols = useMemo(() => {
-    const rand = (min, max) => Math.random() * (max - min) + min;
-    const icons = [
-      { id: "code", node: <CodeIcon fontSize="medium" /> },
-      { id: "brush", node: <BrushIcon fontSize="medium" /> },
-      { id: "science", node: <ScienceIcon fontSize="medium" /> },
-      { id: "mind", node: <PsychologyIcon fontSize="medium" /> },
-      { id: "tips", node: <TipsAndUpdatesIcon fontSize="medium" /> },
-      { id: "code2", node: <CodeIcon fontSize="medium" /> },
-      { id: "brush2", node: <BrushIcon fontSize="medium" /> },
-      { id: "science2", node: <ScienceIcon fontSize="medium" /> },
-    ];
-    return icons.map((icon, index) => ({
-      id: icon.id,
-      icon: icon.node,
-      left: `${rand(6, 90).toFixed(1)}%`,
-      top: `${rand(8, 86).toFixed(1)}%`,
-      size: Math.round(rand(40, 64)),
-      delay: `${rand(0, 3).toFixed(1)}s`,
-      duration: `${rand(14, 22).toFixed(1)}s`,
-      rotate: `${rand(-18, 18).toFixed(1)}deg`,
-      floatDistance: Math.round(rand(14, 28)),
-    }));
-  }, []);
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
