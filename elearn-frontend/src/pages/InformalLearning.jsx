@@ -7,8 +7,6 @@ import ImageIcon from "@mui/icons-material/Image";
 import { useEffect, useMemo, useState } from "react";
 import {
   Box,
-  Container,
-  Grid,
   Card,
   CardContent,
   Typography,
@@ -36,7 +34,6 @@ import {
 
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import PageHeader from "../components/PageHeader";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -47,12 +44,16 @@ import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
 import WhatshotIcon from "@mui/icons-material/Whatshot";
 import SendIcon from "@mui/icons-material/Send";
-import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import CodeIcon from "@mui/icons-material/Code";
 import BrushIcon from "@mui/icons-material/Brush";
 import ScienceIcon from "@mui/icons-material/Science";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import RssFeedIcon from "@mui/icons-material/RssFeed";
+import SearchIcon from "@mui/icons-material/Search";
+import LayersIcon from "@mui/icons-material/Layers";
+import CloseIcon from "@mui/icons-material/Close";
 
 // Topics will be fetched from backend
 const DEFAULT_TOPICS = ["All"];
@@ -62,12 +63,30 @@ const SORTS = [
   { value: "comments", label: "Most commented" },
 ];
 
-const topicIcon = {
-  Tech: <CodeIcon fontSize="small" />,
-  Arts: <BrushIcon fontSize="small" />,
-  Science: <ScienceIcon fontSize="small" />,
-  "Soft skills": <PsychologyIcon fontSize="small" />,
-  "Daily learning tips": <TipsAndUpdatesIcon fontSize="small" />,
+const topicIconMap = {
+  all: <LayersIcon fontSize="small" />,
+  tech: <CodeIcon fontSize="small" />,
+  arts: <BrushIcon fontSize="small" />,
+  science: <ScienceIcon fontSize="small" />,
+  "soft skills": <PsychologyIcon fontSize="small" />,
+  "daily tips": <TipsAndUpdatesIcon fontSize="small" />,
+  "daily learning tips": <TipsAndUpdatesIcon fontSize="small" />,
+};
+
+const getTopicIcon = (topic) => {
+  const key = (topic || "").toLowerCase();
+  return topicIconMap[key] || <LayersIcon fontSize="small" />;
+};
+
+const timeAgo = (dateStr) => {
+  if (!dateStr) return "";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
 };
 
 export default function InformalLearning() {
@@ -118,6 +137,7 @@ export default function InformalLearning() {
   const [composer, setComposer] = useState({ title: "", body: "", topic: "Tech", type: "post", tagsInput: "", media: null });
   const [commentDraft, setCommentDraft] = useState({});
   const [aiResponses, setAiResponses] = useState({});
+  const [composerOpen, setComposerOpen] = useState(false);
 
   const normalizePost = (post) => {
     const parsedComments = typeof post.comments === "string"
@@ -500,9 +520,6 @@ export default function InformalLearning() {
     setFollowingCreators((prev) => [...prev, creator]);
   };
 
-  const formatDate = (iso) => new Date(iso).toLocaleString();
-
-
 
   if (initialLoading) {
     return (
@@ -529,7 +546,7 @@ export default function InformalLearning() {
       <Box
         sx={{
           flexGrow: 1,
-          background: "linear-gradient(135deg, #f7f9fc 0%, #eef2f7 100%)",
+          background: "linear-gradient(180deg, #f4f6fb 0%, #edf1f7 100%)",
           display: "flex",
           flexDirection: "column",
         }}
@@ -543,37 +560,110 @@ export default function InformalLearning() {
             pb: 4,
           }}
         >
-          <Box sx={{ mt: 4, pl: { xs: 2, md: 1 }, pr: { xs: 2, md: 3 }, maxWidth: "1600px", mx: "auto" }}>
-            <PageHeader
-              title="Community Feed"
-              subtitle="A modern, free-flow feed for micro-learning, tips, and peer knowledge"
-              backgroundGradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
-              disableAnimation={true}
-            />
+          <Box sx={{ mt: 4, px: { xs: 2, md: 3 }, maxWidth: "1400px", mx: "auto" }}>
+            <Box
+              sx={{
+                position: "relative",
+                overflow: "hidden",
+                borderRadius: 3,
+                px: { xs: 3, md: 4 },
+                py: { xs: 3, md: 4 },
+                mb: 3,
+                background: "linear-gradient(90deg, #1f2937 0%, #0f172a 100%)",
+                color: "#fff",
+              }}
+            >
+              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                <Box
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: "rgba(255,255,255,0.15)",
+                  }}
+                >
+                  <RssFeedIcon fontSize="small" />
+                </Box>
+                <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                  Community Feed
+                </Typography>
+              </Stack>
+              <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.8)", maxWidth: 520 }}>
+                A modern space for micro-learning, tips, and peer knowledge sharing.
+              </Typography>
+              <Box sx={{ position: "absolute", right: -30, top: -30, width: 120, height: 120, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.08)" }} />
+              <Box sx={{ position: "absolute", right: 20, bottom: -20, width: 80, height: 80, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.05)" }} />
+            </Box>
 
-            {/* REDDIT-LIKE THREE-COLUMN LAYOUT */}
+            <Card sx={{ mb: 2, borderRadius: 2 }}>
+              <CardContent sx={{ py: 2 }}>
+                <Box sx={{ position: "relative" }}>
+                  <SearchIcon sx={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
+                  <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Search posts, tips, topics..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        pl: 3.5,
+                        borderRadius: 2,
+                        bgcolor: "#f8fafc",
+                      },
+                    }}
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+
+            <Box sx={{ display: { xs: "block", md: "none" }, mb: 2 }}>
+              <Card sx={{ borderRadius: 2 }}>
+                <CardContent>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
+                    {topics.map((t) => (
+                      <Chip
+                        key={t}
+                        label={t}
+                        icon={getTopicIcon(t)}
+                        onClick={() => setFilterTopic(t)}
+                        sx={{
+                          bgcolor: filterTopic === t ? "#111827" : "#eef2f7",
+                          color: filterTopic === t ? "#fff" : "#334155",
+                        }}
+                      />
+                    ))}
+                  </Stack>
+                  <FormControl size="small" fullWidth>
+                    <InputLabel>Sort</InputLabel>
+                    <Select value={sortBy} label="Sort" onChange={(e) => setSortBy(e.target.value)}>
+                      {SORTS.map((s) => (
+                        <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </CardContent>
+              </Card>
+            </Box>
+
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  md: "260px 1fr 300px",
-                },
-                gap: { xs: 2, md: 0.75 },
-                mt: 2,
-                ml: { xs: 0, md: -3 },
+                gridTemplateColumns: { xs: "1fr", md: "240px 1fr 280px" },
+                gap: 2,
               }}
             >
-              {/* LEFT SIDEBAR - FILTERS (Sticky) */}
               <Box sx={{ display: { xs: "none", md: "block" } }}>
-                <Box sx={{ position: "sticky", top: 20 }}>
-                  {/* Topic Filter Card */}
-                  <Card sx={{ mb: 2, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                <Box sx={{ position: "sticky", top: 16, display: "flex", flexDirection: "column", gap: 2 }}>
+                  <Card sx={{ borderRadius: 2 }}>
                     <CardContent>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, fontSize: "0.85rem" }}>
-                        TOPICS
+                      <Typography variant="overline" sx={{ fontWeight: 700, color: "#64748b" }}>
+                        Topics
                       </Typography>
-                      <Stack spacing={0.5}>
+                      <Stack spacing={0.5} sx={{ mt: 1 }}>
                         {topics.map((t) => (
                           <Box key={t} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                             <Button
@@ -582,17 +672,12 @@ export default function InformalLearning() {
                               sx={{
                                 justifyContent: "flex-start",
                                 textTransform: "none",
-                                color: filterTopic === t ? "#0066cc" : "#666",
+                                color: filterTopic === t ? "#111827" : "#64748b",
                                 fontWeight: filterTopic === t ? 700 : 500,
-                                fontSize: "0.9rem",
-                                backgroundColor: filterTopic === t ? "#f0f4f8" : "transparent",
-                                "&:hover": {
-                                  backgroundColor: filterTopic === t ? "#e8eef7" : "#f7f9fa",
-                                },
-                                py: 0.75,
-                                pl: 1,
+                                backgroundColor: filterTopic === t ? "#e2e8f0" : "transparent",
+                                "&:hover": { backgroundColor: "#e2e8f0" },
                               }}
-                              startIcon={t !== "All" ? topicIcon[t] : undefined}
+                              startIcon={getTopicIcon(t)}
                             >
                               {t}
                             </Button>
@@ -603,12 +688,7 @@ export default function InformalLearning() {
                                   e.stopPropagation();
                                   handleFollowTopic(t);
                                 }}
-                                sx={{
-                                  color: followingTopics.includes(t) ? "#fbbf24" : "#d1d5db",
-                                  "&:hover": {
-                                    color: followingTopics.includes(t) ? "#f59e0b" : "#9ca3af",
-                                  },
-                                }}
+                                sx={{ color: followingTopics.includes(t) ? "#f59e0b" : "#cbd5f5" }}
                               >
                                 {followingTopics.includes(t) ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
                               </IconButton>
@@ -619,13 +699,12 @@ export default function InformalLearning() {
                     </CardContent>
                   </Card>
 
-                  {/* Sort Options Card */}
-                  <Card sx={{ boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                  <Card sx={{ borderRadius: 2 }}>
                     <CardContent>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, fontSize: "0.85rem" }}>
-                        SORT BY
+                      <Typography variant="overline" sx={{ fontWeight: 700, color: "#64748b" }}>
+                        Sort By
                       </Typography>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" sx={{ mt: 1 }}>
                         <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                           {SORTS.map((s) => (
                             <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>
@@ -637,316 +716,109 @@ export default function InformalLearning() {
                 </Box>
               </Box>
 
-              {/* CENTER FEED */}
               <Box>
-                {/* Search Bar */}
-                <Card sx={{ mb: 2, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-                  <CardContent sx={{ pb: 1.5, pt: 1.5 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      placeholder="Search posts, tips, topics..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: 2,
-                          backgroundColor: "#f7f9fa",
-                        },
-                      }}
-                    />
-                  </CardContent>
-                </Card>
-
-                {/* Mobile Filters */}
-                <Box sx={{ display: { xs: "block", md: "none" }, mb: 2 }}>
-                  <Card sx={{ mb: 2, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                {!composerOpen ? (
+                  <Card
+                    sx={{ mb: 3, borderRadius: 2, border: "2px dashed #cbd5f5", cursor: "pointer" }}
+                    onClick={() => setComposerOpen(true)}
+                  >
                     <CardContent>
-                      <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
-                        {topics.map((t) => (
-                          <Chip
-                            key={t}
-                            label={t}
-                            icon={t !== "All" ? topicIcon[t] : undefined}
-                            color={filterTopic === t ? "primary" : "default"}
-                            onClick={() => setFilterTopic(t)}
-                          />
-                        ))}
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Box sx={{ width: 36, height: 36, borderRadius: "50%", bgcolor: "#e0e7ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <SendIcon fontSize="small" />
+                        </Box>
+                        <Typography variant="body2" sx={{ color: "#64748b" }}>
+                          Share a tip, insight, or start a discussion...
+                        </Typography>
                       </Stack>
-                      <FormControl size="small" fullWidth>
-                        <InputLabel>Sort</InputLabel>
-                        <Select value={sortBy} label="Sort" onChange={(e) => setSortBy(e.target.value)}>
-                          {SORTS.map((s) => (
-                            <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
                     </CardContent>
                   </Card>
-                </Box>
-
-                {/* Create Post Card */}
-                <Card sx={{ mb: 3, boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "2px solid #667eea" }}>
-                  <CardContent>
-                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, fontSize: "1rem" }}>
-                      Share something quick
-                    </Typography>
-                    <Stack spacing={2}>
-                      <TextField
-                        label="Title"
-                        value={composer.title}
-                        onChange={(e) => setComposer({ ...composer, title: e.target.value })}
-                        fullWidth
-                        size="small"
-                      />
-                      <TextField
-                        label="Your note, tip, or snippet"
-                        value={composer.body}
-                        onChange={(e) => setComposer({ ...composer, body: e.target.value })}
-                        fullWidth
-                        multiline
-                        rows={3}
-                        size="small"
-                      />
-                      <TextField
-                        label="Tags (comma separated)"
-                        value={composer.tagsInput}
-                        onChange={(e) => setComposer({ ...composer, tagsInput: e.target.value })}
-                        fullWidth
-                        placeholder="ai, study, habits"
-                        size="small"
-                      />
-                      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ xs: "stretch", sm: "center" }}>
-                        <Button
-                          variant="outlined"
-                          component="label"
-                          startIcon={<ImageIcon />}
-                          sx={{ textTransform: "none" }}
-                          size="small"
-                        >
-                          Upload image/video
-                          <input
-                            hidden
-                            type="file"
-                            accept="image/*,video/*"
-                            onChange={(e) => handleMediaUpload(e.target.files?.[0])}
-                          />
-                        </Button>
-                        {composer.media && (
-                          <Chip
-                            label={`${composer.media.kind === "video" ? "Video" : "Image"}: ${composer.media.name}`}
-                            onDelete={() => setComposer((prev) => ({ ...prev, media: null }))}
-                            size="small"
-                          />
-                        )}
-                      </Stack>
-                      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ xs: "stretch", sm: "flex-start" }}>
-                        <FormControl size="small" sx={{ minWidth: 140 }}>
-                          <InputLabel>Topic</InputLabel>
-                          <Select value={composer.topic} label="Topic" onChange={(e) => setComposer({ ...composer, topic: e.target.value })}>
-                            {topics.filter((t) => t !== "All").map((t) => (
-                              <MenuItem key={t} value={t}>{t}</MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                        <FormControl size="small" sx={{ minWidth: 140 }}>
-                          <InputLabel>Type</InputLabel>
-                          <Select value={composer.type} label="Type" onChange={(e) => setComposer({ ...composer, type: e.target.value })}>
-                            <MenuItem value="post">Post</MenuItem>
-                            <MenuItem value="video">Short video</MenuItem>
-                            <MenuItem value="note">Note</MenuItem>
-                            <MenuItem value="code">Code snippet</MenuItem>
-                          </Select>
-                        </FormControl>
-                        <Box sx={{ flexGrow: 1 }} />
-                        <Button variant="contained" onClick={handleAddPost} startIcon={<SendIcon />} size="small">
-                          Post
-                        </Button>
-                      </Stack>
-                    </Stack>
-                  </CardContent>
-                </Card>
-
-                {/* Posts Feed */}
-                <Stack spacing={2}>
-                  {filtered.map((post) => (
-                    <Card key={post.id} sx={{ boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #e5e7eb", "&:hover": { boxShadow: "0 2px 8px rgba(0,0,0,0.12)" } }}>
-                      <CardContent>
-                        {/* Post Header */}
-                        <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ mb: 2, position: 'relative' }}>
-                          <Avatar sx={{ bgcolor: "#9ca3af", width: 40, height: 40 }}>
-                            <PersonIcon />
-                          </Avatar>
-                          <Box sx={{ flexGrow: 1 }}>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: "1rem", mb: 0.25 }}>
-                              {post.title}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: "#6b7280", fontSize: "0.8rem" }}>
-                              {/* Always show email and role if present, else fallback to author/creator */}
-                              {post.creator_email
-                                ? `${post.creator_email} (${post.creator_role || "role unknown"})`
-                                : post.author
-                                  ? post.author
-                                  : post.creator
-                                    ? post.creator
-                                    : "Unknown"}
-                              {post.created_at || post.createdAt ? (
-                                <> • {formatDate(post.created_at || post.createdAt)}</>
-                              ) : null}
-                            </Typography>
-                            {/* Show tags if present */}
-                            {Array.isArray(post.tags) && post.tags.length > 0 && (
-                              <Stack direction="row" spacing={1} sx={{ mt: 1, mb: 1 }}>
-                                {post.tags.map((tag, idx) => (
-                                  <Chip key={idx} label={tag} size="small" />
-                                ))}
-                              </Stack>
-                            )}
-                            {/* Show media if present */}
-                            {post.media_url && (
-                              <Box sx={{ mt: 1, mb: 1 }}>
-                                {post.media_url.startsWith("data:image") ? (
-                                  <img src={post.media_url} alt="uploaded" style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }} />
-                                ) : post.media_url.startsWith("data:video") ? (
-                                  <video src={post.media_url} controls style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }} />
-                                ) : null}
-                              </Box>
-                            )}
-                          </Box>
-                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
-                            <Chip size="small" label={post.topic} icon={topicIcon[post.topic]} />
-                            {user && (post.author_id === user.id) && (
-                              <Button
-                                variant="outlined"
-                                color="error"
-                                size="small"
-                                sx={{ minWidth: 0, px: 1, py: 0.5, fontSize: '0.75rem' }}
-                                onClick={() => setDeleteDialog({ open: true, postId: post.id })}
-                              >
-                                Delete
-                              </Button>
-                            )}
-                          </Stack>
-                        </Stack>
-
-                        {/* Post Body */}
-                        <Typography variant="body2" sx={{ color: "#374151", mb: 1.5, lineHeight: 1.5 }}>
-                          {post.content || post.body}
+                ) : (
+                  <Card sx={{ mb: 3, borderRadius: 2, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                          Create a post
                         </Typography>
-
-                        {/* Tags */}
-                        {post.tags && post.tags.length > 0 && (
-                          <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1.5 }}>
-                            {(Array.isArray(post.tags) ? post.tags : typeof post.tags === 'string' ? post.tags.split(',') : []).map((t) => (
-                              <Chip key={t} label={t} size="small" variant="outlined" />
-                            ))}
-                          </Stack>
-                        )}
-
-                        {/* Media */}
-                        {post.media && post.media.kind === "image" && (
-                          <Box sx={{ mt: 1.5, mb: 1.5, borderRadius: 2, overflow: "hidden", border: "1px solid #e5e7eb", maxHeight: 400 }}>
-                            <img src={post.media.src} alt={post.media.name || "attachment"} style={{ width: "100%", display: "block" }} />
-                          </Box>
-                        )}
-
-                        {post.media && post.media.kind === "video" && (
-                          <Box sx={{ mt: 1.5, mb: 1.5, borderRadius: 2, overflow: "hidden" }}>
-                            <video src={post.media.src} controls style={{ width: "100%", maxHeight: 400 }} />
-                          </Box>
-                        )}
-
-                        {/* Interaction Bar */}
-                        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1.5, py: 1, borderTop: "1px solid #e5e7eb", borderBottom: "1px solid #e5e7eb" }}>
+                        <IconButton size="small" onClick={() => setComposerOpen(false)}>
+                          <CloseIcon fontSize="small" />
+                        </IconButton>
+                      </Stack>
+                      <Stack spacing={2}>
+                        <TextField
+                          label="Title"
+                          value={composer.title}
+                          onChange={(e) => setComposer({ ...composer, title: e.target.value })}
+                          size="small"
+                          fullWidth
+                        />
+                        <TextField
+                          label="Share your thoughts, tips, or a quick snippet"
+                          value={composer.body}
+                          onChange={(e) => setComposer({ ...composer, body: e.target.value })}
+                          multiline
+                          rows={3}
+                          size="small"
+                          fullWidth
+                        />
+                        <TextField
+                          label="Tags (comma separated)"
+                          value={composer.tagsInput}
+                          onChange={(e) => setComposer({ ...composer, tagsInput: e.target.value })}
+                          placeholder="react, tips, learning"
+                          size="small"
+                          fullWidth
+                        />
+                        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ xs: "stretch", sm: "center" }}>
                           <Button
+                            variant="outlined"
+                            component="label"
+                            startIcon={<ImageIcon />}
+                            sx={{ textTransform: "none" }}
                             size="small"
-                            startIcon={post.likers?.includes(user?.id) ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-                            onClick={() => handleLike(post.id)}
-                            sx={{ textTransform: "none", color: post.likers?.includes(user?.id) ? "#ef4444" : "#666" }}
                           >
-                            {post.likes}
+                            Upload image/video
+                            <input hidden type="file" accept="image/*,video/*" onChange={(e) => handleMediaUpload(e.target.files?.[0])} />
                           </Button>
-
-                          <Button
-                            size="small"
-                            startIcon={<ChatBubbleOutlineIcon />}
-                            sx={{ textTransform: "none", color: "#666" }}
-                          >
-                            {post.comments?.length || 0}
-                          </Button>
-
-                          <Button
-                            size="small"
-                            startIcon={post.savers?.includes(user?.id) ? <BookmarkIcon /> : <BookmarkBorderIcon />}
-                            onClick={() => handleSave(post.id)}
-                            sx={{ textTransform: "none", color: post.savers?.includes(user?.id) ? "#2563eb" : "#666" }}
-                          >
-                            Save
-                          </Button>
-
-                          <Box sx={{ flexGrow: 1 }} />
-
-
-                        </Stack>
-
-
-
-                        {/* Comments Section */}
-
-                        <Stack spacing={1.5}>
-                          {(Array.isArray(post.comments) ? post.comments : []).map((c) => (
-                            <Box key={c.id} sx={{ background: "#f8fafc", p: 1.5, borderRadius: 1, border: "1px solid #e5e7eb", display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <Box>
-                                <Typography variant="caption" sx={{ fontWeight: 700, color: "#111" }}>
-                                  {c.author}
-                                </Typography>
-                                <Typography variant="caption" sx={{ display: "block", mt: 0.25, color: "#4b5563", lineHeight: 1.4 }}>
-                                  {c.text}
-                                </Typography>
-                              </Box>
-                              {user && c.author === user.email && (
-                                <Button
-                                  size="small"
-                                  color="error"
-                                  sx={{ minWidth: 0, ml: 2, fontSize: '1.1em', fontWeight: 700 }}
-                                  onClick={() => handleDeleteComment(post.id, c.id)}
-                                >
-                                  &times;
-                                </Button>
-                              )}
-                            </Box>
-                          ))}
-
-                          {/* Comment Input */}
-                          <Stack direction="row" spacing={1} alignItems="flex-start">
-                            <TextField
+                          {composer.media && (
+                            <Chip
+                              label={`${composer.media.kind === "video" ? "Video" : "Image"}: ${composer.media.name}`}
+                              onDelete={() => setComposer((prev) => ({ ...prev, media: null }))}
                               size="small"
-                              fullWidth
-                              placeholder="Add a comment"
-                              value={commentDraft[post.id] || ""}
-                              onChange={(e) => setCommentDraft((prev) => ({ ...prev, [post.id]: e.target.value }))}
-                              sx={{
-                                "& .MuiOutlinedInput-root": {
-                                  borderRadius: 1,
-                                },
-                              }}
                             />
-                            <IconButton
-                              onClick={() => handleComment(post.id)}
-                              color="primary"
-                              sx={{ mt: 0.5 }}
-                            >
-                              <SendIcon fontSize="small" />
-                            </IconButton>
-                          </Stack>
+                          )}
                         </Stack>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ xs: "stretch", sm: "flex-start" }}>
+                          <FormControl size="small" sx={{ minWidth: 140 }}>
+                            <InputLabel>Topic</InputLabel>
+                            <Select value={composer.topic} label="Topic" onChange={(e) => setComposer({ ...composer, topic: e.target.value })}>
+                              {topics.filter((t) => t !== "All").map((t) => (
+                                <MenuItem key={t} value={t}>{t}</MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                          <FormControl size="small" sx={{ minWidth: 140 }}>
+                            <InputLabel>Type</InputLabel>
+                            <Select value={composer.type} label="Type" onChange={(e) => setComposer({ ...composer, type: e.target.value })}>
+                              <MenuItem value="post">Post</MenuItem>
+                              <MenuItem value="video">Short video</MenuItem>
+                              <MenuItem value="note">Note</MenuItem>
+                              <MenuItem value="code">Code snippet</MenuItem>
+                            </Select>
+                          </FormControl>
+                          <Box sx={{ flexGrow: 1 }} />
+                          <Button variant="contained" onClick={handleAddPost} startIcon={<SendIcon />} size="small">
+                            Post
+                          </Button>
+                        </Stack>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                )}
 
-                  {/* Empty State */}
+                <Stack spacing={2}>
                   {filtered.length === 0 && (
-                    <Card sx={{ boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                    <Card sx={{ borderRadius: 2 }}>
                       <CardContent sx={{ textAlign: "center", py: 4 }}>
                         <Typography variant="body2" sx={{ color: "#6b7280" }}>
                           No posts found. Try adjusting your filters or be the first to share!
@@ -954,8 +826,148 @@ export default function InformalLearning() {
                       </CardContent>
                     </Card>
                   )}
+
+                  {filtered.map((post) => {
+                    const isLiked = Array.isArray(post.likers) && post.likers.includes(user?.id);
+                    const isSaved = Array.isArray(post.savers) && post.savers.includes(user?.id);
+                    const isAuthor = user && post.author_id === user.id;
+                    return (
+                      <Card key={post.id} sx={{ borderRadius: 2, border: "1px solid #e2e8f0" }}>
+                        <CardContent>
+                          <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ mb: 2 }}>
+                            <Avatar sx={{ bgcolor: "#e2e8f0", width: 40, height: 40, color: "#334155" }}>
+                              <PersonIcon fontSize="small" />
+                            </Avatar>
+                            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: "wrap" }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                  {post.author || post.creator || "Anonymous"}
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: "#94a3b8" }}>
+                                  {timeAgo(post.created_at || post.createdAt)}
+                                </Typography>
+                              </Stack>
+                              <Chip
+                                size="small"
+                                label={post.topic}
+                                icon={getTopicIcon(post.topic)}
+                                sx={{ mt: 0.75, bgcolor: "#eef2ff" }}
+                              />
+                            </Box>
+                            {isAuthor && (
+                              <Button
+                                variant="text"
+                                color="error"
+                                size="small"
+                                onClick={() => setDeleteDialog({ open: true, postId: post.id })}
+                              >
+                                Delete
+                              </Button>
+                            )}
+                          </Stack>
+
+                          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, fontSize: "1rem" }}>
+                            {post.title}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: "#475569", mb: 2, lineHeight: 1.6 }}>
+                            {post.content || post.body}
+                          </Typography>
+
+                          {post.tags && post.tags.length > 0 && (
+                            <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
+                              {(Array.isArray(post.tags) ? post.tags : typeof post.tags === "string" ? post.tags.split(",") : []).map((t) => (
+                                <Chip key={t} label={`#${t.trim()}`} size="small" variant="outlined" />
+                              ))}
+                            </Stack>
+                          )}
+
+                          {post.media_url && (
+                            <Box sx={{ mb: 2, borderRadius: 2, overflow: "hidden", border: "1px solid #e2e8f0", maxWidth: "100%" }}>
+                              {post.media_url.startsWith("data:image") ? (
+                                <img src={post.media_url} alt="uploaded" style={{ width: "100%", display: "block" }} />
+                              ) : post.media_url.startsWith("data:video") ? (
+                                <video src={post.media_url} controls style={{ width: "100%", display: "block" }} />
+                              ) : null}
+                            </Box>
+                          )}
+
+                          <Divider sx={{ mb: 1.5 }} />
+
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                            <Button
+                              size="small"
+                              startIcon={isLiked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+                              onClick={() => handleLike(post.id)}
+                              sx={{ textTransform: "none", color: isLiked ? "#ef4444" : "#64748b" }}
+                            >
+                              {post.likes || 0}
+                            </Button>
+                            <Button
+                              size="small"
+                              startIcon={<ChatBubbleOutlineIcon />}
+                              sx={{ textTransform: "none", color: "#64748b" }}
+                            >
+                              {post.comments?.length || 0}
+                            </Button>
+                            <Button
+                              size="small"
+                              startIcon={isSaved ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+                              onClick={() => handleSave(post.id)}
+                              sx={{ textTransform: "none", color: isSaved ? "#2563eb" : "#64748b" }}
+                            >
+                              Save
+                            </Button>
+                          </Stack>
+
+                          <Stack spacing={1.5}>
+                            {(Array.isArray(post.comments) ? post.comments : []).map((c) => (
+                              <Box key={c.id} sx={{ bgcolor: "#f8fafc", p: 1.5, borderRadius: 2, border: "1px solid #e2e8f0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 2 }}>
+                                <Box sx={{ minWidth: 0 }}>
+                                  <Typography variant="caption" sx={{ fontWeight: 700, color: "#0f172a" }}>
+                                    {c.author}
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ display: "block", mt: 0.5, color: "#475569" }}>
+                                    {c.text}
+                                  </Typography>
+                                </Box>
+                                {user && c.author === user.email && (
+                                  <Button
+                                    size="small"
+                                    color="error"
+                                    sx={{ minWidth: 0, fontWeight: 700 }}
+                                    onClick={() => handleDeleteComment(post.id, c.id)}
+                                  >
+                                    &times;
+                                  </Button>
+                                )}
+                              </Box>
+                            ))}
+
+                            <Stack direction="row" spacing={1} alignItems="flex-start">
+                              <TextField
+                                size="small"
+                                fullWidth
+                                placeholder="Write a comment..."
+                                value={commentDraft[post.id] || ""}
+                                onChange={(e) => setCommentDraft((prev) => ({ ...prev, [post.id]: e.target.value }))}
+                                onKeyDown={(e) => e.key === "Enter" && handleComment(post.id)}
+                                sx={{
+                                  "& .MuiOutlinedInput-root": {
+                                    borderRadius: 2,
+                                  },
+                                }}
+                              />
+                              <IconButton onClick={() => handleComment(post.id)} color="primary" sx={{ mt: 0.5 }}>
+                                <SendIcon fontSize="small" />
+                              </IconButton>
+                            </Stack>
+                          </Stack>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </Stack>
-                {/* Single Delete Confirmation Dialog rendered once, outside the map */}
+
                 <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, postId: null })}>
                   <DialogTitle>Delete Post?</DialogTitle>
                   <DialogContent>
@@ -974,96 +986,81 @@ export default function InformalLearning() {
                 </Dialog>
               </Box>
 
-              {/* RIGHT SIDEBAR - TRENDING & INFO (Sticky) */}
               <Box sx={{ display: { xs: "none", md: "block" } }}>
-                <Box
-                  sx={{
-                    position: "sticky",
-                    top: 20,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 2,
-                  }}
-                >
-                  {/* Trending Topics */}
-                  <Card sx={{ boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                <Box sx={{ position: "sticky", top: 16, display: "flex", flexDirection: "column", gap: 2 }}>
+                  <Card sx={{ borderRadius: 2 }}>
                     <CardContent>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, fontSize: "0.9rem" }}>
-                        TRENDING
-                      </Typography>
-                      <Stack spacing={1.5}>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        <TrendingUpIcon fontSize="small" sx={{ color: "#3b82f6" }} />
+                        <Typography variant="overline" sx={{ fontWeight: 700, color: "#64748b" }}>
+                          Trending
+                        </Typography>
+                      </Stack>
+                      <Stack spacing={1}>
                         {trendingTopics.length === 0 ? (
                           <Typography variant="caption" sx={{ color: "#94a3b8" }}>
                             No trending topics yet
                           </Typography>
                         ) : (
                           trendingTopics.map(([t, count]) => (
-                            <Stack
+                            <Box
                               key={t}
-                              direction="row"
-                              justifyContent="space-between"
-                              alignItems="center"
-                              sx={{
-                                p: 1,
-                                borderRadius: 1,
-                                cursor: "pointer",
-                                backgroundColor: filterTopic === t ? "#f0f4f8" : "#f8fafc",
-                                "&:hover": { backgroundColor: "#f0f4f8" },
-                                transition: "background-color 0.2s",
-                              }}
                               onClick={() => setFilterTopic(t)}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                p: 1,
+                                borderRadius: 2,
+                                bgcolor: "#eef2f7",
+                                cursor: "pointer",
+                                "&:hover": { bgcolor: "#e2e8f0" },
+                              }}
                             >
                               <Stack direction="row" spacing={1} alignItems="center">
-                                {topicIcon[t]}
-                                <Typography variant="body2" sx={{ fontSize: "0.9rem" }}>
+                                {getTopicIcon(t)}
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                   {t}
                                 </Typography>
                               </Stack>
-                              <Chip size="small" label={`${count}`} variant="outlined" />
-                            </Stack>
+                              <Chip size="small" label={count} variant="outlined" />
+                            </Box>
                           ))
                         )}
                       </Stack>
                     </CardContent>
                   </Card>
 
-                  {/* Following */}
-                  <Card sx={{ boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                  <Card sx={{ borderRadius: 2 }}>
                     <CardContent>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, fontSize: "0.9rem" }}>
-                        FOLLOWING
-                      </Typography>
-
-                      <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 600, display: "block", mb: 1 }}>
-                        Topics
-                      </Typography>
-                      <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mb: 1.5 }}>
-                        {followingTopics.length === 0 ? (
-                          <Typography variant="caption" sx={{ color: "#94a3b8" }}>
-                            None yet
-                          </Typography>
-                        ) : (
-                          followingTopics.map((t) => (
-                            <Chip
-                              key={t}
-                              label={t}
-                              size="small"
-                              onClick={() => setFilterTopic(t)}
-                              sx={{ cursor: "pointer" }}
-                            />
-                          ))
-                        )}
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        <StarIcon fontSize="small" sx={{ color: "#f59e0b" }} />
+                        <Typography variant="overline" sx={{ fontWeight: 700, color: "#64748b" }}>
+                          Following
+                        </Typography>
                       </Stack>
-
+                      {followingTopics.length === 0 ? (
+                        <Typography variant="caption" sx={{ color: "#94a3b8" }}>
+                          Star topics to follow them
+                        </Typography>
+                      ) : (
+                        <Stack direction="row" spacing={1} flexWrap="wrap">
+                          {followingTopics.map((t) => (
+                            <Chip key={t} label={t} size="small" onClick={() => setFilterTopic(t)} sx={{ cursor: "pointer" }} />
+                          ))}
+                        </Stack>
+                      )}
                     </CardContent>
                   </Card>
 
-                  {/* My Library (Saved Posts) */}
-                  <Card sx={{ boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                  <Card sx={{ borderRadius: 2 }}>
                     <CardContent>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, fontSize: "0.9rem" }}>
-                        MY LIBRARY
-                      </Typography>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        <BookmarkIcon fontSize="small" sx={{ color: "#2563eb" }} />
+                        <Typography variant="overline" sx={{ fontWeight: 700, color: "#64748b" }}>
+                          My Library
+                        </Typography>
+                      </Stack>
                       {(() => {
                         if (!user) return <Typography variant="caption" sx={{ color: "#94a3b8" }}>Login to save posts</Typography>;
                         const savedPosts = posts.filter((p) => Array.isArray(p.savers) && p.savers.includes(user.id));
@@ -1073,37 +1070,25 @@ export default function InformalLearning() {
                         return (
                           <Stack spacing={1}>
                             {savedPosts.slice(0, 5).map((p) => (
-                              <Stack
+                              <Box
                                 key={p.id}
-                                direction="row"
-                                justifyContent="space-between"
-                                alignItems="center"
                                 sx={{
-                                  p: 0.75,
-                                  borderRadius: 1,
-                                  backgroundColor: "#f8fafc",
-                                  cursor: "pointer",
-                                  "&:hover": { backgroundColor: "#f0f4f8" },
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  p: 1,
+                                  borderRadius: 2,
+                                  bgcolor: "#f8fafc",
                                 }}
                               >
-                                <Typography
-                                  variant="caption"
-                                  sx={{
-                                    fontSize: "0.8rem",
-                                    color: "#374151",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                    flex: 1,
-                                  }}
-                                >
+                                <Typography variant="caption" sx={{ color: "#334155", flex: 1, mr: 1 }}>
                                   {p.title}
                                 </Typography>
-                                <Chip label={p.topic} size="small" />
-                              </Stack>
+                                <Chip size="small" label={p.topic} />
+                              </Box>
                             ))}
                             {savedPosts.length > 5 && (
-                              <Typography variant="caption" sx={{ color: "#6b7280", mt: 1 }}>
+                              <Typography variant="caption" sx={{ color: "#94a3b8" }}>
                                 +{savedPosts.length - 5} more
                               </Typography>
                             )}
@@ -1112,11 +1097,6 @@ export default function InformalLearning() {
                       })()}
                     </CardContent>
                   </Card>
-
-                  {/* My Library */}
-
-
-
                 </Box>
               </Box>
             </Box>
