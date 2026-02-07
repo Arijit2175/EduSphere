@@ -605,7 +605,7 @@ export default function InformalLearning() {
                     Community Feed
                   </Typography>
                 </Stack>
-                <Typography variant="body2" sx={{ maxWidth: 520 }}>
+                <Typography variant="body2" sx={{ maxWidth: 520, color: "#ffffff" }}>
                   A modern space for micro-learning, tips, and peer knowledge sharing.
                 </Typography>
               </Box>
