@@ -50,7 +50,7 @@ import ScienceIcon from "@mui/icons-material/Science";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import RssFeedIcon from "@mui/icons-material/RssFeed";
+import GroupsIcon from "@mui/icons-material/Groups";
 import SearchIcon from "@mui/icons-material/Search";
 import LayersIcon from "@mui/icons-material/Layers";
 import CloseIcon from "@mui/icons-material/Close";
@@ -599,7 +599,7 @@ export default function InformalLearning() {
                       bgcolor: "rgba(255, 255, 255, 0.18)",
                     }}
                   >
-                    <RssFeedIcon fontSize="small" />
+                    <GroupsIcon fontSize="small" />
                   </Box>
                   <Typography variant="h5" sx={{ fontWeight: 700 }}>
                     Community Feed
