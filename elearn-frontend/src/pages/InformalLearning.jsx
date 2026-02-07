@@ -569,8 +569,15 @@ export default function InformalLearning() {
                 px: { xs: 3, md: 4 },
                 py: { xs: 3, md: 4 },
                 mb: 3,
-                background: "linear-gradient(90deg, #1f2937 0%, #0f172a 100%)",
-                color: "#fff",
+                background: "linear-gradient(120deg, #e0f2ff 0%, #c7d2fe 35%, #93c5fd 70%, #ffffff 100%)",
+                backgroundSize: "200% 200%",
+                animation: "communityGradient 12s ease-in-out infinite",
+                color: "#0f172a",
+                "@keyframes communityGradient": {
+                  "0%": { backgroundPosition: "0% 50%" },
+                  "50%": { backgroundPosition: "100% 50%" },
+                  "100%": { backgroundPosition: "0% 50%" },
+                },
               }}
             >
               <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
@@ -582,7 +589,7 @@ export default function InformalLearning() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    bgcolor: "rgba(255,255,255,0.15)",
+                    bgcolor: "rgba(15, 23, 42, 0.08)",
                   }}
                 >
                   <RssFeedIcon fontSize="small" />
@@ -591,11 +598,11 @@ export default function InformalLearning() {
                   Community Feed
                 </Typography>
               </Stack>
-              <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.8)", maxWidth: 520 }}>
+              <Typography variant="body2" sx={{ color: "rgba(15, 23, 42, 0.75)", maxWidth: 520 }}>
                 A modern space for micro-learning, tips, and peer knowledge sharing.
               </Typography>
-              <Box sx={{ position: "absolute", right: -30, top: -30, width: 120, height: 120, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.08)" }} />
-              <Box sx={{ position: "absolute", right: 20, bottom: -20, width: 80, height: 80, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.05)" }} />
+              <Box sx={{ position: "absolute", right: -30, top: -30, width: 120, height: 120, borderRadius: "50%", bgcolor: "rgba(59, 130, 246, 0.15)" }} />
+              <Box sx={{ position: "absolute", right: 20, bottom: -20, width: 80, height: 80, borderRadius: "50%", bgcolor: "rgba(59, 130, 246, 0.12)" }} />
             </Box>
 
             <Card sx={{ mb: 2, borderRadius: 2 }}>
