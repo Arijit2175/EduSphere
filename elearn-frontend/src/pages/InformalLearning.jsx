@@ -590,8 +590,9 @@ export default function InformalLearning() {
           sx={{
             position: "absolute",
             inset: 0,
-            zIndex: 0,
-            background: "linear-gradient(180deg, rgba(248,250,252,0.88) 0%, rgba(237,242,247,0.94) 100%)",
+            zIndex: 1,
+            background: "linear-gradient(180deg, rgba(248,250,252,0.35) 0%, rgba(237,242,247,0.45) 100%)",
+            pointerEvents: "none",
           }}
         />
         <Navbar />
@@ -602,7 +603,7 @@ export default function InformalLearning() {
             transition: "margin-left 0.3s ease",
             pb: 4,
             position: "relative",
-            zIndex: 1,
+            zIndex: 2,
           }}
         >
           <Box sx={{ mt: 4, px: { xs: 2, md: 3 }, maxWidth: "1400px", mx: "auto" }}>
