@@ -145,7 +145,7 @@ export default function Profile() {
           ml: 0,
           minHeight: 0,
           height: "100vh",
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+          background: "transparent",
           transition: "margin-left 0.3s ease",
           display: "flex",
           flexDirection: "column",
@@ -174,7 +174,7 @@ export default function Profile() {
             position: "absolute",
             inset: 0,
             zIndex: 1,
-            background: "linear-gradient(180deg, rgba(245,247,250,0.75) 0%, rgba(195,207,226,0.85) 100%)",
+            background: "linear-gradient(180deg, rgba(245,247,250,0.18) 0%, rgba(195,207,226,0.28) 100%)",
             pointerEvents: "none",
           }}
         />
