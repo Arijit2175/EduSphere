@@ -111,7 +111,6 @@ export default function HeroSection({ title, subtitle }) {
             <GradientText
               colors={["#6c47ff", "#d793fb", "#b4b4b7", "#834efd"]}
               animationSpeed={3}
-              showBorder
             >
               {displayTitle}
             </GradientText>
