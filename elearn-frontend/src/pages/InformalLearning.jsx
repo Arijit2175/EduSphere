@@ -525,13 +525,13 @@ export default function InformalLearning() {
     const rand = (min, max) => Math.random() * (max - min) + min;
     const edgePosition = () => {
       const lanePick = Math.random();
-      if (lanePick < 0.7) {
+      if (lanePick < 0.4) {
         return `${rand(4, 22).toFixed(1)}%`;
       }
-      if (lanePick < 0.9) {
+      if (lanePick < 0.8) {
         return `${rand(78, 96).toFixed(1)}%`;
       }
-      return `${rand(40, 60).toFixed(1)}%`;
+      return `${rand(38, 62).toFixed(1)}%`;
     };
     const icons = [
       { id: "code", node: <CodeIcon fontSize="medium" /> },
