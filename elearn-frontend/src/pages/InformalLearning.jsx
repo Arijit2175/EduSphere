@@ -34,6 +34,7 @@ import {
 
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import Grainient from "../components/Grainient";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -546,11 +547,53 @@ export default function InformalLearning() {
       <Box
         sx={{
           flexGrow: 1,
-          background: "linear-gradient(180deg, #f4f6fb 0%, #edf1f7 100%)",
+          background: "#eef2f7",
           display: "flex",
           flexDirection: "column",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 0,
+          }}
+        >
+          <Grainient
+            color1="#0b1f5e"
+            color2="#1d4ed8"
+            color3="#e0e7ff"
+            timeSpeed={1}
+            colorBalance={0}
+            warpStrength={1}
+            warpFrequency={5}
+            warpSpeed={2}
+            warpAmplitude={50}
+            blendAngle={0}
+            blendSoftness={0.05}
+            rotationAmount={500}
+            noiseScale={2}
+            grainAmount={0.08}
+            grainScale={2}
+            grainAnimated
+            contrast={1.3}
+            gamma={1}
+            saturation={1}
+            centerX={0}
+            centerY={0}
+            zoom={0.95}
+          />
+        </Box>
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 0,
+            background: "linear-gradient(180deg, rgba(248,250,252,0.88) 0%, rgba(237,242,247,0.94) 100%)",
+          }}
+        />
         <Navbar />
         <Box
           sx={{
@@ -558,6 +601,8 @@ export default function InformalLearning() {
             ml: { xs: 0, md: isOpen ? 25 : 8.75 },
             transition: "margin-left 0.3s ease",
             pb: 4,
+            position: "relative",
+            zIndex: 1,
           }}
         >
           <Box sx={{ mt: 4, px: { xs: 2, md: 3 }, maxWidth: "1400px", mx: "auto" }}>
