@@ -541,14 +541,30 @@ export default function InformalLearning() {
     );
   }
 
-  const floatingSymbols = [
-    { id: "code", icon: <CodeIcon fontSize="small" />, left: "6%", top: "14%", size: 28, delay: "0s", duration: "16s" },
-    { id: "brush", icon: <BrushIcon fontSize="small" />, left: "18%", top: "68%", size: 26, delay: "2s", duration: "18s" },
-    { id: "science", icon: <ScienceIcon fontSize="small" />, left: "84%", top: "24%", size: 30, delay: "1s", duration: "20s" },
-    { id: "mind", icon: <PsychologyIcon fontSize="small" />, left: "78%", top: "72%", size: 24, delay: "3s", duration: "17s" },
-    { id: "tips", icon: <TipsAndUpdatesIcon fontSize="small" />, left: "46%", top: "10%", size: 22, delay: "1.5s", duration: "19s" },
-    { id: "code2", icon: <CodeIcon fontSize="small" />, left: "56%", top: "58%", size: 20, delay: "2.5s", duration: "15s" },
-  ];
+  const floatingSymbols = useMemo(() => {
+    const rand = (min, max) => Math.random() * (max - min) + min;
+    const icons = [
+      { id: "code", node: <CodeIcon fontSize="medium" /> },
+      { id: "brush", node: <BrushIcon fontSize="medium" /> },
+      { id: "science", node: <ScienceIcon fontSize="medium" /> },
+      { id: "mind", node: <PsychologyIcon fontSize="medium" /> },
+      { id: "tips", node: <TipsAndUpdatesIcon fontSize="medium" /> },
+      { id: "code2", node: <CodeIcon fontSize="medium" /> },
+      { id: "brush2", node: <BrushIcon fontSize="medium" /> },
+      { id: "science2", node: <ScienceIcon fontSize="medium" /> },
+    ];
+    return icons.map((icon, index) => ({
+      id: icon.id,
+      icon: icon.node,
+      left: `${rand(6, 90).toFixed(1)}%`,
+      top: `${rand(8, 86).toFixed(1)}%`,
+      size: Math.round(rand(40, 64)),
+      delay: `${rand(0, 3).toFixed(1)}s`,
+      duration: `${rand(14, 22).toFixed(1)}s`,
+      rotate: `${rand(-18, 18).toFixed(1)}deg`,
+      floatDistance: Math.round(rand(14, 28)),
+    }));
+  }, []);
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
@@ -602,9 +618,9 @@ export default function InformalLearning() {
             zIndex: 1,
             pointerEvents: "none",
             "@keyframes floatSymbol": {
-              "0%": { transform: "translate3d(0, 0, 0)" },
-              "50%": { transform: "translate3d(0, -18px, 0)" },
-              "100%": { transform: "translate3d(0, 0, 0)" },
+              "0%": { transform: "translate3d(0, 0, 0) rotate(var(--rotate))" },
+              "50%": { transform: "translate3d(0, calc(-1 * var(--float)), 0) rotate(var(--rotate))" },
+              "100%": { transform: "translate3d(0, 0, 0) rotate(var(--rotate))" },
             },
           }}
         >
@@ -621,10 +637,12 @@ export default function InformalLearning() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "rgba(30, 64, 175, 0.28)",
-                background: "rgba(255, 255, 255, 0.35)",
-                boxShadow: "0 10px 24px rgba(15, 23, 42, 0.08)",
+                color: "rgba(30, 58, 138, 0.65)",
+                background: "rgba(255, 255, 255, 0.45)",
+                boxShadow: "0 12px 28px rgba(15, 23, 42, 0.12)",
                 animation: `floatSymbol ${symbol.duration} ease-in-out ${symbol.delay} infinite`,
+                "--rotate": symbol.rotate,
+                "--float": `${symbol.floatDistance}px`,
               }}
             >
               {symbol.icon}
