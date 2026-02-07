@@ -1,14 +1,12 @@
 import { Box, Button, Container, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import GradientText from "./GradientText";
 
 const MotionBox = motion(Box);
 
-const letterColors = ["#ffffff", "#e0e7ff", "#c7d2fe", "#a5b4fc", "#c4b5fd"];
-
 export default function HeroSection({ title, subtitle }) {
   const displayTitle = title || "Welcome to EduSphere";
-  const letters = displayTitle.split("");
 
   return (
     <Box sx={{ position: "relative", mt: -6 }}>
@@ -110,22 +108,13 @@ export default function HeroSection({ title, subtitle }) {
               whiteSpace: "nowrap",
             }}
           >
-            {letters.map((char, i) => (
-              <motion.span
-                key={i + char}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * i, duration: 0.35, ease: "easeOut" }}
-                style={{
-                  background: `linear-gradient(135deg, ${letterColors[i % letterColors.length]} 0%, #ffffff 100%)`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  display: "inline-block",
-                }}
-              >
-                {char === " " ? "\u00A0" : char}
-              </motion.span>
-            ))}
+            <GradientText
+              colors={["#6c47ff", "#d793fb", "#b4b4b7", "#834efd"]}
+              animationSpeed={3}
+              showBorder
+            >
+              {displayTitle}
+            </GradientText>
           </Typography>
         </motion.div>
 
