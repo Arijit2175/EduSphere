@@ -541,6 +541,15 @@ export default function InformalLearning() {
     );
   }
 
+  const floatingSymbols = [
+    { id: "code", icon: <CodeIcon fontSize="small" />, left: "6%", top: "14%", size: 28, delay: "0s", duration: "16s" },
+    { id: "brush", icon: <BrushIcon fontSize="small" />, left: "18%", top: "68%", size: 26, delay: "2s", duration: "18s" },
+    { id: "science", icon: <ScienceIcon fontSize="small" />, left: "84%", top: "24%", size: 30, delay: "1s", duration: "20s" },
+    { id: "mind", icon: <PsychologyIcon fontSize="small" />, left: "78%", top: "72%", size: 24, delay: "3s", duration: "17s" },
+    { id: "tips", icon: <TipsAndUpdatesIcon fontSize="small" />, left: "46%", top: "10%", size: 22, delay: "1.5s", duration: "19s" },
+    { id: "code2", icon: <CodeIcon fontSize="small" />, left: "56%", top: "58%", size: 20, delay: "2.5s", duration: "15s" },
+  ];
+
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar />
@@ -591,6 +600,42 @@ export default function InformalLearning() {
             position: "absolute",
             inset: 0,
             zIndex: 1,
+            pointerEvents: "none",
+            "@keyframes floatSymbol": {
+              "0%": { transform: "translate3d(0, 0, 0)" },
+              "50%": { transform: "translate3d(0, -18px, 0)" },
+              "100%": { transform: "translate3d(0, 0, 0)" },
+            },
+          }}
+        >
+          {floatingSymbols.map((symbol) => (
+            <Box
+              key={symbol.id}
+              sx={{
+                position: "absolute",
+                left: symbol.left,
+                top: symbol.top,
+                width: symbol.size,
+                height: symbol.size,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "rgba(30, 64, 175, 0.28)",
+                background: "rgba(255, 255, 255, 0.35)",
+                boxShadow: "0 10px 24px rgba(15, 23, 42, 0.08)",
+                animation: `floatSymbol ${symbol.duration} ease-in-out ${symbol.delay} infinite`,
+              }}
+            >
+              {symbol.icon}
+            </Box>
+          ))}
+        </Box>
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 2,
             background: "linear-gradient(180deg, rgba(248,250,252,0.35) 0%, rgba(237,242,247,0.45) 100%)",
             pointerEvents: "none",
           }}
@@ -603,7 +648,7 @@ export default function InformalLearning() {
             transition: "margin-left 0.3s ease",
             pb: 4,
             position: "relative",
-            zIndex: 2,
+            zIndex: 3,
           }}
         >
           <Box sx={{ mt: 4, px: { xs: 2, md: 3 }, maxWidth: "1400px", mx: "auto" }}>
