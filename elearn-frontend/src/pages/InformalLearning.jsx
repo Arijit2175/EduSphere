@@ -35,6 +35,7 @@ import {
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Grainient from "../components/Grainient";
+import Shuffle from "../components/Shuffle";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -731,7 +732,17 @@ export default function InformalLearning() {
                     <GroupsIcon fontSize="small" />
                   </Box>
                   <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                    Community Feed
+                    <Shuffle
+                      text="Community Feed"
+                      shuffleDirection="down"
+                      duration={0.35}
+                      stagger={0.03}
+                      triggerOnHover
+                      triggerOnce={false}
+                      respectReducedMotion={true}
+                      loop
+                      loopDelay={2}
+                    />
                   </Typography>
                 </Stack>
                 <Typography variant="body2" sx={{ maxWidth: 520, color: "#ffffff" }}>
