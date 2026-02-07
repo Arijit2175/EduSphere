@@ -569,10 +569,10 @@ export default function InformalLearning() {
                 px: { xs: 3, md: 4 },
                 py: { xs: 3, md: 4 },
                 mb: 3,
-                background: "linear-gradient(120deg, #e0f2ff 0%, #c7d2fe 35%, #93c5fd 70%, #ffffff 100%)",
+                background: "linear-gradient(120deg, #0b1f5e 0%, #1d4ed8 38%, #2563eb 62%, #ffffff 100%)",
                 backgroundSize: "200% 200%",
                 animation: "communityGradient 12s ease-in-out infinite",
-                color: "#0f172a",
+                color: "#ffffff",
                 "@keyframes communityGradient": {
                   "0%": { backgroundPosition: "0% 50%" },
                   "50%": { backgroundPosition: "100% 50%" },
@@ -580,29 +580,38 @@ export default function InformalLearning() {
                 },
               }}
             >
-              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                <Box
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 2,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    bgcolor: "rgba(15, 23, 42, 0.08)",
-                  }}
-                >
-                  <RssFeedIcon fontSize="small" />
-                </Box>
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                  Community Feed
+              <Box
+                sx={{
+                  position: "relative",
+                  zIndex: 1,
+                  color: "#ffffff",
+                  mixBlendMode: "difference",
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: "rgba(255, 255, 255, 0.18)",
+                    }}
+                  >
+                    <RssFeedIcon fontSize="small" />
+                  </Box>
+                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                    Community Feed
+                  </Typography>
+                </Stack>
+                <Typography variant="body2" sx={{ maxWidth: 520 }}>
+                  A modern space for micro-learning, tips, and peer knowledge sharing.
                 </Typography>
-              </Stack>
-              <Typography variant="body2" sx={{ color: "rgba(15, 23, 42, 0.75)", maxWidth: 520 }}>
-                A modern space for micro-learning, tips, and peer knowledge sharing.
-              </Typography>
-              <Box sx={{ position: "absolute", right: -30, top: -30, width: 120, height: 120, borderRadius: "50%", bgcolor: "rgba(59, 130, 246, 0.15)" }} />
-              <Box sx={{ position: "absolute", right: 20, bottom: -20, width: 80, height: 80, borderRadius: "50%", bgcolor: "rgba(59, 130, 246, 0.12)" }} />
+              </Box>
+              <Box sx={{ position: "absolute", right: -30, top: -30, width: 120, height: 120, borderRadius: "50%", bgcolor: "rgba(255, 255, 255, 0.18)" }} />
+              <Box sx={{ position: "absolute", right: 20, bottom: -20, width: 80, height: 80, borderRadius: "50%", bgcolor: "rgba(255, 255, 255, 0.12)" }} />
             </Box>
 
             <Card sx={{ mb: 2, borderRadius: 2 }}>
