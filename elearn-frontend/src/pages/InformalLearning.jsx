@@ -523,6 +523,16 @@ export default function InformalLearning() {
 
   const floatingSymbols = useMemo(() => {
     const rand = (min, max) => Math.random() * (max - min) + min;
+    const edgePosition = () => {
+      const lanePick = Math.random();
+      if (lanePick < 0.7) {
+        return `${rand(4, 22).toFixed(1)}%`;
+      }
+      if (lanePick < 0.9) {
+        return `${rand(78, 96).toFixed(1)}%`;
+      }
+      return `${rand(40, 60).toFixed(1)}%`;
+    };
     const icons = [
       { id: "code", node: <CodeIcon fontSize="medium" /> },
       { id: "brush", node: <BrushIcon fontSize="medium" /> },
@@ -542,7 +552,7 @@ export default function InformalLearning() {
     return icons.map((icon) => ({
       id: icon.id,
       icon: icon.node,
-      left: `${rand(4, 92).toFixed(1)}%`,
+      left: edgePosition(),
       top: `${rand(6, 90).toFixed(1)}%`,
       size: Math.round(rand(42, 72)),
       delay: `${rand(0, 4).toFixed(1)}s`,
