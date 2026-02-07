@@ -585,7 +585,6 @@ export default function InformalLearning() {
                   position: "relative",
                   zIndex: 1,
                   color: "#ffffff",
-                  mixBlendMode: "difference",
                 }}
               >
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
