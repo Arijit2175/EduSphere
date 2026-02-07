@@ -11,6 +11,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
+import Iridescence from "../components/Iridescence";
 import { useAuth } from "../contexts/AuthContext";
 import { useSidebar } from "../contexts/SidebarContext";
 
@@ -150,10 +151,35 @@ export default function Profile() {
           flexDirection: "column",
           p: 0,
           m: 0,
+          position: "relative",
+          overflow: "hidden",
         }}
       >
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 0,
+          }}
+        >
+          <Iridescence
+            color={[0.4, 0.3, 0.7]}
+            mouseReact
+            amplitude={0.1}
+            speed={1}
+          />
+        </Box>
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 1,
+            background: "linear-gradient(180deg, rgba(245,247,250,0.75) 0%, rgba(195,207,226,0.85) 100%)",
+            pointerEvents: "none",
+          }}
+        />
         <Navbar />
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", p: 0, m: 0, overflowY: 'auto' }}>
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", p: 0, m: 0, overflowY: 'auto', position: "relative", zIndex: 2 }}>
           <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4, px: 2 }}>
 
             {/* Profile Header Card */}
