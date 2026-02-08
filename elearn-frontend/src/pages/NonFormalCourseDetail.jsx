@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Box,
   Container,
@@ -24,7 +24,7 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import Section from "../components/Section";
+import MagicBento from "../components/MagicBento";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useNonFormal } from "../contexts/NonFormalContext";
@@ -72,6 +72,223 @@ export default function NonFormalCourseDetail() {
   };
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
+
+  const bentoItems = useMemo(() => {
+    const outcomes = course.outcomes ?? [];
+    const lessons = course.lessons ?? [];
+    const attachments = course.attachments ?? [];
+
+    return [
+      {
+        id: "outcomes",
+        label: "Outcomes",
+        title: "What you'll learn",
+        description: `${outcomes.length} key outcomes`,
+        glowColor: "16, 185, 129",
+        className: "magic-bento-card--wide",
+        content: (
+          <Stack spacing={1}>
+            {outcomes.length > 0 ? (
+              outcomes.map((outcome, idx) => (
+                <Stack key={idx} direction="row" spacing={1} alignItems="flex-start">
+                  <Typography sx={{ fontWeight: 700, color: "rgba(226, 232, 240, 0.9)" }}>✓</Typography>
+                  <Typography variant="body2" sx={{ color: "rgba(226, 232, 240, 0.85)" }}>
+                    {outcome}
+                  </Typography>
+                </Stack>
+              ))
+            ) : (
+              <Typography variant="body2" sx={{ color: "rgba(226, 232, 240, 0.7)" }}>
+                Outcomes will appear here once the course is finalized.
+              </Typography>
+            )}
+          </Stack>
+        ),
+      },
+      {
+        id: "content",
+        label: "Content",
+        title: "Course Content",
+        description: `${lessons.length} lessons`,
+        glowColor: "59, 130, 246",
+        className: "magic-bento-card--wide magic-bento-card--tall",
+        content: (
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ background: "rgba(255, 255, 255, 0.08)" }}>
+                <TableCell sx={{ fontWeight: 700, color: "rgba(226, 232, 240, 0.9)" }}>Lesson</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, color: "rgba(226, 232, 240, 0.9)" }}>
+                  Duration
+                </TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, color: "rgba(226, 232, 240, 0.9)" }}>
+                  Action
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {lessons.map((lesson) => (
+                <TableRow key={lesson.id}>
+                  <TableCell sx={{ color: "rgba(226, 232, 240, 0.85)" }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <PlayCircleOutlineIcon fontSize="small" />
+                      <Typography variant="body2" sx={{ color: "inherit" }}>
+                        {lesson.title}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell align="right" sx={{ color: "rgba(226, 232, 240, 0.75)" }}>
+                    <Typography variant="body2" sx={{ color: "inherit" }}>
+                      {lesson.duration}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => {
+                        setPreviewLesson(lesson);
+                        setOpenPreview(true);
+                      }}
+                      sx={{
+                        color: "rgba(226, 232, 240, 0.9)",
+                        borderColor: "rgba(226, 232, 240, 0.45)",
+                      }}
+                    >
+                      Preview
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ),
+      },
+      {
+        id: "resources",
+        label: "Resources",
+        title: "Downloadable Files",
+        description: attachments.length > 0 ? `${attachments.length} resources` : "No downloads",
+        glowColor: "234, 88, 12",
+        content: attachments.length > 0 ? (
+          <Stack spacing={1}>
+            {attachments.map((file, idx) => (
+              <Button
+                key={idx}
+                fullWidth
+                variant="outlined"
+                href={file.url}
+                download
+                sx={{
+                  color: "rgba(226, 232, 240, 0.9)",
+                  borderColor: "rgba(226, 232, 240, 0.35)",
+                }}
+              >
+                ⬇️ {file.name}
+              </Button>
+            ))}
+          </Stack>
+        ) : (
+          <Typography variant="body2" sx={{ color: "rgba(226, 232, 240, 0.7)" }}>
+            Resources will appear here when available.
+          </Typography>
+        ),
+      },
+      {
+        id: "instructor",
+        label: "Instructor",
+        title: course.instructor,
+        description: "Top-rated mentor",
+        glowColor: "168, 85, 247",
+        content: (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Box sx={{ fontSize: 40 }}>👤</Box>
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "rgba(226, 232, 240, 0.9)" }}>
+                {course.instructor}
+              </Typography>
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <StarIcon sx={{ fontSize: 16, color: "#fbbf24" }} />
+                <Typography variant="caption" sx={{ fontWeight: 600, color: "rgba(226, 232, 240, 0.8)" }}>
+                  {course.rating}
+                </Typography>
+              </Stack>
+            </Box>
+          </Stack>
+        ),
+      },
+      {
+        id: "info",
+        label: "Course Info",
+        title: "Details",
+        description: course.category,
+        glowColor: "14, 165, 233",
+        content: (
+          <Stack spacing={1.5}>
+            <Stack>
+              <Typography variant="caption" sx={{ color: "rgba(226, 232, 240, 0.6)" }}>
+                Category
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "rgba(226, 232, 240, 0.9)" }}>
+                {course.category}
+              </Typography>
+            </Stack>
+            <Stack>
+              <Typography variant="caption" sx={{ color: "rgba(226, 232, 240, 0.6)" }}>
+                Duration
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "rgba(226, 232, 240, 0.9)" }}>
+                {course.duration}
+              </Typography>
+            </Stack>
+            <Stack>
+              <Typography variant="caption" sx={{ color: "rgba(226, 232, 240, 0.6)" }}>
+                Level
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "rgba(226, 232, 240, 0.9)" }}>
+                {course.level}
+              </Typography>
+            </Stack>
+            <Stack>
+              <Typography variant="caption" sx={{ color: "rgba(226, 232, 240, 0.6)" }}>
+                Price
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "rgba(226, 232, 240, 0.9)" }}>
+                {course.paid ? "Paid" : "Free"}
+              </Typography>
+            </Stack>
+          </Stack>
+        ),
+      },
+      {
+        id: "enroll",
+        label: "Enrollment",
+        title: hasCertificate ? "Completed" : enrolled ? "Continue Learning" : "Enroll Now",
+        description: hasCertificate ? "Certificate unlocked" : "Start the journey",
+        glowColor: "34, 197, 94",
+        content: (
+          <Stack spacing={1.5}>
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              onClick={handleEnroll}
+              disabled={hasCertificate}
+              sx={{
+                background: hasCertificate ? "rgba(226, 232, 240, 0.4)" : "rgba(255, 255, 255, 0.95)",
+                color: hasCertificate ? "rgba(148, 163, 184, 0.9)" : "#0f172a",
+                fontWeight: 700,
+              }}
+            >
+              {hasCertificate ? "Completed" : enrolled ? "Continue Learning" : "Enroll Now"}
+            </Button>
+            <Typography variant="caption" sx={{ color: "rgba(226, 232, 240, 0.7)" }}>
+              {enrolled ? "Access all lessons and materials" : "Get started with this course"}
+            </Typography>
+          </Stack>
+        ),
+      },
+    ];
+  }, [course, enrolled, hasCertificate]);
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
@@ -195,181 +412,20 @@ export default function NonFormalCourseDetail() {
           </Card>
 
           <Box sx={{ width: { xs: "100%", md: "92%" }, mx: "auto", transform: { md: "translateX(55px)" } }}>
-          <Grid container spacing={3}>
-            {/* Main Content */}
-            <Grid item xs={12} md={8}>
-              {/* Expected Outcomes */}
-              <Card sx={{ mb: 3 }}>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                    📚 What you'll learn
-                  </Typography>
-                  <Stack spacing={1}>
-                    {course.outcomes?.map((outcome, idx) => (
-                      <Stack key={idx} direction="row" spacing={1} alignItems="flex-start">
-                        <Typography sx={{ fontWeight: 700 }}>✓</Typography>
-                        <Typography variant="body2">{outcome}</Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                </CardContent>
-              </Card>
-
-              {/* Course Content */}
-              <Card sx={{ mb: 3 }}>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                    📖 Course Content ({course.lessons?.length} lessons)
-                  </Typography>
-                  <Table>
-                    <TableHead>
-                      <TableRow sx={{ background: "#f3f4f6" }}>
-                        <TableCell sx={{ fontWeight: 700 }}>Lesson</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 700 }}>
-                          Duration
-                        </TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 700 }}>
-                          Action
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {course.lessons?.map((lesson, idx) => (
-                        <TableRow key={lesson.id}>
-                          <TableCell>
-                            <Stack direction="row" spacing={1} alignItems="center">
-                              <PlayCircleOutlineIcon fontSize="small" />
-                              <Typography variant="body2">{lesson.title}</Typography>
-                            </Stack>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Typography variant="body2">{lesson.duration}</Typography>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              onClick={() => {
-                                setPreviewLesson(lesson);
-                                setOpenPreview(true);
-                              }}
-                            >
-                              Preview
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-
-              {/* Attachments */}
-              {course.attachments?.length > 0 && (
-                <Card sx={{ mb: 3 }}>
-                  <CardContent>
-                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                      📎 Downloadable Resources
-                    </Typography>
-                    <Stack spacing={1}>
-                      {course.attachments.map((file, idx) => (
-                        <Button key={idx} fullWidth variant="outlined" href={file.url} download>
-                          ⬇️ {file.name}
-                        </Button>
-                      ))}
-                    </Stack>
-                  </CardContent>
-                </Card>
-              )}
-            </Grid>
-
-            {/* Sidebar */}
-            <Grid item xs={12} md={4}>
-              {/* Instructor Info */}
-              <Card sx={{ mb: 3 }}>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                    👨‍🏫 Instructor
-                  </Typography>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Box sx={{ fontSize: 40 }}>👤</Box>
-                    <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                        {course.instructor}
-                      </Typography>
-                      <Stack direction="row" spacing={0.5}>
-                        <StarIcon sx={{ fontSize: 16, color: "#fbbf24" }} />
-                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                          {course.rating}
-                        </Typography>
-                      </Stack>
-                    </Box>
-                  </Stack>
-                </CardContent>
-              </Card>
-
-              {/* Course Info */}
-              <Card sx={{ mb: 3 }}>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                    ℹ️ Course Info
-                  </Typography>
-                  <Stack spacing={2}>
-                    <Stack>
-                      <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                        Category
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {course.category}
-                      </Typography>
-                    </Stack>
-                    <Stack>
-                      <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                        Duration
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {course.duration}
-                      </Typography>
-                    </Stack>
-                    <Stack>
-                      <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                        Level
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {course.level}
-                      </Typography>
-                    </Stack>
-                    <Stack>
-                      <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                        Price
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {course.paid ? "Paid" : "Free"}
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                </CardContent>
-              </Card>
-
-              {/* Enrollment Button */}
-              <Card>
-                <CardContent>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    size="large"
-                    onClick={handleEnroll}
-                    sx={{ mb: 1 }}
-                  >
-                    {enrolled ? "Continue Learning" : "Enroll Now"}
-                  </Button>
-                  <Typography variant="caption" sx={{ color: "#6b7280", textAlign: "center", display: "block" }}>
-                    {enrolled ? "Access all lessons and materials" : "Get started with this course"}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            </Grid>
+            <MagicBento
+              items={bentoItems}
+              textAutoHide
+              enableStars={false}
+              enableSpotlight
+              enableBorderGlow
+              enableTilt={false}
+              enableMagnetism={false}
+              clickEffect
+              spotlightRadius={240}
+              particleCount={10}
+              glowColor="16, 185, 129"
+              disableAnimations={false}
+            />
           </Box>
 
           {/* Preview Dialog */}
