@@ -179,6 +179,16 @@ export default function NonFormalHome() {
             zoom={0.95}
           />
         </Box>
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 1,
+            pointerEvents: "none",
+            backgroundImage:
+              "radial-gradient(circle at 12% 20%, rgba(16,185,129,0.25) 0%, rgba(16,185,129,0) 55%), radial-gradient(circle at 82% 18%, rgba(52,211,153,0.22) 0%, rgba(52,211,153,0) 52%), radial-gradient(circle at 70% 78%, rgba(5,150,105,0.2) 0%, rgba(5,150,105,0) 58%)",
+          }}
+        />
         <Box sx={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", minHeight: "100%" }}>
           <Navbar />
           <Box
