@@ -185,8 +185,10 @@ export default function NonFormalHome() {
             inset: 0,
             zIndex: 1,
             pointerEvents: "none",
+            opacity: 0.9,
+            mixBlendMode: "screen",
             backgroundImage:
-              "radial-gradient(circle at 12% 20%, rgba(16,185,129,0.38) 0%, rgba(16,185,129,0) 62%), radial-gradient(circle at 82% 18%, rgba(52,211,153,0.34) 0%, rgba(52,211,153,0) 60%), radial-gradient(circle at 70% 78%, rgba(5,150,105,0.32) 0%, rgba(5,150,105,0) 66%)",
+              "radial-gradient(circle at 12% 18%, rgba(16,185,129,0.55) 0%, rgba(16,185,129,0) 65%), radial-gradient(circle at 86% 20%, rgba(52,211,153,0.5) 0%, rgba(52,211,153,0) 62%), radial-gradient(circle at 70% 82%, rgba(5,150,105,0.48) 0%, rgba(5,150,105,0) 68%)",
           }}
         />
         <Box sx={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", minHeight: "100%" }}>
