@@ -179,21 +179,6 @@ export default function NonFormalHome() {
             zoom={0.95}
           />
         </Box>
-        <Box
-          sx={{
-            position: "absolute",
-            left: 0,
-            bottom: 0,
-            width: { xs: 280, sm: 340, md: 420 },
-            height: { xs: 190, sm: 230, md: 280 },
-            backgroundImage: "url('/images/nonformalbg.gif')",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "left bottom",
-            backgroundSize: "contain",
-            pointerEvents: "none",
-            zIndex: 1,
-          }}
-        />
         <Box sx={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", minHeight: "100%" }}>
           <Navbar />
           <Box
