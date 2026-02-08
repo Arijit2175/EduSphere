@@ -101,14 +101,6 @@ export default function NonFormalHome() {
 
   const titleSx = { fontWeight: 700, mb: 1, letterSpacing: "-0.01em", color: "#0f172a" };
   const descSx = { color: "#64748b", mb: 1.5 };
-  const courseTitleSx = { fontWeight: 700, mb: 1, letterSpacing: "-0.01em", color: "#ffffff" };
-  const courseDescSx = { color: "rgba(255,255,255,0.85)", mb: 1.5 };
-  const courseChipSx = {
-    borderColor: "rgba(255,255,255,0.6)",
-    color: "#ffffff",
-    fontWeight: 600,
-    backgroundColor: "rgba(255,255,255,0.12)",
-  };
 
   const filtered = useMemo(() => {
     return courses.filter((c) => {
@@ -355,24 +347,24 @@ export default function NonFormalHome() {
                               >
                                 <CardContent>
                                   <Box sx={{ fontSize: 30, mb: 1 }}>{course.thumbnail}</Box>
-                                  <Typography variant="subtitle1" sx={courseTitleSx}>
+                                  <Typography variant="subtitle1" sx={titleSx}>
                                     {course.title}
                                   </Typography>
-                                  <Typography variant="body2" sx={courseDescSx}>
+                                  <Typography variant="body2" sx={descSx}>
                                     {course.description}
                                   </Typography>
                                   <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
                                     <StarIcon sx={{ fontSize: 16, color: "#f59e0b" }} />
-                                    <Typography variant="caption" sx={{ fontWeight: 700, color: "#ffffff" }}>
+                                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
                                       {course.rating}
                                     </Typography>
-                                    <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.8)" }}>
+                                    <Typography variant="caption" sx={{ color: "#94a3b8" }}>
                                       ({course.reviews})
                                     </Typography>
                                   </Stack>
                                   <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap" }}>
-                                    <Chip label={course.level} size="small" variant="outlined" sx={courseChipSx} />
-                                    <Chip label={course.duration} size="small" variant="outlined" sx={courseChipSx} />
+                                    <Chip label={course.level} size="small" variant="outlined" sx={chipSx} />
+                                    <Chip label={course.duration} size="small" variant="outlined" sx={chipSx} />
                                   </Stack>
                                   <InteractiveHoverButton style={{ width: "100%" }}>
                                     Explore
@@ -396,24 +388,24 @@ export default function NonFormalHome() {
                           >
                             <CardContent>
                               <Box sx={{ fontSize: 30, mb: 1 }}>{course.thumbnail}</Box>
-                              <Typography variant="subtitle1" sx={courseTitleSx}>
+                              <Typography variant="subtitle1" sx={titleSx}>
                                 {course.title}
                               </Typography>
-                              <Typography variant="body2" sx={courseDescSx}>
+                              <Typography variant="body2" sx={descSx}>
                                 {course.description}
                               </Typography>
                               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
                                 <StarIcon sx={{ fontSize: 16, color: "#f59e0b" }} />
-                                <Typography variant="caption" sx={{ fontWeight: 700, color: "#ffffff" }}>
+                                <Typography variant="caption" sx={{ fontWeight: 700 }}>
                                   {course.rating}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.8)" }}>
+                                <Typography variant="caption" sx={{ color: "#94a3b8" }}>
                                   ({course.reviews})
                                 </Typography>
                               </Stack>
                               <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap" }}>
-                                <Chip label={course.level} size="small" variant="outlined" sx={courseChipSx} />
-                                <Chip label={course.duration} size="small" variant="outlined" sx={courseChipSx} />
+                                <Chip label={course.level} size="small" variant="outlined" sx={chipSx} />
+                                <Chip label={course.duration} size="small" variant="outlined" sx={chipSx} />
                               </Stack>
                               <InteractiveHoverButton style={{ width: "100%" }}>
                                 View Course
