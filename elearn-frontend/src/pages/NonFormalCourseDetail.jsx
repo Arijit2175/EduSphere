@@ -91,14 +91,14 @@ export default function NonFormalCourseDetail() {
             {outcomes.length > 0 ? (
               outcomes.map((outcome, idx) => (
                 <Stack key={idx} direction="row" spacing={1} alignItems="flex-start">
-                  <Typography sx={{ fontWeight: 700, color: "rgba(226, 232, 240, 0.9)" }}>✓</Typography>
-                  <Typography variant="body2" sx={{ color: "rgba(226, 232, 240, 0.85)" }}>
+                  <Typography sx={{ fontWeight: 700, color: "#0f172a" }}>✓</Typography>
+                  <Typography variant="body2" sx={{ color: "#334155" }}>
                     {outcome}
                   </Typography>
                 </Stack>
               ))
             ) : (
-              <Typography variant="body2" sx={{ color: "rgba(226, 232, 240, 0.7)" }}>
+              <Typography variant="body2" sx={{ color: "#64748b" }}>
                 Outcomes will appear here once the course is finalized.
               </Typography>
             )}
@@ -115,12 +115,12 @@ export default function NonFormalCourseDetail() {
         content: (
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ background: "rgba(255, 255, 255, 0.08)" }}>
-                <TableCell sx={{ fontWeight: 700, color: "rgba(226, 232, 240, 0.9)" }}>Lesson</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700, color: "rgba(226, 232, 240, 0.9)" }}>
+              <TableRow sx={{ background: "rgba(148, 163, 184, 0.12)" }}>
+                <TableCell sx={{ fontWeight: 700, color: "#0f172a" }}>Lesson</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, color: "#0f172a" }}>
                   Duration
                 </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700, color: "rgba(226, 232, 240, 0.9)" }}>
+                <TableCell align="right" sx={{ fontWeight: 700, color: "#0f172a" }}>
                   Action
                 </TableCell>
               </TableRow>
@@ -128,7 +128,7 @@ export default function NonFormalCourseDetail() {
             <TableBody>
               {lessons.map((lesson) => (
                 <TableRow key={lesson.id}>
-                  <TableCell sx={{ color: "rgba(226, 232, 240, 0.85)" }}>
+                  <TableCell sx={{ color: "#334155" }}>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <PlayCircleOutlineIcon fontSize="small" />
                       <Typography variant="body2" sx={{ color: "inherit" }}>
@@ -136,7 +136,7 @@ export default function NonFormalCourseDetail() {
                       </Typography>
                     </Stack>
                   </TableCell>
-                  <TableCell align="right" sx={{ color: "rgba(226, 232, 240, 0.75)" }}>
+                  <TableCell align="right" sx={{ color: "#475569" }}>
                     <Typography variant="body2" sx={{ color: "inherit" }}>
                       {lesson.duration}
                     </Typography>
@@ -150,8 +150,8 @@ export default function NonFormalCourseDetail() {
                         setOpenPreview(true);
                       }}
                       sx={{
-                        color: "rgba(226, 232, 240, 0.9)",
-                        borderColor: "rgba(226, 232, 240, 0.45)",
+                        color: "#1e293b",
+                        borderColor: "rgba(148, 163, 184, 0.6)",
                       }}
                     >
                       Preview
@@ -179,8 +179,8 @@ export default function NonFormalCourseDetail() {
                 href={file.url}
                 download
                 sx={{
-                  color: "rgba(226, 232, 240, 0.9)",
-                  borderColor: "rgba(226, 232, 240, 0.35)",
+                  color: "#1e293b",
+                  borderColor: "rgba(148, 163, 184, 0.6)",
                 }}
               >
                 ⬇️ {file.name}
@@ -188,7 +188,7 @@ export default function NonFormalCourseDetail() {
             ))}
           </Stack>
         ) : (
-          <Typography variant="body2" sx={{ color: "rgba(226, 232, 240, 0.7)" }}>
+          <Typography variant="body2" sx={{ color: "#64748b" }}>
             Resources will appear here when available.
           </Typography>
         ),
@@ -203,12 +203,12 @@ export default function NonFormalCourseDetail() {
           <Stack direction="row" spacing={2} alignItems="center">
             <Box sx={{ fontSize: 40 }}>👤</Box>
             <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "rgba(226, 232, 240, 0.9)" }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0f172a" }}>
                 {course.instructor}
               </Typography>
               <Stack direction="row" spacing={0.5} alignItems="center">
                 <StarIcon sx={{ fontSize: 16, color: "#fbbf24" }} />
-                <Typography variant="caption" sx={{ fontWeight: 600, color: "rgba(226, 232, 240, 0.8)" }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: "#475569" }}>
                   {course.rating}
                 </Typography>
               </Stack>
@@ -225,34 +225,34 @@ export default function NonFormalCourseDetail() {
         content: (
           <Stack spacing={1.5}>
             <Stack>
-              <Typography variant="caption" sx={{ color: "rgba(226, 232, 240, 0.6)" }}>
+              <Typography variant="caption" sx={{ color: "#64748b" }}>
                 Category
               </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: "rgba(226, 232, 240, 0.9)" }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "#0f172a" }}>
                 {course.category}
               </Typography>
             </Stack>
             <Stack>
-              <Typography variant="caption" sx={{ color: "rgba(226, 232, 240, 0.6)" }}>
+              <Typography variant="caption" sx={{ color: "#64748b" }}>
                 Duration
               </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: "rgba(226, 232, 240, 0.9)" }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "#0f172a" }}>
                 {course.duration}
               </Typography>
             </Stack>
             <Stack>
-              <Typography variant="caption" sx={{ color: "rgba(226, 232, 240, 0.6)" }}>
+              <Typography variant="caption" sx={{ color: "#64748b" }}>
                 Level
               </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: "rgba(226, 232, 240, 0.9)" }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "#0f172a" }}>
                 {course.level}
               </Typography>
             </Stack>
             <Stack>
-              <Typography variant="caption" sx={{ color: "rgba(226, 232, 240, 0.6)" }}>
+              <Typography variant="caption" sx={{ color: "#64748b" }}>
                 Price
               </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: "rgba(226, 232, 240, 0.9)" }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "#0f172a" }}>
                 {course.paid ? "Paid" : "Free"}
               </Typography>
             </Stack>
@@ -274,14 +274,17 @@ export default function NonFormalCourseDetail() {
               onClick={handleEnroll}
               disabled={hasCertificate}
               sx={{
-                background: hasCertificate ? "rgba(226, 232, 240, 0.4)" : "rgba(255, 255, 255, 0.95)",
-                color: hasCertificate ? "rgba(148, 163, 184, 0.9)" : "#0f172a",
+                background: hasCertificate ? "#e2e8f0" : "#2563eb",
+                color: hasCertificate ? "#94a3b8" : "#ffffff",
                 fontWeight: 700,
+                "&:hover": {
+                  background: hasCertificate ? "#e2e8f0" : "#1d4ed8",
+                },
               }}
             >
               {hasCertificate ? "Completed" : enrolled ? "Continue Learning" : "Enroll Now"}
             </Button>
-            <Typography variant="caption" sx={{ color: "rgba(226, 232, 240, 0.7)" }}>
+            <Typography variant="caption" sx={{ color: "#64748b" }}>
               {enrolled ? "Access all lessons and materials" : "Get started with this course"}
             </Typography>
           </Stack>

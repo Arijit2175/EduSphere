@@ -1,8 +1,8 @@
 .magic-bento {
-  --magic-white: #f8fafc;
-  --magic-border: rgba(148, 163, 184, 0.35);
-  --magic-bg: rgba(15, 23, 42, 0.82);
-  --magic-shadow: rgba(15, 23, 42, 0.18);
+  --magic-white: #0f172a;
+  --magic-border: rgba(148, 163, 184, 0.4);
+  --magic-bg: rgba(255, 255, 255, 0.95);
+  --magic-shadow: rgba(15, 23, 42, 0.12);
   width: 100%;
 }
 
@@ -65,7 +65,7 @@
   font-size: 0.85em;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.72);
+  color: rgba(71, 85, 105, 0.9);
 }
 
 .magic-bento-card__title,
