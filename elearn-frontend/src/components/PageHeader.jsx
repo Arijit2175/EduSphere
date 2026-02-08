@@ -160,20 +160,6 @@ export default function PageHeader({
           pointerEvents: "none",
         }}
       />
-      <Box
-        sx={{
-          position: "absolute",
-          width: { xs: 170, md: 240 },
-          height: { xs: 170, md: 240 },
-          borderRadius: "50%",
-          right: { xs: -10, md: 20 },
-          top: { xs: 90, md: 120 },
-          background: "rgba(255,255,255,0.16)",
-          border: "1px solid rgba(255,255,255,0.2)",
-          boxShadow: "0 20px 48px rgba(15, 23, 42, 0.12)",
-          pointerEvents: "none",
-        }}
-      />
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
         <Box
