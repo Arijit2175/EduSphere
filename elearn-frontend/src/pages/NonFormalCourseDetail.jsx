@@ -361,7 +361,7 @@ export default function NonFormalCourseDetail() {
           <Card
             sx={{
               mb: 3,
-              background: "linear-gradient(135deg, #6d28d9 0%, #2563eb 45%, #22d3ee 100%)",
+              background: "linear-gradient(135deg, #ef4444 0%, #8b5cf6 40%, #3b82f6 70%, #1d4ed8 100%)",
               backgroundSize: "200% 200%",
               animation: "gradientShift 14s ease infinite",
               color: "white",
