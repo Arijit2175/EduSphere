@@ -170,6 +170,7 @@ export default function NonFormalHome() {
                   title="Certificate Courses"
                   subtitle="Flexible, skill-focused micro-courses and workshops"
                   backgroundGradient="linear-gradient(135deg, rgba(56,189,248,0.95) 0%, rgba(45,212,191,0.9) 50%, rgba(34,197,94,0.9) 100%)"
+                  useSplitTextTitle
                 />
 
                 <Section delay={0.05}>

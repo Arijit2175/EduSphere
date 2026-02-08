@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { Box, Container, Typography, Avatar, IconButton, Tooltip } from "@mui/material";
 import { motion } from "framer-motion";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import SplitText from "./SplitText";
 
 const MotionBox = motion(Box);
 
@@ -15,6 +16,7 @@ export default function PageHeader({
   userName,
   onAvatarChange,
   disableAnimation = false,
+  useSplitTextTitle = false,
   children,
 }) {
   const fileInputRef = useRef(null);
@@ -141,21 +143,47 @@ export default function PageHeader({
           }}
         >
           <Box sx={{ flex: 1 }}>
-            <Typography
-              component={motion.h1}
-              {...titleMotion}
-              sx={{
-                fontWeight: 800,
-                mb: 1.5,
-                fontSize: { xs: "2rem", md: "3.1rem" },
-                letterSpacing: "-0.03em",
-                textShadow: "0 6px 24px rgba(0,0,0,0.15)",
-                color: "#ffffff",
-                fontFamily: '"Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-              }}
-            >
-              {title}
-            </Typography>
+            {useSplitTextTitle && !disableAnimation ? (
+              <SplitText
+                text={title}
+                delay={50}
+                duration={1.1}
+                ease="power3.out"
+                splitType="chars"
+                from={{ opacity: 0, y: 40 }}
+                to={{ opacity: 1, y: 0 }}
+                threshold={0.1}
+                rootMargin="-100px"
+                textAlign={showAvatar ? "left" : "center"}
+                tag="h1"
+                className="page-header-title"
+                style={{
+                  fontWeight: 800,
+                  marginBottom: "12px",
+                  fontSize: "clamp(2rem, 3.4vw, 3.1rem)",
+                  letterSpacing: "-0.03em",
+                  textShadow: "0 6px 24px rgba(0,0,0,0.15)",
+                  color: "#ffffff",
+                  fontFamily: '"Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+                }}
+              />
+            ) : (
+              <Typography
+                component={motion.h1}
+                {...titleMotion}
+                sx={{
+                  fontWeight: 800,
+                  mb: 1.5,
+                  fontSize: { xs: "2rem", md: "3.1rem" },
+                  letterSpacing: "-0.03em",
+                  textShadow: "0 6px 24px rgba(0,0,0,0.15)",
+                  color: "#ffffff",
+                  fontFamily: '"Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+                }}
+              >
+                {title}
+              </Typography>
+            )}
             {subtitle && (
               <Typography
                 component={motion.p}
