@@ -82,7 +82,7 @@ export default function NonFormalCourseDetail() {
       {
         id: "outcomes",
         label: "Outcomes",
-        title: "What you'll learn",
+        title: "📚 What you'll learn",
         description: `${outcomes.length} key outcomes`,
         glowColor: "16, 185, 129",
         className: "magic-bento-card--wide",
@@ -108,7 +108,7 @@ export default function NonFormalCourseDetail() {
       {
         id: "content",
         label: "Content",
-        title: "Course Content",
+        title: "🎬 Course Content",
         description: `${lessons.length} lessons`,
         glowColor: "59, 130, 246",
         className: "magic-bento-card--wide magic-bento-card--tall",
@@ -166,7 +166,7 @@ export default function NonFormalCourseDetail() {
       {
         id: "resources",
         label: "Resources",
-        title: "Downloadable Files",
+        title: "📎 Downloadable Files",
         description: attachments.length > 0 ? `${attachments.length} resources` : "No downloads",
         glowColor: "234, 88, 12",
         content: attachments.length > 0 ? (
@@ -196,7 +196,7 @@ export default function NonFormalCourseDetail() {
       {
         id: "instructor",
         label: "Instructor",
-        title: course.instructor,
+        title: `👨‍🏫 ${course.instructor}`,
         description: "Top-rated mentor",
         glowColor: "168, 85, 247",
         content: (
@@ -219,7 +219,7 @@ export default function NonFormalCourseDetail() {
       {
         id: "info",
         label: "Course Info",
-        title: "Details",
+        title: "🧾 Details",
         description: course.category,
         glowColor: "14, 165, 233",
         content: (
@@ -262,7 +262,7 @@ export default function NonFormalCourseDetail() {
       {
         id: "enroll",
         label: "Enrollment",
-        title: hasCertificate ? "Completed" : enrolled ? "Continue Learning" : "Enroll Now",
+        title: hasCertificate ? "✅ Completed" : enrolled ? "🚀 Continue Learning" : "🧭 Enroll Now",
         description: hasCertificate ? "Certificate unlocked" : "Start the journey",
         glowColor: "34, 197, 94",
         content: (
