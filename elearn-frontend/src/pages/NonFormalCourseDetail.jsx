@@ -74,6 +74,18 @@ export default function NonFormalCourseDetail() {
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
+  const heroBubbles = useMemo(() => {
+    const rand = (min, max) => Math.random() * (max - min) + min;
+    return Array.from({ length: 5 }, (_, i) => ({
+      id: `hero-bubble-${i}`,
+      size: Math.round(rand(38, 80)),
+      left: `${Math.round(rand(6, 88))}%`,
+      top: `${Math.round(rand(10, 78))}%`,
+      delay: `${rand(0, 2).toFixed(2)}s`,
+      duration: `${rand(10, 18).toFixed(1)}s`,
+    }));
+  }, []);
+
   const bentoItems = useMemo(() => {
     const outcomes = course.outcomes ?? [];
     const lessons = course.lessons ?? [];
@@ -346,8 +358,47 @@ export default function NonFormalCourseDetail() {
             </Button>
           </Box>
           {/* Hero Section */}
-          <Card sx={{ mb: 3, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white", width: { xs: "100%", md: "92%" }, ml: 0, mr: "auto" }}>
-            <CardContent sx={{ p: 4 }}>
+          <Card
+            sx={{
+              mb: 3,
+              background: "linear-gradient(135deg, #6d28d9 0%, #2563eb 45%, #22d3ee 100%)",
+              backgroundSize: "200% 200%",
+              animation: "gradientShift 14s ease infinite",
+              color: "white",
+              width: { xs: "100%", md: "92%" },
+              ml: 0,
+              mr: "auto",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <Box
+              sx={{
+                position: "absolute",
+                inset: 0,
+                zIndex: 1,
+                pointerEvents: "none",
+              }}
+            >
+              {heroBubbles.map((bubble) => (
+                <Box
+                  key={bubble.id}
+                  sx={{
+                    position: "absolute",
+                    left: bubble.left,
+                    top: bubble.top,
+                    width: bubble.size,
+                    height: bubble.size,
+                    borderRadius: "50%",
+                    background: "rgba(255, 255, 255, 0.22)",
+                    border: "1px solid rgba(255, 255, 255, 0.35)",
+                    boxShadow: "0 18px 40px rgba(15, 23, 42, 0.18)",
+                    animation: `bubbleFloat ${bubble.duration} ease-in-out ${bubble.delay} infinite`,
+                  }}
+                />
+              ))}
+            </Box>
+            <CardContent sx={{ p: 4, position: "relative", zIndex: 2 }}>
               <Grid container spacing={{ xs: 2, md: 5 }} alignItems="flex-start">
                 <Grid item xs={12} md={8}>
                   <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, color: "#ffffff" }}>
