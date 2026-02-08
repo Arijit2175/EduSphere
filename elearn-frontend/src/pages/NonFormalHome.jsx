@@ -19,6 +19,7 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
+import Grainient from "../components/Grainient";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useNonFormal } from "../contexts/NonFormalContext";
@@ -139,256 +140,306 @@ export default function NonFormalHome() {
       <Box
         sx={{
           flexGrow: 1,
-          background:
-            "radial-gradient(circle at top, rgba(16,185,129,0.24) 0%, rgba(34,197,94,0.22) 35%, rgba(5,150,105,0.2) 60%, rgba(16,185,129,0.18) 100%)",
           display: "flex",
           flexDirection: "column",
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#ecfdf5",
         }}
       >
-        <Navbar />
         <Box
           sx={{
-            flexGrow: 1,
-            ml: { xs: 0, md: isOpen ? 25 : 8.75 },
-            transition: "margin-left 0.3s ease",
+            position: "absolute",
+            inset: 0,
+            zIndex: 0,
           }}
         >
-          <Container maxWidth="lg" sx={{ mt: 4, pb: 6 }}>
-            {isTeacher && (
-              <Alert severity="info" sx={{ mt: 4 }}>
-                <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
-                  <Typography variant="body2" sx={{ mr: 2 }}>
-                    Non-formal courses are only available for students. Teachers can manage formal courses in their dashboard.
-                  </Typography>
-                  <Button variant="text" onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
-                </Box>
-              </Alert>
-            )}
+          <Grainient
+            color1="#059669"
+            color2="#16a34a"
+            color3="#dcfce7"
+            timeSpeed={1}
+            colorBalance={0.1}
+            warpStrength={1}
+            warpFrequency={5}
+            warpSpeed={2}
+            warpAmplitude={45}
+            blendAngle={0}
+            blendSoftness={0.06}
+            rotationAmount={520}
+            noiseScale={2}
+            grainAmount={0.08}
+            grainScale={2}
+            grainAnimated
+            contrast={1.2}
+            gamma={1}
+            saturation={1.1}
+            centerX={0}
+            centerY={0}
+            zoom={0.95}
+          />
+        </Box>
+        <Box
+          sx={{
+            position: "absolute",
+            left: 0,
+            bottom: 0,
+            width: { xs: 180, sm: 220, md: 260 },
+            height: { xs: 120, sm: 150, md: 180 },
+            backgroundImage: "url('/images/nonformalbg.gif')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "left bottom",
+            backgroundSize: "contain",
+            pointerEvents: "none",
+            zIndex: 1,
+          }}
+        />
+        <Box sx={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", minHeight: "100%" }}>
+          <Navbar />
+          <Box
+            sx={{
+              flexGrow: 1,
+              ml: { xs: 0, md: isOpen ? 25 : 8.75 },
+              transition: "margin-left 0.3s ease",
+            }}
+          >
+            <Container maxWidth="lg" sx={{ mt: 4, pb: 6 }}>
+              {isTeacher && (
+                <Alert severity="info" sx={{ mt: 4 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                    <Typography variant="body2" sx={{ mr: 2 }}>
+                      Non-formal courses are only available for students. Teachers can manage formal courses in their dashboard.
+                    </Typography>
+                    <Button variant="text" onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
+                  </Box>
+                </Alert>
+              )}
 
-            {!isTeacher && (
-              <>
-                <PageHeader
-                  title="Certificate Courses"
-                  subtitle="Flexible, skill-focused micro-courses and workshops"
-                  backgroundGradient="linear-gradient(135deg, rgba(56,189,248,0.95) 0%, rgba(45,212,191,0.9) 50%, rgba(34,197,94,0.9) 100%)"
-                  useSplitTextTitle
-                />
+              {!isTeacher && (
+                <>
+                  <PageHeader
+                    title="Certificate Courses"
+                    subtitle="Flexible, skill-focused micro-courses and workshops"
+                    backgroundGradient="linear-gradient(135deg, rgba(56,189,248,0.95) 0%, rgba(45,212,191,0.9) 50%, rgba(34,197,94,0.9) 100%)"
+                    useSplitTextTitle
+                  />
 
-                <Section delay={0.05}>
-                  <Card
-                    sx={{
-                      borderRadius: 3,
-                      boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
-                      border: "1px solid rgba(226,232,240,0.7)",
-                    }}
-                  >
-                    <CardContent>
-                      <TextField
-                        fullWidth
-                        placeholder="Search courses by skill or topic..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <SearchIcon />
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={{
-                          "& .MuiInputBase-root": {
-                            backgroundColor: "rgba(248,250,252,0.8)",
-                            borderRadius: 3,
-                          },
-                        }}
-                      />
-                    </CardContent>
-                  </Card>
-                </Section>
-
-                <Section title="Explore by Category" delay={0.1}>
-                  <Grid container spacing={2.5}>
-                    {CATEGORIES.map((cat) => (
-                      <Grid item xs={4} sm={4} md={2} key={cat.id}>
-                        <Card
-                          onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                  <Section delay={0.05}>
+                    <Card
+                      sx={{
+                        borderRadius: 3,
+                        boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
+                        border: "1px solid rgba(226,232,240,0.7)",
+                      }}
+                    >
+                      <CardContent>
+                        <TextField
+                          fullWidth
+                          placeholder="Search courses by skill or topic..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <SearchIcon />
+                              </InputAdornment>
+                            ),
+                          }}
                           sx={{
-                            cursor: "pointer",
-                            borderRadius: 3,
-                            border: selectedCategory === cat.id ? "2px solid rgba(14,165,233,0.7)" : "1px solid rgba(226,232,240,0.8)",
-                            background: selectedCategory === cat.id ? "rgba(14,165,233,0.08)" : "white",
-                            transition: "all 0.25s ease",
-                            boxShadow: selectedCategory === cat.id
-                              ? "0 12px 24px rgba(14, 165, 233, 0.18)"
-                              : "0 10px 18px rgba(15, 23, 42, 0.06)",
-                            "&:hover": {
-                              boxShadow: "0 16px 28px rgba(15, 23, 42, 0.12)",
-                              transform: "translateY(-4px)",
+                            "& .MuiInputBase-root": {
+                              backgroundColor: "rgba(248,250,252,0.8)",
+                              borderRadius: 3,
                             },
                           }}
-                        >
-                          <CardContent sx={{ textAlign: "center", py: 2.5 }}>
-                            <Box
-                              sx={{
-                                width: 44,
-                                height: 44,
-                                borderRadius: "50%",
-                                margin: "0 auto 8px",
-                                display: "grid",
-                                placeItems: "center",
-                                background: "rgba(15, 23, 42, 0.06)",
-                                color: "rgba(15, 23, 42, 0.75)",
-                              }}
-                            >
-                              {cat.icon}
-                            </Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                              {cat.label}
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Section>
-
-                <Box ref={resultsRef} sx={{ scrollMarginTop: 32 }}>
-                  <Section
-                    title={`All Courses${selectedCategory ? ` in ${categoryMap[selectedCategory]}` : ""}`}
-                    delay={0.12}
-                  >
-                    {filtered.length === 0 ? (
-                      <Card sx={{ p: 4, textAlign: "center", borderRadius: 3 }}>
-                        <Typography variant="body1" sx={{ color: "#64748b" }}>
-                          No courses found. Try a different search or category.
-                        </Typography>
-                      </Card>
-                    ) : (
-                      <Grid container spacing={3}>
-                        {filtered.map((course) => (
-                          <Grid item xs={12} sm={6} md={4} lg={3} key={course.id}>
-                            <Card
-                              onClick={() => handleCourseClick(course.id)}
-                              sx={courseCardSx}
-                            >
-                              <CardContent>
-                                <Box sx={{ fontSize: 30, mb: 1 }}>{course.thumbnail}</Box>
-                                <Typography variant="subtitle1" sx={titleSx}>
-                                  {course.title}
-                                </Typography>
-                                <Typography variant="body2" sx={descSx}>
-                                  {course.description}
-                                </Typography>
-                                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
-                                  <StarIcon sx={{ fontSize: 16, color: "#f59e0b" }} />
-                                  <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                                    {course.rating}
-                                  </Typography>
-                                  <Typography variant="caption" sx={{ color: "#94a3b8" }}>
-                                    ({course.reviews})
-                                  </Typography>
-                                </Stack>
-                                <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap" }}>
-                                  <Chip label={course.level} size="small" variant="outlined" sx={chipSx} />
-                                  <Chip label={course.duration} size="small" variant="outlined" sx={chipSx} />
-                                </Stack>
-                                <InteractiveHoverButton style={{ width: "100%" }}>
-                                  Explore
-                                </InteractiveHoverButton>
-                              </CardContent>
-                            </Card>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    )}
+                        />
+                      </CardContent>
+                    </Card>
                   </Section>
-                </Box>
 
-                <Section title="Recommended For You" delay={0.15}>
-                  <Grid container spacing={3}>
-                    {recommended.map((course) => (
-                      <Grid item xs={12} sm={6} md={4} key={course.id}>
-                        <Card
-                          onClick={() => handleCourseClick(course.id)}
-                          sx={courseCardSx}
-                        >
-                          <CardContent>
-                            <Box sx={{ fontSize: 30, mb: 1 }}>{course.thumbnail}</Box>
-                            <Typography variant="subtitle1" sx={titleSx}>
-                              {course.title}
-                            </Typography>
-                            <Typography variant="body2" sx={descSx}>
-                              {course.description}
-                            </Typography>
-                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
-                              <StarIcon sx={{ fontSize: 16, color: "#f59e0b" }} />
-                              <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                                {course.rating}
+                  <Section title="Explore by Category" delay={0.1}>
+                    <Grid container spacing={2.5}>
+                      {CATEGORIES.map((cat) => (
+                        <Grid item xs={4} sm={4} md={2} key={cat.id}>
+                          <Card
+                            onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                            sx={{
+                              cursor: "pointer",
+                              borderRadius: 3,
+                              border: selectedCategory === cat.id ? "2px solid rgba(14,165,233,0.7)" : "1px solid rgba(226,232,240,0.8)",
+                              background: selectedCategory === cat.id ? "rgba(14,165,233,0.08)" : "white",
+                              transition: "all 0.25s ease",
+                              boxShadow: selectedCategory === cat.id
+                                ? "0 12px 24px rgba(14, 165, 233, 0.18)"
+                                : "0 10px 18px rgba(15, 23, 42, 0.06)",
+                              "&:hover": {
+                                boxShadow: "0 16px 28px rgba(15, 23, 42, 0.12)",
+                                transform: "translateY(-4px)",
+                              },
+                            }}
+                          >
+                            <CardContent sx={{ textAlign: "center", py: 2.5 }}>
+                              <Box
+                                sx={{
+                                  width: 44,
+                                  height: 44,
+                                  borderRadius: "50%",
+                                  margin: "0 auto 8px",
+                                  display: "grid",
+                                  placeItems: "center",
+                                  background: "rgba(15, 23, 42, 0.06)",
+                                  color: "rgba(15, 23, 42, 0.75)",
+                                }}
+                              >
+                                {cat.icon}
+                              </Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                {cat.label}
                               </Typography>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Section>
+
+                  <Box ref={resultsRef} sx={{ scrollMarginTop: 32 }}>
+                    <Section
+                      title={`All Courses${selectedCategory ? ` in ${categoryMap[selectedCategory]}` : ""}`}
+                      delay={0.12}
+                    >
+                      {filtered.length === 0 ? (
+                        <Card sx={{ p: 4, textAlign: "center", borderRadius: 3 }}>
+                          <Typography variant="body1" sx={{ color: "#64748b" }}>
+                            No courses found. Try a different search or category.
+                          </Typography>
+                        </Card>
+                      ) : (
+                        <Grid container spacing={3}>
+                          {filtered.map((course) => (
+                            <Grid item xs={12} sm={6} md={4} lg={3} key={course.id}>
+                              <Card
+                                onClick={() => handleCourseClick(course.id)}
+                                sx={courseCardSx}
+                              >
+                                <CardContent>
+                                  <Box sx={{ fontSize: 30, mb: 1 }}>{course.thumbnail}</Box>
+                                  <Typography variant="subtitle1" sx={titleSx}>
+                                    {course.title}
+                                  </Typography>
+                                  <Typography variant="body2" sx={descSx}>
+                                    {course.description}
+                                  </Typography>
+                                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
+                                    <StarIcon sx={{ fontSize: 16, color: "#f59e0b" }} />
+                                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                                      {course.rating}
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ color: "#94a3b8" }}>
+                                      ({course.reviews})
+                                    </Typography>
+                                  </Stack>
+                                  <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap" }}>
+                                    <Chip label={course.level} size="small" variant="outlined" sx={chipSx} />
+                                    <Chip label={course.duration} size="small" variant="outlined" sx={chipSx} />
+                                  </Stack>
+                                  <InteractiveHoverButton style={{ width: "100%" }}>
+                                    Explore
+                                  </InteractiveHoverButton>
+                                </CardContent>
+                              </Card>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      )}
+                    </Section>
+                  </Box>
+
+                  <Section title="Recommended For You" delay={0.15}>
+                    <Grid container spacing={3}>
+                      {recommended.map((course) => (
+                        <Grid item xs={12} sm={6} md={4} key={course.id}>
+                          <Card
+                            onClick={() => handleCourseClick(course.id)}
+                            sx={courseCardSx}
+                          >
+                            <CardContent>
+                              <Box sx={{ fontSize: 30, mb: 1 }}>{course.thumbnail}</Box>
+                              <Typography variant="subtitle1" sx={titleSx}>
+                                {course.title}
+                              </Typography>
+                              <Typography variant="body2" sx={descSx}>
+                                {course.description}
+                              </Typography>
+                              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
+                                <StarIcon sx={{ fontSize: 16, color: "#f59e0b" }} />
+                                <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                                  {course.rating}
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: "#94a3b8" }}>
+                                  ({course.reviews})
+                                </Typography>
+                              </Stack>
+                              <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap" }}>
+                                <Chip label={course.level} size="small" variant="outlined" sx={chipSx} />
+                                <Chip label={course.duration} size="small" variant="outlined" sx={chipSx} />
+                              </Stack>
+                              <InteractiveHoverButton style={{ width: "100%" }}>
+                                View Course
+                              </InteractiveHoverButton>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Section>
+
+                  <Section title="Top-Rated Instructors" delay={0.2}>
+                    <Grid container spacing={2.5}>
+                      {topInstructors.map((instructor) => (
+                        <Grid item xs={6} md={3} key={instructor.name}>
+                          <Card
+                            sx={{
+                              borderRadius: 3,
+                              border: "1px solid rgba(226,232,240,0.9)",
+                              background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+                              boxShadow: "0 10px 22px rgba(15, 23, 42, 0.08)",
+                            }}
+                          >
+                            <CardContent sx={{ textAlign: "center" }}>
+                              <Box sx={{ fontSize: 30, mb: 1 }}>🙂</Box>
+                              <Typography variant="subtitle1" sx={titleSx}>
+                                {instructor.name}
+                              </Typography>
+                              <Stack direction="row" spacing={0.5} justifyContent="center" sx={{ mb: 1 }}>
+                                {[...Array(5)].map((_, i) => (
+                                  <StarIcon
+                                    key={i}
+                                    sx={{
+                                      fontSize: 16,
+                                      color: i < Math.floor(instructor.rating) ? "#f59e0b" : "#e2e8f0",
+                                    }}
+                                  />
+                                ))}
+                              </Stack>
                               <Typography variant="caption" sx={{ color: "#94a3b8" }}>
-                                ({course.reviews})
+                                {instructor.courseCount} courses
                               </Typography>
-                            </Stack>
-                            <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap" }}>
-                              <Chip label={course.level} size="small" variant="outlined" sx={chipSx} />
-                              <Chip label={course.duration} size="small" variant="outlined" sx={chipSx} />
-                            </Stack>
-                            <InteractiveHoverButton style={{ width: "100%" }}>
-                              View Course
-                            </InteractiveHoverButton>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Section>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Section>
 
-                <Section title="Top-Rated Instructors" delay={0.2}>
-                  <Grid container spacing={2.5}>
-                    {topInstructors.map((instructor) => (
-                      <Grid item xs={6} md={3} key={instructor.name}>
-                        <Card
-                          sx={{
-                            borderRadius: 3,
-                            border: "1px solid rgba(226,232,240,0.9)",
-                            background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
-                            boxShadow: "0 10px 22px rgba(15, 23, 42, 0.08)",
-                          }}
-                        >
-                          <CardContent sx={{ textAlign: "center" }}>
-                            <Box sx={{ fontSize: 30, mb: 1 }}>🙂</Box>
-                            <Typography variant="subtitle1" sx={titleSx}>
-                              {instructor.name}
-                            </Typography>
-                            <Stack direction="row" spacing={0.5} justifyContent="center" sx={{ mb: 1 }}>
-                              {[...Array(5)].map((_, i) => (
-                                <StarIcon
-                                  key={i}
-                                  sx={{
-                                    fontSize: 16,
-                                    color: i < Math.floor(instructor.rating) ? "#f59e0b" : "#e2e8f0",
-                                  }}
-                                />
-                              ))}
-                            </Stack>
-                            <Typography variant="caption" sx={{ color: "#94a3b8" }}>
-                              {instructor.courseCount} courses
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Section>
-
-                <Box sx={{ mt: 6, mb: 2 }}>
-                  <Typography variant="body2" sx={{ color: "#64748b", textAlign: "center", fontWeight: 500 }}>
-                    © 2025 EduSphere. All rights reserved.
-                  </Typography>
-                </Box>
-              </>
-            )}
-          </Container>
+                  <Box sx={{ mt: 6, mb: 2 }}>
+                    <Typography variant="body2" sx={{ color: "#64748b", textAlign: "center", fontWeight: 500 }}>
+                      © 2025 EduSphere. All rights reserved.
+                    </Typography>
+                  </Box>
+                </>
+              )}
+            </Container>
+          </Box>
         </Box>
       </Box>
       <Snackbar
