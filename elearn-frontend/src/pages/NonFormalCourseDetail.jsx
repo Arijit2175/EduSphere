@@ -385,7 +385,11 @@ export default function NonFormalCourseDetail() {
                     <Chip
                       label={course.duration}
                       icon={<AccessTimeIcon sx={{ color: "#ffffff" }} />}
-                      sx={{ color: "#ffffff", borderColor: "rgba(255,255,255,0.6)" }}
+                      sx={{
+                        color: "#ffffff",
+                        borderColor: "rgba(255,255,255,0.6)",
+                        "& .MuiChip-icon": { color: "#ffffff" },
+                      }}
                       variant="outlined"
                     />
                   </Stack>
