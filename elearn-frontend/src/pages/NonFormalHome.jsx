@@ -155,9 +155,9 @@ export default function NonFormalHome() {
           }}
         >
           <Grainient
-            color1="#10b981"
-            color2="#34d399"
-            color3="#ecfdf5"
+            color1="#a7f3d0"
+            color2="#6ee7b7"
+            color3="#f0fdf4"
             timeSpeed={1}
             colorBalance={0.1}
             warpStrength={1}
@@ -173,7 +173,7 @@ export default function NonFormalHome() {
             grainAnimated
             contrast={1.2}
             gamma={1}
-            saturation={1.1}
+            saturation={1}
             centerX={0}
             centerY={0}
             zoom={0.95}
@@ -186,7 +186,7 @@ export default function NonFormalHome() {
             zIndex: 1,
             pointerEvents: "none",
             backgroundImage:
-              "radial-gradient(circle at 12% 20%, rgba(16,185,129,0.25) 0%, rgba(16,185,129,0) 55%), radial-gradient(circle at 82% 18%, rgba(52,211,153,0.22) 0%, rgba(52,211,153,0) 52%), radial-gradient(circle at 70% 78%, rgba(5,150,105,0.2) 0%, rgba(5,150,105,0) 58%)",
+              "radial-gradient(circle at 12% 20%, rgba(16,185,129,0.38) 0%, rgba(16,185,129,0) 62%), radial-gradient(circle at 82% 18%, rgba(52,211,153,0.34) 0%, rgba(52,211,153,0) 60%), radial-gradient(circle at 70% 78%, rgba(5,150,105,0.32) 0%, rgba(5,150,105,0) 66%)",
           }}
         />
         <Box sx={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", minHeight: "100%" }}>
