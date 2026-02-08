@@ -25,6 +25,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import MagicBento from "../components/MagicBento";
+import ShinyText from "../components/ShinyText";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useNonFormal } from "../contexts/NonFormalContext";
@@ -350,7 +351,18 @@ export default function NonFormalCourseDetail() {
               <Grid container spacing={{ xs: 2, md: 5 }} alignItems="flex-start">
                 <Grid item xs={12} md={8}>
                   <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, color: "#ffffff" }}>
-                    {course.title}
+                    <ShinyText
+                      text={course.title}
+                      speed={2}
+                      delay={0}
+                      color="#e2e8f0"
+                      shineColor="#ffffff"
+                      spread={120}
+                      direction="left"
+                      yoyo
+                      pauseOnHover={false}
+                      disabled={false}
+                    />
                   </Typography>
                   <Typography variant="body1" sx={{ mb: 2, opacity: 0.9, color: "#ffffff" }}>
                     {course.description}
