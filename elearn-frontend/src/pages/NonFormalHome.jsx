@@ -20,6 +20,7 @@ import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
 import Grainient from "../components/Grainient";
+import GlassIcons from "../components/GlassIcons";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useNonFormal } from "../contexts/NonFormalContext";
@@ -41,6 +42,8 @@ const CATEGORIES = [
   { id: "personal", label: "Personal Growth", icon: <PsychologyIcon /> },
   { id: "entrepreneurship", label: "Entrepreneurship", icon: <LightbulbIcon /> },
 ];
+
+const GLASS_COLORS = ["blue", "purple", "orange", "indigo", "red", "green"];
 
 export default function NonFormalHome() {
   const { isOpen } = useSidebar();
@@ -123,6 +126,18 @@ export default function NonFormalHome() {
     });
     return Object.values(instructorMap).sort((a, b) => b.rating - a.rating).slice(0, 4);
   }, [courses]);
+
+  const glassItems = useMemo(
+    () =>
+      CATEGORIES.map((cat, index) => ({
+        id: cat.id,
+        icon: cat.icon,
+        color: GLASS_COLORS[index % GLASS_COLORS.length],
+        label: cat.label,
+        customClass: selectedCategory === cat.id ? "icon-btn--active" : "",
+      })),
+    [selectedCategory]
+  );
 
   const bubbles = useMemo(() => {
     const rand = (min, max) => Math.random() * (max - min) + min;
@@ -300,49 +315,15 @@ export default function NonFormalHome() {
                   </Section>
 
                   <Section title="Explore by Category" delay={0.1}>
-                    <Grid container spacing={2.5}>
-                      {CATEGORIES.map((cat) => (
-                        <Grid item xs={4} sm={4} md={2} key={cat.id}>
-                          <Card
-                            onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
-                            sx={{
-                              cursor: "pointer",
-                              borderRadius: 3,
-                              border: selectedCategory === cat.id ? "2px solid rgba(14,165,233,0.7)" : "1px solid rgba(226,232,240,0.8)",
-                              background: selectedCategory === cat.id ? "rgba(14,165,233,0.08)" : "white",
-                              transition: "all 0.25s ease",
-                              boxShadow: selectedCategory === cat.id
-                                ? "0 12px 24px rgba(14, 165, 233, 0.18)"
-                                : "0 10px 18px rgba(15, 23, 42, 0.06)",
-                              "&:hover": {
-                                boxShadow: "0 16px 28px rgba(15, 23, 42, 0.12)",
-                                transform: "translateY(-4px)",
-                              },
-                            }}
-                          >
-                            <CardContent sx={{ textAlign: "center", py: 2.5 }}>
-                              <Box
-                                sx={{
-                                  width: 44,
-                                  height: 44,
-                                  borderRadius: "50%",
-                                  margin: "0 auto 8px",
-                                  display: "grid",
-                                  placeItems: "center",
-                                  background: "rgba(15, 23, 42, 0.06)",
-                                  color: "rgba(15, 23, 42, 0.75)",
-                                }}
-                              >
-                                {cat.icon}
-                              </Box>
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                {cat.label}
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      ))}
-                    </Grid>
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      <GlassIcons
+                        items={glassItems}
+                        className="glass-icons-grid"
+                        onItemClick={(item) =>
+                          setSelectedCategory(selectedCategory === item.id ? null : item.id)
+                        }
+                      />
+                    </Box>
                   </Section>
 
                   <Box ref={resultsRef} sx={{ scrollMarginTop: 32 }}>
