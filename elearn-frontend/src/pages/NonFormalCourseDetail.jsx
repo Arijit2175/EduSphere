@@ -357,19 +357,32 @@ export default function NonFormalCourseDetail() {
                   </Typography>
                   <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                     <Stack direction="row" spacing={0.5} alignItems="center">
-                      <StarIcon />
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      <StarIcon sx={{ color: "#ffffff" }} />
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: "#ffffff" }}>
                         {course.rating}
                       </Typography>
-                      <Typography variant="body2">({course.reviews} reviews)</Typography>
+                      <Typography variant="body2" sx={{ color: "#ffffff" }}>
+                        ({course.reviews} reviews)
+                      </Typography>
                     </Stack>
-                    <Chip label={course.level} />
-                    <Chip label={course.duration} icon={<AccessTimeIcon />} />
+                    <Chip
+                      label={course.level}
+                      sx={{ color: "#ffffff", borderColor: "rgba(255,255,255,0.6)" }}
+                      variant="outlined"
+                    />
+                    <Chip
+                      label={course.duration}
+                      icon={<AccessTimeIcon sx={{ color: "#ffffff" }} />}
+                      sx={{ color: "#ffffff", borderColor: "rgba(255,255,255,0.6)" }}
+                      variant="outlined"
+                    />
                   </Stack>
                   {course.certificate && (
                     <Stack direction="row" spacing={1} alignItems="center">
-                      <VerifiedIcon />
-                      <Typography variant="body2">Certificate included</Typography>
+                      <VerifiedIcon sx={{ color: "#ffffff" }} />
+                      <Typography variant="body2" sx={{ color: "#ffffff" }}>
+                        Certificate included
+                      </Typography>
                     </Stack>
                   )}
                 </Grid>
