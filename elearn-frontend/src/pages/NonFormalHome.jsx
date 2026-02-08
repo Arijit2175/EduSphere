@@ -124,6 +124,19 @@ export default function NonFormalHome() {
     return Object.values(instructorMap).sort((a, b) => b.rating - a.rating).slice(0, 4);
   }, [courses]);
 
+  const bubbles = useMemo(() => {
+    const rand = (min, max) => Math.random() * (max - min) + min;
+    return Array.from({ length: 5 }, (_, i) => ({
+      id: `bubble-${i}`,
+      size: Math.round(rand(140, 260)),
+      left: `${Math.round(rand(6, 86))}%`,
+      top: `${Math.round(rand(8, 78))}%`,
+      delay: `${rand(0, 2.5).toFixed(2)}s`,
+      duration: `${rand(16, 28).toFixed(1)}s`,
+      floatDistance: Math.round(rand(18, 40)),
+    }));
+  }, []);
+
   const isTeacher = user?.role === "teacher";
 
   const handleCourseClick = (courseId) => {
@@ -191,7 +204,40 @@ export default function NonFormalHome() {
               "radial-gradient(circle at 12% 18%, rgba(16,185,129,0.55) 0%, rgba(16,185,129,0) 65%), radial-gradient(circle at 86% 20%, rgba(52,211,153,0.5) 0%, rgba(52,211,153,0) 62%), radial-gradient(circle at 70% 82%, rgba(5,150,105,0.48) 0%, rgba(5,150,105,0) 68%)",
           }}
         />
-        <Box sx={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", minHeight: "100%" }}>
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 2,
+            pointerEvents: "none",
+            "@keyframes floatBubble": {
+              "0%": { transform: "translate3d(0, 0, 0)" },
+              "50%": { transform: "translate3d(0, calc(-1 * var(--float)), 0)" },
+              "100%": { transform: "translate3d(0, var(--float), 0)" },
+            },
+          }}
+        >
+          {bubbles.map((bubble) => (
+            <Box
+              key={bubble.id}
+              sx={{
+                position: "absolute",
+                left: bubble.left,
+                top: bubble.top,
+                width: bubble.size,
+                height: bubble.size,
+                borderRadius: "50%",
+                background: "rgba(255, 255, 255, 0.35)",
+                border: "1px solid rgba(255, 255, 255, 0.45)",
+                boxShadow: "0 24px 50px rgba(15, 23, 42, 0.12)",
+                backdropFilter: "blur(2px)",
+                animation: `floatBubble ${bubble.duration} ease-in-out ${bubble.delay} infinite`,
+                "--float": `${bubble.floatDistance}px`,
+              }}
+            />
+          ))}
+        </Box>
+        <Box sx={{ position: "relative", zIndex: 3, display: "flex", flexDirection: "column", minHeight: "100%" }}>
           <Navbar />
           <Box
             sx={{
