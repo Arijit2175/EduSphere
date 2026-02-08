@@ -86,7 +86,9 @@ export default function PageHeader({
         zIndex: 9,
         background:
           backgroundGradient ||
-          "linear-gradient(135deg, rgba(14,165,233,0.95) 0%, rgba(20,184,166,0.9) 55%, rgba(34,197,94,0.9) 100%)",
+          "linear-gradient(120deg, rgba(14,165,233,0.95), rgba(45,212,191,0.95), rgba(34,197,94,0.95), rgba(59,130,246,0.95))",
+        backgroundSize: "240% 240%",
+        animation: "gradientShift 10s ease infinite",
         color: "#ffffff",
         py: { xs: 5, md: 7 },
         mb: 4,
