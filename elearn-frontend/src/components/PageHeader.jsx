@@ -1,9 +1,22 @@
 
 import { useRef } from "react";
 import { Box, Container, Typography, Avatar, IconButton, Tooltip } from "@mui/material";
+import { motion } from "framer-motion";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 
-export default function PageHeader({ title, subtitle, backgroundGradient, showAvatar, avatarSrc, userName, onAvatarChange }) {
+const MotionBox = motion(Box);
+
+export default function PageHeader({
+  title,
+  subtitle,
+  backgroundGradient,
+  showAvatar,
+  avatarSrc,
+  userName,
+  onAvatarChange,
+  disableAnimation = false,
+  children,
+}) {
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -30,89 +43,147 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
     }
   };
 
+  const motionProps = disableAnimation
+    ? {}
+    : {
+        initial: { opacity: 0, scale: 0.98 },
+        animate: { opacity: 1, scale: 1 },
+        transition: { duration: 0.6, ease: "easeOut" },
+      };
+
+  const titleMotion = disableAnimation
+    ? {}
+    : {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.5, delay: 0.2 },
+      };
+
+  const subtitleMotion = disableAnimation
+    ? {}
+    : {
+        initial: { opacity: 0, y: 12 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.5, delay: 0.35 },
+      };
+
+  const childrenMotion = disableAnimation
+    ? {}
+    : {
+        initial: { opacity: 0, y: 12 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.5, delay: 0.45 },
+      };
+
   return (
-    <Box
+    <MotionBox
+      component="header"
+      {...motionProps}
       sx={{
         position: "relative",
-        top: 0,
         zIndex: 9,
-        background: backgroundGradient || "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background:
+          backgroundGradient ||
+          "linear-gradient(135deg, rgba(14,165,233,0.95) 0%, rgba(20,184,166,0.9) 55%, rgba(34,197,94,0.9) 100%)",
         color: "#ffffff",
-        py: { xs: 6, md: 8 },
+        py: { xs: 5, md: 7 },
         mb: 4,
-        borderRadius: "20px",
+        borderRadius: { xs: 3, md: 4 },
         overflow: "hidden",
-        boxShadow: "0 10px 40px rgba(102, 126, 234, 0.3)",
-        transformOrigin: "top center",
-        mt: 0,
-        textAlign: "center",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%)",
-          pointerEvents: "none",
-        },
-        "&::after": {
-          content: '""',
-          position: "absolute",
-          top: "-50%",
-          right: "-10%",
-          width: "40%",
-          height: "200%",
-          background: "radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%)",
-          pointerEvents: "none",
-        },
+        boxShadow: "0 18px 48px rgba(14, 116, 144, 0.25)",
+        textAlign: showAvatar ? "left" : "center",
       }}
     >
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          background: "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18) 0%, transparent 45%)",
+          pointerEvents: "none",
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          width: 320,
+          height: 320,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.12)",
+          filter: "blur(60px)",
+          top: -120,
+          left: -80,
+          pointerEvents: "none",
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          width: 420,
+          height: 420,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.12)",
+          filter: "blur(70px)",
+          bottom: -180,
+          right: -120,
+          pointerEvents: "none",
+        }}
+      />
+
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { xs: "center", md: "center" },
+            justifyContent: "space-between",
+            gap: { xs: 3, md: 4 },
+            textAlign: showAvatar ? { xs: "center", md: "left" } : "center",
+          }}
+        >
           <Box sx={{ flex: 1 }}>
             <Typography
-              variant="h3"
+              component={motion.h1}
+              {...titleMotion}
               sx={{
                 fontWeight: 800,
                 mb: 1.5,
-                fontSize: { xs: "2rem", md: "3rem" },
-                background: "linear-gradient(to right, #ffffff 0%, #e0e7ff 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                textShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                fontSize: { xs: "2rem", md: "3.1rem" },
+                letterSpacing: "-0.03em",
+                textShadow: "0 6px 24px rgba(0,0,0,0.15)",
+                fontFamily: '"Playfair Display", "Times New Roman", serif',
               }}
             >
               {title}
             </Typography>
             {subtitle && (
               <Typography
-                variant="h6"
+                component={motion.p}
+                {...subtitleMotion}
                 sx={{
-                  fontWeight: 500,
-                  opacity: 0.95,
-                  fontSize: { xs: "1rem", md: "1.2rem" },
-                  color: "#e0e7ff",
+                  fontWeight: 600,
+                  opacity: 0.92,
+                  fontSize: { xs: "0.95rem", md: "1.15rem" },
+                  color: "rgba(255,255,255,0.9)",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
+                  justifyContent: showAvatar ? { xs: "center", md: "flex-start" } : "center",
                   gap: 1,
                   width: "100%",
-                  "&::before": {
-                    content: '"✨"',
-                    fontSize: "1.2rem",
-                  },
                 }}
               >
+                <span>✨</span>
                 {subtitle}
               </Typography>
             )}
+            {children && (
+              <Box component={motion.div} {...childrenMotion} sx={{ mt: 4 }}>
+                {children}
+              </Box>
+            )}
           </Box>
 
-          {/* Profile Avatar */}
           {showAvatar && (
-            <Box sx={{ position: "relative", mr: { xs: 6, md: 12 } }}>
+            <Box sx={{ position: "relative" }}>
               {onAvatarChange ? (
                 <>
                   <input
@@ -128,17 +199,17 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
                       alt={userName || "User"}
                       onClick={handleAvatarClick}
                       sx={{
-                        width: { xs: 80, md: 120 },
-                        height: { xs: 80, md: 120 },
-                        border: "4px solid rgba(255, 255, 255, 0.3)",
-                        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
+                        width: { xs: 84, md: 122 },
+                        height: { xs: 84, md: 122 },
+                        border: "4px solid rgba(255, 255, 255, 0.35)",
+                        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
                         fontSize: { xs: "2rem", md: "3rem" },
                         fontWeight: 800,
-                        background: "linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%)",
-                        color: "#667eea",
+                        background: "linear-gradient(135deg, #ffffff 0%, #dbeafe 100%)",
+                        color: "#0f172a",
                         cursor: "pointer",
                         "&:hover": {
-                          transform: "scale(1.05)",
+                          transform: "scale(1.04)",
                           transition: "transform 0.2s ease",
                         },
                       }}
@@ -151,12 +222,12 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
                       <IconButton
                         onClick={handleClearAvatar}
                         sx={{
-                          backgroundColor: "#e74c3c",
+                          backgroundColor: "#ef4444",
                           color: "white",
                           width: { xs: 28, md: 36 },
                           height: { xs: 28, md: 36 },
                           "&:hover": {
-                            backgroundColor: "#c0392b",
+                            backgroundColor: "#dc2626",
                           },
                           boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                           fontSize: { xs: "0.8rem", md: "1rem" },
@@ -169,12 +240,12 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
                     <IconButton
                       onClick={handleAvatarClick}
                       sx={{
-                        backgroundColor: "#667eea",
+                        backgroundColor: "rgba(15, 23, 42, 0.85)",
                         color: "white",
                         width: { xs: 28, md: 36 },
                         height: { xs: 28, md: 36 },
                         "&:hover": {
-                          backgroundColor: "#764ba2",
+                          backgroundColor: "rgba(15, 23, 42, 1)",
                         },
                         boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                       }}
@@ -188,14 +259,14 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
                   src={avatarSrc || ""}
                   alt={userName || "User"}
                   sx={{
-                    width: { xs: 80, md: 120 },
-                    height: { xs: 80, md: 120 },
-                    border: "4px solid rgba(255, 255, 255, 0.3)",
-                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
+                    width: { xs: 84, md: 122 },
+                    height: { xs: 84, md: 122 },
+                    border: "4px solid rgba(255, 255, 255, 0.35)",
+                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
                     fontSize: { xs: "2rem", md: "3rem" },
                     fontWeight: 800,
-                    background: "linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%)",
-                    color: "#667eea",
+                    background: "linear-gradient(135deg, #ffffff 0%, #dbeafe 100%)",
+                    color: "#0f172a",
                   }}
                 >
                   {!avatarSrc && userName ? userName.charAt(0).toUpperCase() : "U"}
@@ -205,6 +276,6 @@ export default function PageHeader({ title, subtitle, backgroundGradient, showAv
           )}
         </Box>
       </Container>
-    </Box>
+    </MotionBox>
   );
 }

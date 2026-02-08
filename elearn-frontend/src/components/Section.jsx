@@ -1,10 +1,13 @@
-import { Box, Container } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 
 const MotionBox = motion(Box);
 
 export default function Section({
   children,
+  title,
+  delay = 0,
+  className = "",
   background = "transparent",
   minHeight = "auto",
   py = { xs: 4, md: 6 },
@@ -13,23 +16,44 @@ export default function Section({
   noContainer = false,
   id = null,
   animated = true,
-  delay = 0,
 }) {
   const sectionVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 28 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6, delay },
+      transition: { duration: 0.6, delay, ease: "easeOut" },
     },
   };
 
-  const content = noContainer ? children : <Container maxWidth="lg">{children}</Container>;
+  const sectionContent = (
+    <>
+      {title && (
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 800,
+            mb: 2.5,
+            color: "#0f172a",
+            letterSpacing: "-0.02em",
+            fontFamily: '"Playfair Display", "Times New Roman", serif',
+          }}
+        >
+          {title}
+        </Typography>
+      )}
+      {children}
+    </>
+  );
+
+  const content = noContainer ? sectionContent : <Container maxWidth="lg">{sectionContent}</Container>;
 
   if (!animated) {
     return (
       <Box
+        component="section"
         id={id}
+        className={className}
         sx={{
           background,
           minHeight,
@@ -44,10 +68,12 @@ export default function Section({
 
   return (
     <MotionBox
+      component="section"
       id={id}
+      className={className}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: true, amount: 0.15 }}
       variants={sectionVariants}
       sx={{
         background,
