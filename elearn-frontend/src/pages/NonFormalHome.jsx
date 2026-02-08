@@ -142,7 +142,7 @@ export default function NonFormalHome() {
           backgroundImage: "url('/images/nonformalbg.gif')",
           backgroundPosition: "center top",
           backgroundRepeat: "no-repeat",
-          backgroundSize: "contain",
+          backgroundSize: "cover",
           backgroundColor: "#f8fafc",
           display: "flex",
           flexDirection: "column",
