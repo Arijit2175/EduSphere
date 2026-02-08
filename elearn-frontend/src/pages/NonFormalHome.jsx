@@ -140,7 +140,7 @@ export default function NonFormalHome() {
         sx={{
           flexGrow: 1,
           background:
-            "radial-gradient(circle at top, rgba(240,253,244,0.96) 0%, rgba(220,252,231,0.88) 35%, rgba(187,247,208,0.78) 60%, rgba(236,253,245,0.98) 100%)",
+            "radial-gradient(circle at top, rgba(16,185,129,0.24) 0%, rgba(34,197,94,0.22) 35%, rgba(5,150,105,0.2) 60%, rgba(16,185,129,0.18) 100%)",
           display: "flex",
           flexDirection: "column",
         }}
