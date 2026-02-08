@@ -150,7 +150,8 @@ export default function PageHeader({
                 fontSize: { xs: "2rem", md: "3.1rem" },
                 letterSpacing: "-0.03em",
                 textShadow: "0 6px 24px rgba(0,0,0,0.15)",
-                fontFamily: '"Playfair Display", "Times New Roman", serif',
+                color: "#ffffff",
+                fontFamily: '"Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
               }}
             >
               {title}
