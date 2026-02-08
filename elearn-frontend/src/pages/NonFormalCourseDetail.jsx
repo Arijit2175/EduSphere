@@ -355,7 +355,7 @@ export default function NonFormalCourseDetail() {
                       text={course.title}
                       speed={2}
                       delay={0}
-                      color="#e2e8f0"
+                      color="#c4b5fd"
                       shineColor="#ffffff"
                       spread={120}
                       direction="left"
