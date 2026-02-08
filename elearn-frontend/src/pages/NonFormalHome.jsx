@@ -139,11 +139,8 @@ export default function NonFormalHome() {
       <Box
         sx={{
           flexGrow: 1,
-          backgroundImage: "url('/images/nonformalbg.gif')",
-          backgroundPosition: "center top",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-          backgroundColor: "#f8fafc",
+          background:
+            "radial-gradient(circle at top, rgba(255,255,255,0.9) 0%, rgba(240,249,255,0.85) 35%, rgba(224,231,255,0.7) 60%, rgba(255,255,255,0.95) 100%)",
           display: "flex",
           flexDirection: "column",
         }}
