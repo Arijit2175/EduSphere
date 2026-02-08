@@ -140,9 +140,10 @@ export default function NonFormalHome() {
         sx={{
           flexGrow: 1,
           backgroundImage: "url('/images/nonformalbg.gif')",
-          backgroundPosition: "center",
+          backgroundPosition: "center top",
           backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
+          backgroundSize: "contain",
+          backgroundColor: "#f8fafc",
           display: "flex",
           flexDirection: "column",
         }}
