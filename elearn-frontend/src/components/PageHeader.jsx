@@ -132,6 +132,48 @@ export default function PageHeader({
           pointerEvents: "none",
         }}
       />
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+        }}
+      >
+        {["12%", "28%", "46%", "62%", "78%"].map((left, index) => (
+          <Box
+            key={left}
+            sx={{
+              position: "absolute",
+              width: { xs: 28, md: 44 },
+              height: { xs: 28, md: 44 },
+              borderRadius: "50%",
+              left,
+              top: { xs: 18 + index * 10, md: 16 + index * 8 },
+              background: "rgba(255,255,255,0.2)",
+              boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
+              animation: `bubbleFloat ${6 + index}s ease-in-out infinite`,
+              opacity: 0.65,
+            }}
+          />
+        ))}
+        {["18%", "40%", "70%"].map((right, index) => (
+          <Box
+            key={right}
+            sx={{
+              position: "absolute",
+              width: { xs: 18, md: 32 },
+              height: { xs: 18, md: 32 },
+              borderRadius: "50%",
+              right,
+              bottom: { xs: 12 + index * 14, md: 20 + index * 18 },
+              background: "rgba(255,255,255,0.16)",
+              boxShadow: "0 8px 22px rgba(15, 23, 42, 0.1)",
+              animation: `bubbleFloat ${7 + index * 1.5}s ease-in-out infinite`,
+              opacity: 0.6,
+            }}
+          />
+        ))}
+      </Box>
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
         <Box
