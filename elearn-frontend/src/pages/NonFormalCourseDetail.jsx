@@ -349,10 +349,10 @@ export default function NonFormalCourseDetail() {
             <CardContent sx={{ p: 4 }}>
               <Grid container spacing={{ xs: 2, md: 5 }} alignItems="flex-start">
                 <Grid item xs={12} md={8}>
-                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, color: "#ffffff" }}>
                     {course.title}
                   </Typography>
-                  <Typography variant="body1" sx={{ mb: 2, opacity: 0.9 }}>
+                  <Typography variant="body1" sx={{ mb: 2, opacity: 0.9, color: "#ffffff" }}>
                     {course.description}
                   </Typography>
                   <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
