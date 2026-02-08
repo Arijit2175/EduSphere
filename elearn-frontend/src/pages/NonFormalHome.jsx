@@ -30,6 +30,7 @@ import TranslateIcon from "@mui/icons-material/Translate";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import StarIcon from "@mui/icons-material/Star";
+import { InteractiveHoverButton } from "../components/ui/interactive-hover-button";
 
 const CATEGORIES = [
   { id: "tech", label: "Tech Skills", icon: <CodeIcon /> },
@@ -291,23 +292,9 @@ export default function NonFormalHome() {
                                   <Chip label={course.level} size="small" variant="outlined" sx={chipSx} />
                                   <Chip label={course.duration} size="small" variant="outlined" sx={chipSx} />
                                 </Stack>
-                                <Button
-                                  fullWidth
-                                  variant="contained"
-                                  size="small"
-                                  sx={{
-                                    textTransform: "none",
-                                    fontWeight: 700,
-                                    borderRadius: 2.5,
-                                    background: "linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%)",
-                                    boxShadow: "0 8px 18px rgba(14, 165, 233, 0.25)",
-                                    "&:hover": {
-                                      background: "linear-gradient(135deg, #0284c7 0%, #16a34a 100%)",
-                                    },
-                                  }}
-                                >
+                                <InteractiveHoverButton style={{ width: "100%" }}>
                                   Explore
-                                </Button>
+                                </InteractiveHoverButton>
                               </CardContent>
                             </Card>
                           </Grid>
@@ -346,23 +333,9 @@ export default function NonFormalHome() {
                               <Chip label={course.level} size="small" variant="outlined" sx={chipSx} />
                               <Chip label={course.duration} size="small" variant="outlined" sx={chipSx} />
                             </Stack>
-                            <Button
-                              fullWidth
-                              variant="contained"
-                              size="small"
-                              sx={{
-                                textTransform: "none",
-                                fontWeight: 700,
-                                borderRadius: 2.5,
-                                background: "linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%)",
-                                boxShadow: "0 8px 18px rgba(14, 165, 233, 0.25)",
-                                "&:hover": {
-                                  background: "linear-gradient(135deg, #0284c7 0%, #16a34a 100%)",
-                                },
-                              }}
-                            >
+                            <InteractiveHoverButton style={{ width: "100%" }}>
                               View Course
-                            </Button>
+                            </InteractiveHoverButton>
                           </CardContent>
                         </Card>
                       </Grid>
