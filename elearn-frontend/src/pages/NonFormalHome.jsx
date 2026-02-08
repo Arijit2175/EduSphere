@@ -109,7 +109,7 @@ export default function NonFormalHome() {
   }, [searchQuery, selectedCategory, courses]);
 
   const recommended = useMemo(() => {
-    return [...courses].sort(() => Math.random() - 0.5).slice(0, 4);
+    return [...courses].sort(() => Math.random() - 0.5).slice(0, 3);
   }, [courses]);
 
   const topInstructors = useMemo(() => {
@@ -307,7 +307,7 @@ export default function NonFormalHome() {
                 <Section title="Recommended For You" delay={0.15}>
                   <Grid container spacing={3}>
                     {recommended.map((course) => (
-                      <Grid item xs={12} sm={6} md={3} key={course.id}>
+                      <Grid item xs={12} sm={6} md={4} key={course.id}>
                         <Card
                           onClick={() => handleCourseClick(course.id)}
                           sx={courseCardSx}
