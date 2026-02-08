@@ -35,8 +35,8 @@ export default function Section({
             fontWeight: 800,
             mb: 2.5,
             color: "#0f172a",
-            letterSpacing: "-0.02em",
-            fontFamily: '"Playfair Display", "Times New Roman", serif',
+            letterSpacing: "-0.01em",
+            fontFamily: '"Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
           }}
         >
           {title}
