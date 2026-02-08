@@ -377,14 +377,12 @@ export default function NonFormalCourseDetail() {
                       variant="outlined"
                     />
                   </Stack>
-                  {course.certificate && (
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <VerifiedIcon sx={{ color: "#ffffff" }} />
-                      <Typography variant="body2" sx={{ color: "#ffffff" }}>
-                        Certificate included
-                      </Typography>
-                    </Stack>
-                  )}
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <VerifiedIcon sx={{ color: "#ffffff" }} />
+                    <Typography variant="body2" sx={{ color: "#ffffff" }}>
+                      Certificate included
+                    </Typography>
+                  </Stack>
                 </Grid>
                 <Grid
                   item 
