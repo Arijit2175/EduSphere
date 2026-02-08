@@ -144,7 +144,7 @@ export default function NonFormalHome() {
           flexDirection: "column",
           position: "relative",
           overflow: "hidden",
-          backgroundColor: "#ecfdf5",
+          backgroundColor: "#f0fdf4",
         }}
       >
         <Box
@@ -155,9 +155,9 @@ export default function NonFormalHome() {
           }}
         >
           <Grainient
-            color1="#059669"
-            color2="#16a34a"
-            color3="#dcfce7"
+            color1="#10b981"
+            color2="#34d399"
+            color3="#ecfdf5"
             timeSpeed={1}
             colorBalance={0.1}
             warpStrength={1}
@@ -168,7 +168,7 @@ export default function NonFormalHome() {
             blendSoftness={0.06}
             rotationAmount={520}
             noiseScale={2}
-            grainAmount={0.08}
+            grainAmount={0.03}
             grainScale={2}
             grainAnimated
             contrast={1.2}
@@ -184,8 +184,8 @@ export default function NonFormalHome() {
             position: "absolute",
             left: 0,
             bottom: 0,
-            width: { xs: 180, sm: 220, md: 260 },
-            height: { xs: 120, sm: 150, md: 180 },
+            width: { xs: 280, sm: 340, md: 420 },
+            height: { xs: 190, sm: 230, md: 280 },
             backgroundImage: "url('/images/nonformalbg.gif')",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "left bottom",
