@@ -26,6 +26,7 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import MagicBento from "../components/MagicBento";
 import ShinyText from "../components/ShinyText";
+import DottedButton from "../components/DottedButton";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useNonFormal } from "../contexts/NonFormalContext";
@@ -353,14 +354,7 @@ export default function NonFormalCourseDetail() {
               alignItems: "center",
             }}
           >
-            <Button
-              variant="text"
-              startIcon={<ArrowBackIosNewIcon />}
-              onClick={() => navigate("/nonformal")}
-              sx={{ color: "#374151", textTransform: "none", px: 0, fontWeight: 600 }}
-            >
-              Back
-            </Button>
+            <DottedButton onClick={() => navigate("/nonformal")}>Back</DottedButton>
           </Box>
           {/* Hero Section */}
           <Card
