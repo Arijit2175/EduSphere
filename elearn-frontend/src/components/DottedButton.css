@@ -1,11 +1,11 @@
 .dotted-button {
   border-radius: 16px;
-  border: 2px dashed #0f172a;
-  background: #ffffff;
+  border: 2px dashed #ffffff;
+  background: #0f172a;
   padding: 12px 24px;
   font-weight: 700;
   text-transform: uppercase;
-  color: #0f172a;
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -13,7 +13,7 @@
 .dotted-button:hover {
   transform: translate(-4px, -4px);
   border-radius: 6px;
-  box-shadow: 4px 4px 0 #0f172a;
+  box-shadow: 4px 4px 0 #ffffff;
 }
 
 .dotted-button:active {
