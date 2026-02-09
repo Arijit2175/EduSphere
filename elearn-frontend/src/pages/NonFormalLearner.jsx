@@ -380,10 +380,9 @@ export default function NonFormalLearner() {
             </Typography>
           </Box>
 
-          <Container maxWidth={false} sx={{ py: 3, px: { xs: 1.5, md: 2 } }}>
-            <Box sx={{ maxWidth: 2200, mx: "auto" }}>
-              <Grid container spacing={2} justifyContent="center">
-                <Grid item xs={12} lg={11} xl={10}>
+          <Container maxWidth={false} sx={{ py: 3, px: { xs: 2, md: 4 } }}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} lg={8}>
                   <Box sx={{ borderRadius: 3, overflow: "hidden", bgcolor: cardBg, border: `1px solid ${borderColor}` }}>
                   <Box sx={{ position: "relative", pb: "56.25%", height: 0, bgcolor: "#000" }}>
                     <iframe
@@ -493,7 +492,7 @@ export default function NonFormalLearner() {
                 </Box>
               </Grid>
 
-                <Grid item xs={12} lg={1} xl={2}>
+                <Grid item xs={12} lg={4}>
                   <Box
                     sx={{
                       borderRadius: 3,
@@ -649,7 +648,6 @@ export default function NonFormalLearner() {
                   </Box>
                 </Grid>
               </Grid>
-            </Box>
           </Container>
 
           <AssessmentDialog
