@@ -27,6 +27,7 @@ import Sidebar from "../components/Sidebar";
 import MagicBento from "../components/MagicBento";
 import ShinyText from "../components/ShinyText";
 import DottedButton from "../components/DottedButton";
+import Aurora from "../components/Aurora";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useNonFormal } from "../contexts/NonFormalContext";
@@ -318,17 +319,35 @@ export default function NonFormalCourseDetail() {
       <Box
         sx={{
           flexGrow: 1,
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
           display: "flex",
           flexDirection: "column",
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#f8fafc",
         }}
       >
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 0,
+          }}
+        >
+          <Aurora
+            colorStops={["#811aff", "#fb4b4b", "#f3f2f7"]}
+            blend={0.38}
+            amplitude={1.0}
+            speed={1.2}
+          />
+        </Box>
         <Navbar />
         <Box
           sx={{
             flexGrow: 1,
             ml: { xs: 0, md: isOpen ? 25 : 8.75 },
             transition: "margin-left 0.3s ease",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           <Container maxWidth="lg" sx={{ mt: 4 }}>
