@@ -322,7 +322,7 @@ export default function NonFormalCourseDetail() {
           flexDirection: "column",
           position: "relative",
           overflow: "hidden",
-          background: "linear-gradient(180deg, #000000 0%, #000000 70%, #ffffff 100%)",
+          background: "linear-gradient(180deg, #0f0f1a 0%, #0f0f1a 70%, #ffffff 100%)",
         }}
       >
         <Navbar />
