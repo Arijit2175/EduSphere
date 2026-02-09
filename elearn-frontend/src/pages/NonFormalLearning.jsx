@@ -17,11 +17,14 @@ export default function NonFormalLearning() {
   const { courses, getEnrolledCourses, getCourseProgress, certificates, resetAllData, isLoading } = useNonFormal();
   const navigate = useNavigate();
 
+  const getCertUserId = (cert) => cert?.user_id ?? cert?.userId ?? cert?.student_id;
+  const getCertCourseId = (cert) => cert?.course_id ?? cert?.courseId;
+
   const enrolledCourses = getEnrolledCourses(user?.id);
-  const userCertificates = certificates.filter((c) => c.userId === user?.id);
+  const userCertificates = certificates.filter((c) => getCertUserId(c) === user?.id);
   
   const inProgressCourses = enrolledCourses.filter(
-    (course) => !userCertificates.some((cert) => cert.courseId === course.id)
+    (course) => !userCertificates.some((cert) => String(getCertCourseId(cert)) === String(course.id))
   );
 
   if (isLoading) {
@@ -154,7 +157,9 @@ export default function NonFormalLearning() {
                     const progressPercent = progress?.completedLessons
                       ? (progress.completedLessons.length / (course.lessons?.length || 1)) * 100
                       : 0;
-                    const hasCertificate = userCertificates.some((c) => c.courseId === course.id);
+                    const hasCertificate = userCertificates.some(
+                      (c) => String(getCertCourseId(c)) === String(course.id)
+                    );
 
                     return (
                       <Grid item xs={12} md={6} key={course.id}>

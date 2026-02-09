@@ -63,11 +63,16 @@ export default function NonFormalHome() {
     }
   }, [searchQuery, selectedCategory, isFiltering]);
 
+  const getCertUserId = (cert) => cert?.user_id ?? cert?.userId ?? cert?.student_id;
+  const getCertCourseId = (cert) => cert?.course_id ?? cert?.courseId;
+
   // Build a set of certified course IDs for the current user
-  const certifiedIds = useMemo(
-    () => new Set((certificates || []).filter(c => c.student_id === user?.id).map(c => c.course_id)),
-    [certificates, user?.id]
-  );
+  const certifiedIds = useMemo(() => {
+    const ids = (certificates || [])
+      .filter((c) => getCertUserId(c) === user?.id)
+      .map((c) => String(getCertCourseId(c)));
+    return new Set(ids);
+  }, [certificates, user?.id]);
 
   const categoryMap = {
     tech: "Tech Skills",
@@ -155,7 +160,7 @@ export default function NonFormalHome() {
   const isTeacher = user?.role === "teacher";
 
   const handleCourseClick = (courseId) => {
-    if (certifiedIds.has(courseId)) {
+    if (certifiedIds.has(String(courseId))) {
       setSnackbarOpen(true);
     } else {
       navigate(`/nonformal/course/${courseId}`);
@@ -345,7 +350,15 @@ export default function NonFormalHome() {
                                 onClick={() => handleCourseClick(course.id)}
                                 sx={courseCardSx}
                               >
-                                <CardContent>
+                                  <CardContent sx={{ position: "relative" }}>
+                                    {certifiedIds.has(String(course.id)) && (
+                                      <Chip
+                                        label="Certified"
+                                        color="success"
+                                        size="small"
+                                        sx={{ position: "absolute", top: 12, right: 12 }}
+                                      />
+                                    )}
                                   <Box sx={{ fontSize: 30, mb: 1 }}>{course.thumbnail}</Box>
                                   <Typography variant="subtitle1" sx={titleSx}>
                                     {course.title}
@@ -386,7 +399,15 @@ export default function NonFormalHome() {
                             onClick={() => handleCourseClick(course.id)}
                             sx={courseCardSx}
                           >
-                            <CardContent>
+                                <CardContent sx={{ position: "relative" }}>
+                                  {certifiedIds.has(String(course.id)) && (
+                                    <Chip
+                                      label="Certified"
+                                      color="success"
+                                      size="small"
+                                      sx={{ position: "absolute", top: 12, right: 12 }}
+                                    />
+                                  )}
                               <Box sx={{ fontSize: 30, mb: 1 }}>{course.thumbnail}</Box>
                               <Typography variant="subtitle1" sx={titleSx}>
                                 {course.title}
