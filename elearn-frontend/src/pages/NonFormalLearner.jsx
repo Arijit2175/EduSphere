@@ -365,7 +365,7 @@ export default function NonFormalLearner() {
               height: 56,
               display: "flex",
               alignItems: "center",
-              px: 2,
+              px: { xs: 2, md: 4 },
             }}
           >
             <Button
@@ -375,16 +375,16 @@ export default function NonFormalLearner() {
             >
               Back
             </Button>
-            <Box sx={{ width: 1, height: 20, bgcolor: borderColor, mx: 1.5 }} />
-            <Typography variant="subtitle2" fontWeight={600} noWrap>
+            <Typography variant="subtitle2" fontWeight={600} noWrap sx={{ ml: 2 }}>
               {course.title}
             </Typography>
           </Box>
 
-          <Container maxWidth="xl" sx={{ py: 2, px: { xs: 1, md: 2 } }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} lg={8} xl={9}>
-                <Box sx={{ borderRadius: 3, overflow: "hidden", bgcolor: cardBg, border: `1px solid ${borderColor}` }}>
+          <Container maxWidth={false} sx={{ py: 3, px: { xs: 1.5, md: 4 } }}>
+            <Box sx={{ maxWidth: 1500, mx: "auto" }}>
+              <Grid container spacing={3} justifyContent="center">
+                <Grid item xs={12} lg={8} xl={9}>
+                  <Box sx={{ borderRadius: 3, overflow: "hidden", bgcolor: cardBg, border: `1px solid ${borderColor}` }}>
                   <Box sx={{ position: "relative", pb: "56.25%", height: 0, bgcolor: "#000" }}>
                     <iframe
                       style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
@@ -493,16 +493,16 @@ export default function NonFormalLearner() {
                 </Box>
               </Grid>
 
-              <Grid item xs={12} lg={4} xl={3}>
-                <Box
-                  sx={{
-                    borderRadius: 3,
-                    bgcolor: cardBg,
-                    border: `1px solid ${borderColor}`,
-                    position: { lg: "sticky" },
-                    top: { lg: 72 },
-                  }}
-                >
+                <Grid item xs={12} lg={4} xl={3}>
+                  <Box
+                    sx={{
+                      borderRadius: 3,
+                      bgcolor: cardBg,
+                      border: `1px solid ${borderColor}`,
+                      position: { lg: "sticky" },
+                      top: { lg: 72 },
+                    }}
+                  >
                   <Box sx={{ p: 2, borderBottom: `1px solid ${borderColor}` }}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
                       <Stack direction="row" spacing={1} alignItems="center">
@@ -646,9 +646,10 @@ export default function NonFormalLearner() {
                       </Button>
                     </Box>
                   )}
-                </Box>
+                  </Box>
+                </Grid>
               </Grid>
-            </Grid>
+            </Box>
           </Container>
 
           <AssessmentDialog
