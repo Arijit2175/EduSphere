@@ -323,7 +323,7 @@ export default function NonFormalCourseDetail() {
           flexDirection: "column",
           position: "relative",
           overflow: "hidden",
-          backgroundColor: "#f8fafc",
+          backgroundColor: "#000000",
         }}
       >
         <Box
@@ -331,6 +331,7 @@ export default function NonFormalCourseDetail() {
             position: "absolute",
             inset: 0,
             zIndex: 0,
+            opacity: 0.9,
           }}
         >
           <Aurora
@@ -340,6 +341,15 @@ export default function NonFormalCourseDetail() {
             speed={1.2}
           />
         </Box>
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 0,
+            background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.9) 100%)",
+            pointerEvents: "none",
+          }}
+        />
         <Navbar />
         <Box
           sx={{
