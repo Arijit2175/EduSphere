@@ -331,13 +331,15 @@ export default function NonFormalCourseDetail() {
             position: "absolute",
             inset: 0,
             zIndex: 0,
-            opacity: 0.9,
+            opacity: 1,
+            mixBlendMode: "screen",
+            pointerEvents: "none",
           }}
         >
           <Aurora
             colorStops={["#811aff", "#fb4b4b", "#f3f2f7"]}
-            blend={0.38}
-            amplitude={1.0}
+            blend={0.7}
+            amplitude={1.4}
             speed={1.2}
           />
         </Box>
@@ -346,7 +348,7 @@ export default function NonFormalCourseDetail() {
             position: "absolute",
             inset: 0,
             zIndex: 0,
-            background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.9) 100%)",
+            background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 55%, rgba(0,0,0,0.75) 100%)",
             pointerEvents: "none",
           }}
         />
