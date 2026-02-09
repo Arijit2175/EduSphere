@@ -361,7 +361,6 @@ export default function NonFormalLearner() {
               zIndex: 40,
               bgcolor: "rgba(15,15,26,0.8)",
               backdropFilter: "blur(12px)",
-              borderBottom: `1px solid ${borderColor}`,
               height: 56,
               display: "flex",
               alignItems: "center",
@@ -371,7 +370,29 @@ export default function NonFormalLearner() {
             <Button
               startIcon={<ChevronLeftIcon />}
               onClick={() => navigate("/dashboard")}
-              sx={{ color: "rgba(255,255,255,0.5)", textTransform: "none", fontSize: 14 }}
+              sx={{
+                borderRadius: "16px",
+                border: "2px dashed #e53935",
+                bgcolor: "transparent",
+                px: 2,
+                py: 0.75,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                color: "#fff",
+                fontSize: 12,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  transform: "translate(-4px, -4px)",
+                  borderRadius: "6px",
+                  boxShadow: "4px 4px 0 #e53935",
+                  bgcolor: "transparent",
+                },
+                "&:active": {
+                  transform: "translate(0, 0)",
+                  borderRadius: "16px",
+                  boxShadow: "none",
+                },
+              }}
             >
               Back
             </Button>
