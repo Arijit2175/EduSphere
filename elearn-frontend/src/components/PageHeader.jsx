@@ -17,6 +17,7 @@ export default function PageHeader({
   onAvatarChange,
   disableAnimation = false,
   useSplitTextTitle = false,
+  titleComponent,
   children,
 }) {
   const fileInputRef = useRef(null);
@@ -173,7 +174,9 @@ export default function PageHeader({
           }}
         >
           <Box sx={{ flex: 1 }}>
-            {useSplitTextTitle && !disableAnimation ? (
+            {titleComponent ? (
+              <Box sx={{ mb: 1.5 }}>{titleComponent}</Box>
+            ) : useSplitTextTitle && !disableAnimation ? (
               <SplitText
                 text={title}
                 delay={50}

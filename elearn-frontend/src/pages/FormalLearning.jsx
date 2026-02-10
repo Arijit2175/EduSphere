@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
+import BlurText from "../components/BlurText";
 import Section from "../components/Section";
 import SectionTitle from "../components/SectionTitle";
 import CourseCardAdvanced from "../components/CourseCardAdvanced";
@@ -191,6 +192,24 @@ export default function FormalLearning() {
                   subtitle="Structured, curriculum-driven courses for students"
                   backgroundGradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                   disableAnimation
+                  titleComponent={
+                    <BlurText
+                      text="Classes Catalog"
+                      delay={140}
+                      animateBy="words"
+                      direction="top"
+                      className="page-header-title"
+                      style={{
+                        fontWeight: 800,
+                        marginBottom: "12px",
+                        fontSize: "clamp(2rem, 3.4vw, 3.1rem)",
+                        letterSpacing: "-0.03em",
+                        textShadow: "0 6px 24px rgba(0,0,0,0.15)",
+                        color: "#ffffff",
+                        fontFamily: '"Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+                      }}
+                    />
+                  }
                 />
               </Section>
               <Section background="transparent" py={{ xs: 4, md: 6 }}>
