@@ -49,6 +49,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   const [openGradesDialog, setOpenGradesDialog] = useState({ open: false, course: null, enrollment: null });
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [openClassesDialog, setOpenClassesDialog] = useState({ open: false, course: null });
+  const [openMaterialsDialog, setOpenMaterialsDialog] = useState({ open: false, course: null });
   // Add state for assignments dialog
   const [openAssignmentsDialog, setOpenAssignmentsDialog] = useState({ open: false, course: null, enrollment: null });
 
@@ -219,32 +220,26 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                           <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5, color: "#1f2937", fontSize: "0.9rem" }}>
                             📚 Materials ({course.materials.length})
                           </Typography>
-                          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                            {course.materials.slice(0, 2).map((material) => (
-                              <Button
-                                key={material.id}
-                                fullWidth
-                                variant="outlined"
-                                size="small"
-                                startIcon={<Download />}
-                                href={material.url}
-                                download={material.name}
-                                sx={{
-                                  justifyContent: "flex-start",
-                                  textTransform: "none",
-                                  borderColor: "#e5e7eb",
-                                  color: "#667eea",
-                                  fontWeight: 600,
-                                  "&:hover": {
-                                    borderColor: "#667eea",
-                                    background: "#667eea10"
-                                  }
-                                }}
-                              >
-                                {material.name.length > 15 ? material.name.substring(0, 15) + "..." : material.name}
-                              </Button>
-                            ))}
-                          </Box>
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            size="small"
+                            startIcon={<Download />}
+                            onClick={() => setOpenMaterialsDialog({ open: true, course })}
+                            sx={{
+                              justifyContent: "flex-start",
+                              textTransform: "none",
+                              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                              color: "white",
+                              fontWeight: 600,
+                              mt: 1,
+                              '&:hover': {
+                                background: "linear-gradient(135deg, #5568d3 0%, #63398e 100%)"
+                              }
+                            }}
+                          >
+                            View All Materials
+                          </Button>
                         </Box>
                       )}
 
@@ -279,6 +274,52 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                           </Box>
                         </Box>
                       )}
+      {/* All Materials Dialog */}
+      <Dialog open={openMaterialsDialog.open} onClose={() => setOpenMaterialsDialog({ open: false, course: null })} maxWidth="sm" fullWidth>
+        <DialogTitle>All Course Materials</DialogTitle>
+        <DialogContent>
+          {openMaterialsDialog.course && openMaterialsDialog.course.materials && openMaterialsDialog.course.materials.length > 0 ? (
+            <Stack spacing={2}>
+              {openMaterialsDialog.course.materials.map((material, idx) => {
+                const label = material.name || material.title || `Material ${idx + 1}`;
+                const url = material.url || material.link || material.fileUrl;
+                return (
+                  <Box key={material.id || idx} sx={{ p: 1.5, borderRadius: 2, border: "1px solid #e5e7eb", background: "#f9fafb" }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#1f2937" }}>
+                      {label}
+                    </Typography>
+                    {url ? (
+                      <Button
+                        fullWidth
+                        size="small"
+                        variant="contained"
+                        href={url}
+                        download
+                        startIcon={<Download />}
+                        sx={{ mt: 0.5, textTransform: "none", background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", fontWeight: 700, fontSize: "0.75rem" }}
+                      >
+                        Download
+                      </Button>
+                    ) : (
+                      <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mt: 0.5 }}>
+                        No download link available
+                      </Typography>
+                    )}
+                  </Box>
+                );
+              })}
+            </Stack>
+          ) : (
+            <Typography variant="body2" sx={{ color: "#6b7280" }}>
+              No materials available.
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenMaterialsDialog({ open: false, course: null })} variant="contained">Close</Button>
+        </DialogActions>
+      </Dialog>
+
       {/* All Classes Dialog */}
       <Dialog open={openClassesDialog.open} onClose={() => setOpenClassesDialog({ open: false, course: null })} maxWidth="sm" fullWidth>
         <DialogTitle>All Scheduled Classes</DialogTitle>
