@@ -281,7 +281,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
           {openMaterialsDialog.course && openMaterialsDialog.course.materials && openMaterialsDialog.course.materials.length > 0 ? (
             <Stack spacing={2}>
               {openMaterialsDialog.course.materials.map((material, idx) => {
-                const label = material.name || material.title || `Material ${idx + 1}`;
+                const label = material.name || material.title || material.file_name || material.filename || `Material ${idx + 1}`;
                 const url = material.url || material.link || material.fileUrl;
                 return (
                   <Box key={material.id || idx} sx={{ p: 1.5, borderRadius: 2, border: "1px solid #e5e7eb", background: "#f9fafb" }}>
@@ -294,11 +294,11 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                         size="small"
                         variant="contained"
                         href={url}
-                        download
+                        download={label}
                         startIcon={<Download />}
                         sx={{ mt: 0.5, textTransform: "none", background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", fontWeight: 700, fontSize: "0.75rem" }}
                       >
-                        Download
+                        Download {label}
                       </Button>
                     ) : (
                       <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mt: 0.5 }}>
