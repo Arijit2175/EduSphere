@@ -5,6 +5,7 @@ import { useFormalEducation } from "../contexts/FormalEducationContext";
 import { useAuth } from "../contexts/AuthContext";
 import Section from "./Section";
 import SectionTitle from "./SectionTitle";
+import TextType from "./TextType";
 import { Download, Description, Quiz, CheckCircle, CalendarMonth, VideoCall, Link } from "@mui/icons-material";
 
 // Helper function to get grade color
@@ -106,6 +107,19 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   return (
     <Box>
       <Section background="transparent">
+        <Box sx={{ mb: 4, mt: 1, textAlign: 'center' }}>
+          <TextType
+            text={[`Welcome back, ${user?.first_name || "Learner"}!`, "Have fun learning!"]}
+            typingSpeed={45}
+            deletingSpeed={30}
+            pauseDuration={1800}
+            loop
+            showCursor
+            className="formal-banner-type"
+            as="h2"
+            style={{ fontWeight: 700, fontSize: '2rem', color: '#6c47c6', letterSpacing: 1 }}
+          />
+        </Box>
         <SectionTitle 
             title="My Classes" 
             subtitle={`${studentEnrollments.length} classes enrolled`}

@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import Section from "./Section";
 import SectionTitle from "./SectionTitle";
 import AuroraText from "./AuroraText";
+import TextType from "./TextType";
 import { Add, Edit, VideoCall, People, CalendarMonth, Link, Check, Close } from "@mui/icons-material";
 
 // Helper function to get grade color
@@ -326,7 +327,19 @@ export default function TeacherDashboard() {
                   <span className="aurora-exception" style={{ fontWeight: 700 }}>Teacher</span> Dashboard
                 </AuroraText>
               }
-              subtitle={`Welcome, ${user?.first_name || "Teacher"}!`}
+              subtitle={
+                <TextType
+                  text={[`Welcome back, ${user?.first_name || "Teacher"}!`, "Ready to teach?"]}
+                  typingSpeed={45}
+                  deletingSpeed={30}
+                  pauseDuration={1800}
+                  loop
+                  showCursor
+                  className="formal-banner-type"
+                  as="span"
+                  style={{ fontWeight: 600, fontSize: '1.2rem', color: '#6c47c6', letterSpacing: 1 }}
+                />
+              }
               centered={false}
               titleColor="gradient"
               subtitleColor="#7f8c8d"
