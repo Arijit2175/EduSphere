@@ -260,9 +260,10 @@ export default function TeacherDashboard() {
           <Box>
             <SectionTitle
               titleComponent={
-                <AuroraText>
-                  <span className="aurora-exception" style={{ fontWeight: 700 }}>Teacher</span> Dashboard
-                </AuroraText>
+                <>
+                  <span style={{ color: '#ff9800', fontWeight: 700, marginRight: 8 }}>Teacher</span>
+                  <AuroraText>Dashboard</AuroraText>
+                </>
               }
               subtitle={`Welcome, ${user?.first_name || "Teacher"}!`}
               centered={false}
