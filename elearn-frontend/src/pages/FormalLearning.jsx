@@ -118,7 +118,7 @@ export default function FormalLearning() {
           <Tabs
             value={tabValue}
             onChange={(_, newValue) => setTabValue(newValue)}
-            sx={{ mb: 2, borderBottom: 1, borderColor: "divider" }}
+            sx={{ mb: 2 }}
             variant="scrollable"
             scrollButtons="auto"
           >
