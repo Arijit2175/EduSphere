@@ -190,7 +190,7 @@ export default function FormalLearning() {
                 <PageHeader
                   title="Classes Catalog"
                   subtitle="Structured, curriculum-driven courses for students"
-                  backgroundGradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                  backgroundGradient="linear-gradient(120deg, #667eea 0%, #764ba2 40%, #667eea 70%, #764ba2 100%)"
                   disableAnimation
                   titleComponent={
                     <BlurText
@@ -279,7 +279,6 @@ export default function FormalLearning() {
             mt: "auto",
             py: 3,
             textAlign: "center",
-            borderTop: "1px solid #e5e7eb",
           }}
         >
           <Typography variant="body2" sx={{ color: "#6b7280" }}>
