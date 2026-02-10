@@ -1,16 +1,14 @@
-  // Animated Background Component (from TeacherDashboard)
-  const AnimatedBackground = () => (
-    <Box
-      sx={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        overflow: 'hidden',
+import API_URL from "../config";
+import { Box, Card, CardContent, Button, Grid, Typography, LinearProgress, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Stack } from "@mui/material";
+import { useState, useEffect, useMemo } from "react";
+import { useFormalEducation } from "../contexts/FormalEducationContext";
+import { useAuth } from "../contexts/AuthContext";
+import Section from "./Section";
+import SectionTitle from "./SectionTitle";
+import { Download, Description, Quiz, CheckCircle, CalendarMonth, VideoCall, Link } from "@mui/icons-material";
 
 // Helper function to get grade color
-              {/* AnimatedBackground removed: now applied globally in FormalLearning.jsx */}
+const getGradeColor = (grade) => {
   if (!grade) return { color: "#6b7280", background: "#f3f4f6", border: "#e5e7eb" };
   
   const gradeStr = String(grade).toUpperCase().trim();
@@ -43,7 +41,6 @@
 
 
 export default function StudentFormalDashboard({ onExploreCourses }) {
-  // ...existing code...
   const { user } = useAuth();
   const { enrollments, courses, submissions, getStudentEnrollments, getCourseById, submitAssignment, uploadMaterial, getSubmission, getAssignmentsForEnrollment } = useFormalEducation();
   const [openAssignment, setOpenAssignment] = useState(false);
@@ -56,7 +53,6 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   // Add state for assignments dialog
   const [openAssignmentsDialog, setOpenAssignmentsDialog] = useState({ open: false, course: null, enrollment: null });
 
-  // Fix: Refetch attendance when enrollments or courses change
   useEffect(() => {
     async function fetchAttendance() {
       if (!user?.id) return;
@@ -75,25 +71,11 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
       }
     }
     fetchAttendance();
-  }, [user?.id, enrollments, courses]);
+  }, [user?.id]);
 
   // Only include enrollments for formal courses, and attach attendance - memoized to prevent re-renders
-  const studentEnrollments = useMemo(() => {
-    // Build a map of schedule_id to course_id for all formal courses
-    const scheduleToCourse = {};
-    courses.forEach(course => {
-      if (course.type === "formal" && Array.isArray(course.schedules)) {
-        course.schedules.forEach(sch => {
-          scheduleToCourse[sch.id] = course.id;
-        });
-      }
-    });
-    // Enrich attendance records with course_id
-    const attendanceWithCourse = attendanceRecords.map(a => ({
-      ...a,
-      course_id: a.course_id || scheduleToCourse[a.schedule_id]
-    }));
-    return getStudentEnrollments(user?.id)
+  const studentEnrollments = useMemo(() => 
+    getStudentEnrollments(user?.id)
       .filter(e => {
         const course = getCourseById(e.courseId);
         return course && course.type === "formal";
@@ -104,10 +86,9 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
         // Attach attendance records for this enrollment/course
         return {
           ...e,
-          attendance: attendanceWithCourse.filter(a => a.course_id === e.courseId),
+          attendance: attendanceRecords.filter(a => course.schedules?.some(s => s.id === a.schedule_id)),
         };
-      });
-  }, [enrollments, courses, user?.id, attendanceRecords]);
+      }), [enrollments, courses, user?.id, attendanceRecords]);
 
   const handleSubmitAssignment = () => {
     if (submission.trim() && selectedAssignment) {
@@ -123,8 +104,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   };
 
   return (
-    <Box sx={{ position: 'relative', minHeight: '100vh' }}>
-      <AnimatedBackground />
+    <Box>
       <Section background="transparent">
         <SectionTitle 
             title="My Classes" 

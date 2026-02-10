@@ -13,68 +13,6 @@ import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import TeacherDashboard from "../components/TeacherDashboard";
 import StudentFormalDashboard from "../components/StudentFormalDashboard";
-
-// Animated Background Component (shared)
-import { Box as MuiBox } from "@mui/material";
-const AnimatedBackground = () => (
-  <MuiBox
-    sx={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      width: '100vw',
-      height: '100vh',
-      overflow: 'hidden',
-      zIndex: 0,
-      pointerEvents: 'none',
-    }}
-  >
-    {[...Array(5)].map((_, i) => (
-      <MuiBox
-        key={i}
-        sx={{
-          position: 'absolute',
-          width: 450 + i * 150,
-          height: 450 + i * 150,
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${
-            ['rgba(139, 92, 246, 0.15)', 'rgba(99, 102, 241, 0.12)', 'rgba(167, 139, 250, 0.1)', 'rgba(79, 70, 229, 0.08)', 'rgba(196, 181, 253, 0.12)'][i]
-          } 0%, transparent 70%)`,
-          left: `${[10, 60, 30, 70, 20][i]}%`,
-          top: `${[20, 60, 80, 10, 50][i]}%`,
-          transform: 'translate(-50%, -50%)',
-          animation: `float${i} ${8 + i * 2}s ease-in-out infinite`,
-          [`@keyframes float${i}`]: {
-            '0%, 100%': { transform: `translate(-50%, -50%) scale(1)` },
-            '50%': { transform: `translate(${-50 + (i % 2 === 0 ? 10 : -10)}%, ${-50 + (i % 2 === 0 ? -10 : 10)}%) scale(1.1)` },
-          },
-        }}
-      />
-    ))}
-    {[...Array(20)].map((_, i) => (
-      <MuiBox
-        key={`particle-${i}`}
-        sx={{
-          position: 'absolute',
-          width: 4 + (i % 3) * 2,
-          height: 4 + (i % 3) * 2,
-          borderRadius: '50%',
-          bgcolor: ['rgba(139, 92, 246, 0.4)', 'rgba(167, 139, 250, 0.5)', 'rgba(99, 102, 241, 0.4)'][i % 3],
-          left: `${(i * 5) % 100}%`,
-          top: `${(i * 7) % 100}%`,
-          animation: `particle${i} ${10 + (i % 5) * 2}s linear infinite`,
-          [`@keyframes particle${i}`]: {
-            '0%': { transform: 'translateY(0) rotate(0deg)', opacity: 0.6 },
-            '50%': { opacity: 1 },
-            '100%': { transform: `translateY(-${100 + i * 10}px) rotate(360deg)`, opacity: 0 },
-          },
-        }}
-      />
-    ))}
-  </MuiBox>
-);
 import { useFormalEducation } from "../contexts/FormalEducationContext";
 
 export default function FormalLearning() {
@@ -111,8 +49,7 @@ export default function FormalLearning() {
   }
   if (isTeacher) {
     return (
-      <Box sx={{ display: "flex", position: 'relative', minHeight: '100vh' }}>
-        <AnimatedBackground />
+      <Box sx={{ display: "flex" }}>
         <Sidebar />
         <Box
           sx={{
@@ -120,7 +57,7 @@ export default function FormalLearning() {
             background: "linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%)",
             minHeight: "100vh",
             display: "flex",
-            flexDirection: "column"
+            flexDirection: "column",
           }}
         >
           <Navbar />
@@ -128,7 +65,7 @@ export default function FormalLearning() {
             sx={{
               flexGrow: 1,
               ml: { xs: 0, md: isOpen ? 25 : 8.75 },
-              transition: "margin-left 0.3s ease"
+              transition: "margin-left 0.3s ease",
             }}
           >
             <TeacherDashboard />
@@ -153,28 +90,27 @@ export default function FormalLearning() {
       setEnrollmentMessage({ type: "success", message: "Successfully enrolled in the course!" });
       setConfirmDialog({ open: false, course: null });
       setTimeout(() => setEnrollmentMessage({ type: "", message: "" }), 3000);
-    return (
-      <Box sx={{ display: "flex", position: 'relative', minHeight: "100vh" }}>
-        <AnimatedBackground />
-        <Sidebar />
+    } else {
+      setEnrollmentMessage({ type: "error", message: result.message || "Enrollment failed" });
+      // Keep dialog open on error
+    }
+  };
+
+  // Student view
+  return (
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      <Sidebar />
+      <Box
+        sx={{
+          flexGrow: 1,
+          background: "linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%)",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Navbar />
         <Box
-          sx={{
-            flexGrow: 1,
-            background: "linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%)",
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column"
-          }}
-        >
-          <Navbar />
-          <Box
-            sx={{
-              flexGrow: 1,
-              ml: { xs: 0, md: isOpen ? 25 : 8.75 },
-              transition: "margin-left 0.3s ease"
-            }}
-          >
-            <Tabs
           sx={{
             flexGrow: 1,
             ml: { xs: 0, md: isOpen ? 25 : 8.75 },
