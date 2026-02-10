@@ -5,6 +5,7 @@ import { useFormalEducation } from "../contexts/FormalEducationContext";
 import { useAuth } from "../contexts/AuthContext";
 import Section from "./Section";
 import SectionTitle from "./SectionTitle";
+import AuroraText from "./AuroraText";
 import { Add, Edit, VideoCall, People, CalendarMonth, Link, Check, Close } from "@mui/icons-material";
 
 // Helper function to get grade color
@@ -257,9 +258,12 @@ export default function TeacherDashboard() {
       <Section background="transparent">
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Box>
-            <SectionTitle title="Teacher Dashboard" subtitle={`Welcome, ${user?.first_name || "Teacher"}!`} centered={false} 
-            titleColor="gradient"
-            subtitleColor="#7f8c8d"
+            <SectionTitle
+              titleComponent={<AuroraText>Teacher Dashboard</AuroraText>}
+              subtitle={`Welcome, ${user?.first_name || "Teacher"}!`}
+              centered={false}
+              titleColor="gradient"
+              subtitleColor="#7f8c8d"
             />
           </Box>
           <Button
@@ -317,9 +321,12 @@ export default function TeacherDashboard() {
         </Grid>
 
         {/* My Courses */}
-        <SectionTitle title="My Courses" subtitle="Manage your courses and students" centered={false} 
-        titleColor="gradient"
-        subtitleColor="#7f8c8d"
+        <SectionTitle
+          titleComponent={<AuroraText>My Courses</AuroraText>}
+          subtitle="Manage your courses and students"
+          centered={false}
+          titleColor="gradient"
+          subtitleColor="#7f8c8d"
         />
         
         {teacherCourses.length === 0 ? (
@@ -364,9 +371,9 @@ export default function TeacherDashboard() {
       {/* Live Classes & Attendance */}
       <Section background="transparent">
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-          <SectionTitle 
-            title="Live Classes" 
-            subtitle="Schedule sessions and track attendance" 
+          <SectionTitle
+            titleComponent={<AuroraText>Live Classes</AuroraText>}
+            subtitle="Schedule sessions and track attendance"
             centered={false}
             titleColor="gradient"
             subtitleColor="#7f8c8d"
