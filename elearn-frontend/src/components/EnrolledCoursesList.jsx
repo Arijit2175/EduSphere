@@ -1,5 +1,6 @@
 import { Box, Grid, Card, CardContent, Typography, Button, LinearProgress, Stack, Chip, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import VideocamIcon from "@mui/icons-material/Videocam";
+import DownloadIcon from "@mui/icons-material/Download";
 import { motion } from "framer-motion";
 
 const MotionCard = motion(Card);
@@ -8,6 +9,7 @@ import { useState } from "react";
 
 export default function EnrolledCoursesList({ courses = [] }) {
   const [openDialogIdx, setOpenDialogIdx] = useState(null);
+  const [openMaterialsIdx, setOpenMaterialsIdx] = useState(null);
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -107,6 +109,61 @@ export default function EnrolledCoursesList({ courses = [] }) {
                 </Box>
 
                 <CardContent sx={{ flexGrow: 1, p: 2.5, display: "flex", flexDirection: "column" }}>
+                  {/* Materials */}
+                  {course.materials && course.materials.length > 0 && (
+                    <Box sx={{ mb: 2.5 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5, color: "#1f2937", fontSize: "0.85rem" }}>
+                        📚 Materials
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{ mb: 1, textTransform: "none" }}
+                        onClick={() => setOpenMaterialsIdx(i)}
+                      >
+                        View All Materials
+                      </Button>
+                      <Dialog open={openMaterialsIdx === i} onClose={() => setOpenMaterialsIdx(null)} maxWidth="xs" fullWidth>
+                        <DialogTitle>All Course Materials</DialogTitle>
+                        <DialogContent>
+                          <Stack spacing={2}>
+                            {course.materials.map((material, idx) => {
+                              const label = material.title || material.name || `Material ${idx + 1}`;
+                              const url = material.url || material.link || material.fileUrl;
+                              return (
+                                <Box key={material.id || idx} sx={{ p: 1.5, borderRadius: 2, border: "1px solid #e5e7eb", background: "#f9fafb" }}>
+                                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#1f2937" }}>
+                                    {label}
+                                  </Typography>
+                                  {url ? (
+                                    <Button
+                                      fullWidth
+                                      size="small"
+                                      variant="contained"
+                                      href={url}
+                                      download
+                                      startIcon={<DownloadIcon />}
+                                      sx={{ mt: 0.5, textTransform: "none", background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", fontWeight: 700, fontSize: "0.75rem" }}
+                                    >
+                                      Download
+                                    </Button>
+                                  ) : (
+                                    <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mt: 0.5 }}>
+                                      No download link available
+                                    </Typography>
+                                  )}
+                                </Box>
+                              );
+                            })}
+                          </Stack>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={() => setOpenMaterialsIdx(null)} variant="contained">Close</Button>
+                        </DialogActions>
+                      </Dialog>
+                    </Box>
+                  )}
+
                   {/* Meeting Links */}
                   {course.schedules && course.schedules.length > 0 && (
                     <Box sx={{ mb: 2.5, flexGrow: 1 }}>
