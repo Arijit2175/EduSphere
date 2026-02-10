@@ -121,6 +121,7 @@ export default function FormalLearning() {
             variant="scrollable"
             scrollButtons="auto"
             sx={{
+              mt: 2,
               mb: 2,
               "& .MuiTabs-flexContainer": { gap: 1.5 },
               "& .MuiTabs-indicator": { display: "none" },
