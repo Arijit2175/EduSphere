@@ -4,6 +4,7 @@ import { Box, Container, Typography, Avatar, IconButton, Tooltip } from "@mui/ma
 import { motion } from "framer-motion";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import SplitText from "./SplitText";
+import TextType from "./TextType";
 
 const MotionBox = motion(Box);
 
@@ -184,30 +185,6 @@ export default function PageHeader({
               >
                 {titleComponent}
               </Box>
-            ) : useSplitTextTitle && !disableAnimation ? (
-              <SplitText
-                text={title}
-                delay={50}
-                duration={1.1}
-                ease="power3.out"
-                splitType="chars"
-                from={{ opacity: 0, y: 40 }}
-                to={{ opacity: 1, y: 0 }}
-                threshold={0.1}
-                rootMargin="-100px"
-                textAlign={showAvatar ? "left" : "center"}
-                tag="h1"
-                className="page-header-title"
-                style={{
-                  fontWeight: 800,
-                  marginBottom: "12px",
-                  fontSize: "clamp(2rem, 3.4vw, 3.1rem)",
-                  letterSpacing: "-0.03em",
-                  textShadow: "0 6px 24px rgba(0,0,0,0.15)",
-                  color: "#ffffff",
-                  fontFamily: '"Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-                }}
-              />
             ) : (
               <Typography
                 component={motion.h1}
@@ -220,9 +197,28 @@ export default function PageHeader({
                   textShadow: "0 6px 24px rgba(0,0,0,0.15)",
                   color: "#ffffff",
                   fontFamily: '"Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
                 }}
               >
-                {title}
+                <TextType
+                  text={Array.isArray(title) ? title : [title]}
+                  typingSpeed={75}
+                  pauseDuration={1500}
+                  deletingSpeed={50}
+                  showCursor
+                  cursorCharacter="|"
+                  cursorBlinkDuration={0.5}
+                  loop
+                  as="span"
+                  style={{
+                    fontWeight: 800,
+                    fontSize: "inherit",
+                    color: "inherit",
+                    fontFamily: 'inherit',
+                  }}
+                />
               </Typography>
             )}
             {subtitle && (
