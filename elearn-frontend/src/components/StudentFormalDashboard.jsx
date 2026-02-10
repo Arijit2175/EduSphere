@@ -107,6 +107,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   return (
     <Box>
       <Section background="transparent">
+        {/* Animated Welcome Banner */}
         <Box
           sx={{
             mb: 4,
@@ -141,6 +142,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
             style={{ fontWeight: 700, fontSize: '2.1rem', color: '#fff', letterSpacing: 1 }}
           />
         </Box>
+        {/* Section Title below banner */}
         <SectionTitle 
             title="My Classes" 
             subtitle={`${studentEnrollments.length} classes enrolled`}

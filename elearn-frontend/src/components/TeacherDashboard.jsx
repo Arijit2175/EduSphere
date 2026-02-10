@@ -321,6 +321,7 @@ export default function TeacherDashboard() {
       <Section background="transparent">
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Box>
+            {/* Animated Welcome Banner */}
             <Box
               sx={{
                 mb: 4,
@@ -355,6 +356,7 @@ export default function TeacherDashboard() {
                 style={{ fontWeight: 700, fontSize: '2.1rem', color: '#fff', letterSpacing: 1 }}
               />
             </Box>
+            {/* Section Title below banner */}
             <SectionTitle
               titleComponent={
                 <AuroraText>
