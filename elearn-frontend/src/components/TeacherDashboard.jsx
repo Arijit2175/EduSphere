@@ -39,6 +39,8 @@ const getGradeColor = (grade) => {
 };
 
 export default function TeacherDashboard() {
+    // Show/hide assignments list in Manage dialog
+    const [showAssignmentsList, setShowAssignmentsList] = useState(false);
   // For attendance confirmation dialog
   const [confirmDialog, setConfirmDialog] = useState({ open: false, student: null, status: "" });
   // All useState declarations at the top
@@ -55,6 +57,8 @@ export default function TeacherDashboard() {
   const [assignmentForm, setAssignmentForm] = useState({ title: "", description: "", dueDate: "" });
   const [gradeDialog, setGradeDialog] = useState({ open: false, submission: null });
   const [gradeForm, setGradeForm] = useState({ grade: "", feedback: "" });
+  // Show/hide materials list in Manage dialog
+  const [showMaterialsList, setShowMaterialsList] = useState(false);
   // Fetch enrolled students for present/absent dialog when it opens
   useEffect(() => {
     const fetchEnrolled = async () => {
@@ -780,106 +784,122 @@ export default function TeacherDashboard() {
             {/* Materials Section */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>📄 Course Materials ({manageDialog.course.materials?.length || 0})</Typography>
-                {manageDialog.course.materials?.length > 0 && (
-                  <Stack spacing={1} sx={{ mb: 2 }}>
-                    {manageDialog.course.materials.map((material, idx) => (
-                      <Paper key={material.id || idx} sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span>{material.name}</span>
-                        <Stack direction="row" spacing={0.5}>
-                          <Button
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                            onClick={() => {
-                              const url = material.fileUrl || material.url;
-                              if (url) {
-                                const link = document.createElement('a');
-                                link.href = url;
-                                link.download = material.name || 'material.pdf';
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                              } else {
-                                alert('No file URL available for download.');
-                              }
-                            }}
-                          >
-                            Download
-                          </Button>
-                          <Button
-                            size="small"
-                            color="error"
-                            variant="outlined"
-                            onClick={async () => {
-                              await deleteMaterial(manageDialog.course.id, material.id);
-                              // Optionally refresh materials list after deletion
-                              const res = await fetch(`${API_URL}/resources/?course_id=${manageDialog.course.id}`);
-                              if (res.ok) {
-                                const materials = await res.json();
-                                setManageDialog((prev) => ({
-                                  ...prev,
-                                  course: { ...prev.course, materials },
-                                }));
-                              }
-                            }}
-                          >
-                            Delete
-                          </Button>
-                        </Stack>
-                      </Paper>
-                    ))}
-                  </Stack>
-                )}
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Material Name"
-                  value={materialForm.name}
-                  onChange={e => setMaterialForm(f => ({ ...f, name: e.target.value }))}
-                  sx={{ mb: 2 }}
-                />
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  style={{ display: "block", marginBottom: 16 }}
-                  onChange={e => {
-                    const file = e.target.files[0];
-                    setMaterialForm(f => ({ ...f, file }));
-                  }}
-                />
-                <Button
-                  variant="contained"
-                  size="small"
-                  fullWidth
-                  onClick={async () => {
-                    if (manageDialog.course?.id && materialForm.name && materialForm.file) {
-                      await addMaterial(manageDialog.course.id, {
-                        name: materialForm.name,
-                        file: materialForm.file,
-                        type: "pdf"
-                      });
-                      setMaterialForm({ name: "", file: null });
-                      // Fetch latest materials from backend and update dialog
-                      try {
-                        const res = await fetch(`${API_URL}/resources/?course_id=${manageDialog.course.id}`);
-                        if (res.ok) {
-                          const materials = await res.json();
-                          setManageDialog(prev => ({ open: true, course: { ...prev.course, materials } }));
-                        }
-                      } catch {}
-                    } else {
-                      alert("Please provide a name and a PDF file.");
-                    }
-                  }}
-                >
-                  Add Material
-                </Button>
-              </Box>
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ mb: 2 }}
+                onClick={() => setShowMaterialsList((prev) => !prev)}
+              >
+                {showMaterialsList ? 'Hide Materials List' : 'Show Materials List'}
+              </Button>
+              {showMaterialsList && manageDialog.course.materials?.length > 0 && (
+                <Stack spacing={1} sx={{ mb: 2 }}>
+                  {manageDialog.course.materials.map((material, idx) => (
+                    <Paper key={material.id || idx} sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span>{material.name}</span>
+                      <Stack direction="row" spacing={0.5}>
+                        <Button
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                          onClick={() => {
+                            const url = material.fileUrl || material.url;
+                            if (url) {
+                              const link = document.createElement('a');
+                              link.href = url;
+                              link.download = material.name || 'material.pdf';
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            } else {
+                              alert('No file URL available for download.');
+                            }
+                          }}
+                        >
+                          Download
+                        </Button>
+                        <Button
+                          size="small"
+                          color="error"
+                          variant="outlined"
+                          onClick={async () => {
+                            await deleteMaterial(manageDialog.course.id, material.id);
+                            // Optionally refresh materials list after deletion
+                            const res = await fetch(`${API_URL}/resources/?course_id=${manageDialog.course.id}`);
+                            if (res.ok) {
+                              const materials = await res.json();
+                              setManageDialog((prev) => ({
+                                ...prev,
+                                course: { ...prev.course, materials },
+                              }));
+                            }
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </Stack>
+                    </Paper>
+                  ))}
+                </Stack>
+              )}
+              <TextField
+                fullWidth
+                size="small"
+                label="Material Name"
+                value={materialForm.name}
+                onChange={e => setMaterialForm(f => ({ ...f, name: e.target.value }))}
+                sx={{ mb: 2 }}
+              />
+              <input
+                type="file"
+                accept="application/pdf"
+                style={{ display: "block", marginBottom: 16 }}
+                onChange={e => {
+                  const file = e.target.files[0];
+                  setMaterialForm(f => ({ ...f, file }));
+                }}
+              />
+              <Button
+                variant="contained"
+                size="small"
+                fullWidth
+                onClick={async () => {
+                  if (manageDialog.course?.id && materialForm.name && materialForm.file) {
+                    await addMaterial(manageDialog.course.id, {
+                      name: materialForm.name,
+                      file: materialForm.file,
+                      type: "pdf"
+                    });
+                    setMaterialForm({ name: "", file: null });
+                    // Fetch latest materials from backend and update dialog
+                    try {
+                      const res = await fetch(`${API_URL}/resources/?course_id=${manageDialog.course.id}`);
+                      if (res.ok) {
+                        const materials = await res.json();
+                        setManageDialog(prev => ({ open: true, course: { ...prev.course, materials } }));
+                      }
+                    } catch {}
+                  } else {
+                    alert("Please provide a name and a PDF file.");
+                  }
+                }}
+              >
+                Add Material
+              </Button>
+            </Box>
 
             {/* Assignments Section */}
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>📝 Assignments ({manageDialog.course.assignments?.length || 0})</Typography>
-              {manageDialog.course.assignments?.length > 0 && (
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ mb: 2 }}
+                onClick={() => setShowAssignmentsList((prev) => !prev)}
+              >
+                {showAssignmentsList ? 'Hide Assignments List' : 'Show Assignments List'}
+              </Button>
+              {showAssignmentsList && manageDialog.course.assignments?.length > 0 && (
                 <Stack spacing={1} sx={{ mb: 2 }}>
                   {manageDialog.course.assignments.map((assignment, idx) => {
                     // Get submissions for this assignment
@@ -900,8 +920,6 @@ export default function TeacherDashboard() {
                             >
                               Submissions: {Array.isArray(submissions) ? submissions.length : 0}
                             </Typography>
-                          </Box>
-                          {/* Add the missing closing tag for the left Box */}
                           </Box>
                           <Box sx={{ display: 'flex', gap: 1 }}>
                             <Button
@@ -924,14 +942,15 @@ export default function TeacherDashboard() {
                                 // Optionally refresh assignments list after deletion
                                 const res = await fetch(`${API_URL}/assignments/?course_id=${manageDialog.course.id}`);
                                 if (res.ok) {
-                                const assignments = await res.json();
-                                setManageDialog(prev => ({ open: true, course: { ...prev.course, assignments } }));
-                              }
-                            }}
-                            sx={{ ml: 2 }}
-                          >
-                            Delete
-                          </Button>
+                                  const assignments = await res.json();
+                                  setManageDialog(prev => ({ open: true, course: { ...prev.course, assignments } }));
+                                }
+                              }}
+                              sx={{ ml: 2 }}
+                            >
+                              Delete
+                            </Button>
+                          </Box>
                         </Box>
                         {/* Submissions dialog is now opened by clicking the Submissions link */}
                       </Paper>
