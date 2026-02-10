@@ -107,17 +107,38 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   return (
     <Box>
       <Section background="transparent">
-        <Box sx={{ mb: 4, mt: 1, textAlign: 'center' }}>
+        <Box
+          sx={{
+            mb: 4,
+            mt: 1,
+            textAlign: 'center',
+            background: 'linear-gradient(120deg, #0b1f5e 0%, #1d4ed8 38%, #2563eb 62%, #ffffff 100%)',
+            backgroundSize: '200% 200%',
+            animation: 'communityGradient 12s ease-in-out infinite',
+            color: '#fff',
+            borderRadius: 3,
+            px: { xs: 3, md: 4 },
+            py: { xs: 3, md: 4 },
+            position: 'relative',
+            overflow: 'hidden',
+            '@keyframes communityGradient': {
+              '0%': { backgroundPosition: '0% 50%' },
+              '50%': { backgroundPosition: '100% 50%' },
+              '100%': { backgroundPosition: '0% 50%' },
+            },
+          }}
+        >
           <TextType
             text={[`Welcome back, ${user?.first_name || "Learner"}!`, "Have fun learning!"]}
-            typingSpeed={45}
-            deletingSpeed={30}
-            pauseDuration={1800}
-            loop
+            typingSpeed={75}
+            pauseDuration={1500}
+            deletingSpeed={50}
             showCursor
-            className="formal-banner-type"
+            cursorCharacter="|"
+            cursorBlinkDuration={0.5}
+            loop
             as="h2"
-            style={{ fontWeight: 700, fontSize: '2rem', color: '#6c47c6', letterSpacing: 1 }}
+            style={{ fontWeight: 700, fontSize: '2.1rem', color: '#fff', letterSpacing: 1 }}
           />
         </Box>
         <SectionTitle 
