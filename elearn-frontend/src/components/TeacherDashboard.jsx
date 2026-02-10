@@ -261,7 +261,7 @@ export default function TeacherDashboard() {
             <SectionTitle
               titleComponent={
                 <AuroraText>
-                  <span style={{ color: '#ff9800', fontWeight: 700 }}>Teacher</span> Dashboard
+                  <span className="aurora-exception" style={{ fontWeight: 700 }}>Teacher</span> Dashboard
                 </AuroraText>
               }
               subtitle={`Welcome, ${user?.first_name || "Teacher"}!`}

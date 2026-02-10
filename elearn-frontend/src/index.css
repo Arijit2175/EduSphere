@@ -76,3 +76,11 @@ html {
   color: transparent;
   animation: auroraShift 8s ease infinite;
 }
+
+.aurora-text .aurora-exception {
+  color: #ff9800 !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  animation: none !important;
+}
