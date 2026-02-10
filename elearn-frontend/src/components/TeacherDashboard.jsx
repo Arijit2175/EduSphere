@@ -40,6 +40,67 @@ const getGradeColor = (grade) => {
 };
 
 export default function TeacherDashboard() {
+      // Animated Background Component (from AITutor)
+      const AnimatedBackground = () => (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            overflow: 'hidden',
+            zIndex: 0,
+            pointerEvents: 'none',
+          }}
+        >
+          {/* Gradient orbs */}
+          {[...Array(5)].map((_, i) => (
+            <Box
+              key={i}
+              sx={{
+                position: 'absolute',
+                width: 300 + i * 100,
+                height: 300 + i * 100,
+                borderRadius: '50%',
+                background: `radial-gradient(circle, ${
+                  ['rgba(139, 92, 246, 0.15)', 'rgba(99, 102, 241, 0.12)', 'rgba(167, 139, 250, 0.1)', 'rgba(79, 70, 229, 0.08)', 'rgba(196, 181, 253, 0.12)'][i]
+                } 0%, transparent 70%)`,
+                left: `${[10, 60, 30, 70, 20][i]}%`,
+                top: `${[20, 60, 80, 10, 50][i]}%`,
+                transform: 'translate(-50%, -50%)',
+                animation: `float${i} ${8 + i * 2}s ease-in-out infinite`,
+                [`@keyframes float${i}`]: {
+                  '0%, 100%': { transform: `translate(-50%, -50%) scale(1)` },
+                  '50%': { transform: `translate(${-50 + (i % 2 === 0 ? 10 : -10)}%, ${-50 + (i % 2 === 0 ? -10 : 10)}%) scale(1.1)` },
+                },
+              }}
+            />
+          ))}
+
+          {/* Floating particles */}
+          {[...Array(20)].map((_, i) => (
+            <Box
+              key={`particle-${i}`}
+              sx={{
+                position: 'absolute',
+                width: 4 + (i % 3) * 2,
+                height: 4 + (i % 3) * 2,
+                borderRadius: '50%',
+                bgcolor: ['rgba(139, 92, 246, 0.4)', 'rgba(167, 139, 250, 0.5)', 'rgba(99, 102, 241, 0.4)'][i % 3],
+                left: `${(i * 5) % 100}%`,
+                top: `${(i * 7) % 100}%`,
+                animation: `particle${i} ${10 + (i % 5) * 2}s linear infinite`,
+                [`@keyframes particle${i}`]: {
+                  '0%': { transform: 'translateY(0) rotate(0deg)', opacity: 0.6 },
+                  '50%': { opacity: 1 },
+                  '100%': { transform: `translateY(-${100 + i * 10}px) rotate(360deg)`, opacity: 0 },
+                },
+              }}
+            />
+          ))}
+        </Box>
+      );
     // Show/hide assignments list in Manage dialog
     const [showAssignmentsList, setShowAssignmentsList] = useState(false);
   // For attendance confirmation dialog
@@ -254,7 +315,8 @@ export default function TeacherDashboard() {
 
   return (
     <>
-    <Box>
+    <Box sx={{ position: 'relative', minHeight: '100vh' }}>
+      <AnimatedBackground />
       <Section background="transparent">
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Box>
