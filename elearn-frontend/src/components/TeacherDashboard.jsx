@@ -259,7 +259,11 @@ export default function TeacherDashboard() {
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Box>
             <SectionTitle
-              titleComponent={<AuroraText>Teacher Dashboard</AuroraText>}
+              titleComponent={
+                <AuroraText>
+                  <span style={{ color: '#ff9800', fontWeight: 700 }}>Teacher</span> Dashboard
+                </AuroraText>
+              }
               subtitle={`Welcome, ${user?.first_name || "Teacher"}!`}
               centered={false}
               titleColor="gradient"
@@ -1169,8 +1173,7 @@ export default function TeacherDashboard() {
       sx={{
         mt: 8,
         py: 3,
-        textAlign: "center",
-        borderTop: "1px solid #e5e7eb",
+        textAlign: "center"
       }}
     >
       <Typography variant="body2" sx={{ color: "#6b7280" }}>
