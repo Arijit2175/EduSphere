@@ -60,8 +60,8 @@ export default function TeacherDashboard() {
               key={i}
               sx={{
                 position: 'absolute',
-                width: 300 + i * 100,
-                height: 300 + i * 100,
+                width: 450 + i * 150,
+                height: 450 + i * 150,
                 borderRadius: '50%',
                 background: `radial-gradient(circle, ${
                   ['rgba(139, 92, 246, 0.15)', 'rgba(99, 102, 241, 0.12)', 'rgba(167, 139, 250, 0.1)', 'rgba(79, 70, 229, 0.08)', 'rgba(196, 181, 253, 0.12)'][i]
