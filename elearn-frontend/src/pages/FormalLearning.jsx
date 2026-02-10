@@ -118,12 +118,68 @@ export default function FormalLearning() {
           <Tabs
             value={tabValue}
             onChange={(_, newValue) => setTabValue(newValue)}
-            sx={{ mb: 2 }}
             variant="scrollable"
             scrollButtons="auto"
+            sx={{
+              mb: 2,
+              "& .MuiTabs-flexContainer": { gap: 1.5 },
+              "& .MuiTabs-indicator": { display: "none" },
+            }}
           >
-            <Tab label="My Classes" />
-            <Tab label="Browse Classes" />
+            <Tab
+              label="My Classes"
+              disableRipple
+              sx={{
+                px: 2.5,
+                py: 1,
+                minHeight: "auto",
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: 1.5,
+                bgcolor: "#4f46e5",
+                color: "#fff",
+                boxShadow: "3px 3px 0 #000",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  boxShadow: "none",
+                  transform: "translate(3px, 3px)",
+                  bgcolor: "#4f46e5",
+                },
+                "&.Mui-selected": {
+                  color: "#fff",
+                  boxShadow: "none",
+                  transform: "translate(3px, 3px)",
+                  bgcolor: "#4f46e5",
+                },
+              }}
+            />
+            <Tab
+              label="Browse Classes"
+              disableRipple
+              sx={{
+                px: 2.5,
+                py: 1,
+                minHeight: "auto",
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: 1.5,
+                bgcolor: "#4f46e5",
+                color: "#fff",
+                boxShadow: "3px 3px 0 #000",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  boxShadow: "none",
+                  transform: "translate(3px, 3px)",
+                  bgcolor: "#4f46e5",
+                },
+                "&.Mui-selected": {
+                  color: "#fff",
+                  boxShadow: "none",
+                  transform: "translate(3px, 3px)",
+                  bgcolor: "#4f46e5",
+                },
+              }}
+            />
           </Tabs>
           {tabValue === 0 && <StudentFormalDashboard onExploreCourses={() => setTabValue(1)} />}
           {tabValue === 1 && (
