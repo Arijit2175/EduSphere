@@ -1,5 +1,5 @@
 import API_URL from "../config";
-import { Box, Card, CardContent, Button, Grid, Typography, LinearProgress, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import { Box, Card, CardContent, Button, Grid, Typography, LinearProgress, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Stack } from "@mui/material";
 import { useState, useEffect, useMemo } from "react";
 import { useFormalEducation } from "../contexts/FormalEducationContext";
 import { useAuth } from "../contexts/AuthContext";
