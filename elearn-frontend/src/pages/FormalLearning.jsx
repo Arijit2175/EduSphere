@@ -7,6 +7,7 @@ import BlurText from "../components/BlurText";
 import Section from "../components/Section";
 import SectionTitle from "../components/SectionTitle";
 import CourseCardAdvanced from "../components/CourseCardAdvanced";
+import AuroraText from "../components/AuroraText";
 
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -218,8 +219,13 @@ export default function FormalLearning() {
                   subtitle="Choose from our comprehensive collection of formal learning programs"
                   centered
                   variant="h3"
-                  titleColor="gradient"
+                  titleColor="#1f2937"
                   subtitleColor="#7f8c8d"
+                  titleComponent={
+                    <>
+                      Available <AuroraText>Classes</AuroraText>
+                    </>
+                  }
                 />
                 <Container maxWidth="lg">
                   <Box sx={{

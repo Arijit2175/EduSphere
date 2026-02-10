@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 const MotionBox = motion(Box);
 
-export default function SectionTitle({ title, subtitle, centered = true, variant = "h3", titleColor, subtitleColor }) {
+export default function SectionTitle({ title, subtitle, centered = true, variant = "h3", titleColor, subtitleColor, titleComponent }) {
   // Support 'gradient' as a special value for titleColor
   const titleSx = titleColor === 'gradient'
     ? {
@@ -51,7 +51,7 @@ export default function SectionTitle({ title, subtitle, centered = true, variant
         component="h2"
         sx={titleSx}
       >
-        {title}
+        {titleComponent || title}
       </Typography>
       {subtitle && (
         <Typography
