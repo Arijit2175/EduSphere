@@ -115,6 +115,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   // Add state for assignments dialog
   const [openAssignmentsDialog, setOpenAssignmentsDialog] = useState({ open: false, course: null, enrollment: null });
 
+  // Fix: Refetch attendance when enrollments or courses change
   useEffect(() => {
     async function fetchAttendance() {
       if (!user?.id) return;
@@ -133,7 +134,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
       }
     }
     fetchAttendance();
-  }, [user?.id]);
+  }, [user?.id, enrollments, courses]);
 
   // Only include enrollments for formal courses, and attach attendance - memoized to prevent re-renders
   const studentEnrollments = useMemo(() => 
@@ -166,7 +167,8 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   };
 
   return (
-    <Box>
+    <Box sx={{ position: 'relative', minHeight: '100vh' }}>
+      <AnimatedBackground />
       <Section background="transparent">
         <SectionTitle 
             title="My Classes" 
