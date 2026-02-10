@@ -303,7 +303,11 @@ export default function Dashboard() {
         {/* Page Header Section */}
         <Section background="transparent" pt={4} pb={2} animated={false}>
           <PageHeader
-            title={`Welcome back, ${displayName}!`}
+            title={
+              user?.role === "teacher"
+                ? [`Welcome back, ${displayName}!`, "Ready to teach?"]
+                : [`Welcome back, ${displayName}!`, "Have fun learning!"]
+            }
             subtitle="Track your learning progress and achievements"
             backgroundGradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
             showAvatar={true}
