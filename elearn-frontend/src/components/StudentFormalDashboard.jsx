@@ -137,8 +137,22 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
   }, [user?.id, enrollments, courses]);
 
   // Only include enrollments for formal courses, and attach attendance - memoized to prevent re-renders
-  const studentEnrollments = useMemo(() => 
-    getStudentEnrollments(user?.id)
+  const studentEnrollments = useMemo(() => {
+    // Build a map of schedule_id to course_id for all formal courses
+    const scheduleToCourse = {};
+    courses.forEach(course => {
+      if (course.type === "formal" && Array.isArray(course.schedules)) {
+        course.schedules.forEach(sch => {
+          scheduleToCourse[sch.id] = course.id;
+        });
+      }
+    });
+    // Enrich attendance records with course_id
+    const attendanceWithCourse = attendanceRecords.map(a => ({
+      ...a,
+      course_id: a.course_id || scheduleToCourse[a.schedule_id]
+    }));
+    return getStudentEnrollments(user?.id)
       .filter(e => {
         const course = getCourseById(e.courseId);
         return course && course.type === "formal";
@@ -149,9 +163,10 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
         // Attach attendance records for this enrollment/course
         return {
           ...e,
-          attendance: attendanceRecords.filter(a => a.course_id === e.courseId),
+          attendance: attendanceWithCourse.filter(a => a.course_id === e.courseId),
         };
-      }), [enrollments, courses, user?.id, attendanceRecords]);
+      });
+  }, [enrollments, courses, user?.id, attendanceRecords]);
 
   const handleSubmitAssignment = () => {
     if (submission.trim() && selectedAssignment) {
