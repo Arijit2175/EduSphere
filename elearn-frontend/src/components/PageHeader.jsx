@@ -175,7 +175,15 @@ export default function PageHeader({
         >
           <Box sx={{ flex: 1 }}>
             {titleComponent ? (
-              <Box sx={{ mb: 1.5 }}>{titleComponent}</Box>
+              <Box
+                sx={{
+                  mb: 1.5,
+                  display: "flex",
+                  justifyContent: showAvatar ? { xs: "center", md: "flex-start" } : "center",
+                }}
+              >
+                {titleComponent}
+              </Box>
             ) : useSplitTextTitle && !disableAnimation ? (
               <SplitText
                 text={title}
