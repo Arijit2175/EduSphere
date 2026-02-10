@@ -221,11 +221,11 @@ export default function FormalLearning() {
                   variant="h3"
                   titleColor="#1f2937"
                   subtitleColor="#7f8c8d"
-                  titleComponent={
-                    <>
-                      Available <AuroraText>Classes</AuroraText>
-                    </>
-                  }
+                    titleComponent={
+                      <AuroraText>
+                        <span style={{ color: '#ff9800', fontWeight: 700 }}>Available</span> Classes
+                      </AuroraText>
+                    }
                 />
                 <Container maxWidth="lg">
                   <Box sx={{
