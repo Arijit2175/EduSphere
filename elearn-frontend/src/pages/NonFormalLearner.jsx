@@ -18,10 +18,11 @@ import {
   Radio,
   Alert,
   Chip,
-  BarLoader,
   useMediaQuery,
   Paper,
 } from "@mui/material";
+
+import BarLoader from "../components/BarLoader";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
