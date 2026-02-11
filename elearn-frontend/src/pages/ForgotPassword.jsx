@@ -189,7 +189,7 @@ export default function ForgotPassword() {
                     }}
                     disabled={loading}
                   >
-                    {loading ? <BarLoader /> : "Reset Password"}
+                    {loading ? <BarLoader color="#fff" /> : "Reset Password"}
                   </Button>
 
                   <Typography variant="body2" sx={{ textAlign: "center", color: "#666", mb: 2 }}>

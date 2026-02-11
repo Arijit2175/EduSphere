@@ -289,7 +289,7 @@ function Login() {
                       },
                     }}
                   >
-                    {loading ? <BarLoader /> : "Sign In"}
+                    {loading ? <BarLoader color="#fff" /> : "Sign In"}
                   </Button>
                 </motion.div>
 

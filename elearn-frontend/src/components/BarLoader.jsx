@@ -17,7 +17,7 @@ const variants = {
   },
 };
 
-const BarLoader = () => {
+const BarLoader = ({ color = '#8B5CF6' }) => {
   return (
     <motion.div
       transition={{
@@ -28,11 +28,11 @@ const BarLoader = () => {
       className="flex gap-1"
       style={{ display: 'flex', gap: 4, justifyContent: 'center', alignItems: 'center', minHeight: 64 }}
     >
-      <motion.div variants={variants} style={{ height: 48, width: 8, background: '#fff', borderRadius: 4 }} />
-      <motion.div variants={variants} style={{ height: 48, width: 8, background: '#fff', borderRadius: 4 }} />
-      <motion.div variants={variants} style={{ height: 48, width: 8, background: '#fff', borderRadius: 4 }} />
-      <motion.div variants={variants} style={{ height: 48, width: 8, background: '#fff', borderRadius: 4 }} />
-      <motion.div variants={variants} style={{ height: 48, width: 8, background: '#fff', borderRadius: 4 }} />
+      <motion.div variants={variants} style={{ height: 48, width: 8, background: color, borderRadius: 4 }} />
+      <motion.div variants={variants} style={{ height: 48, width: 8, background: color, borderRadius: 4 }} />
+      <motion.div variants={variants} style={{ height: 48, width: 8, background: color, borderRadius: 4 }} />
+      <motion.div variants={variants} style={{ height: 48, width: 8, background: color, borderRadius: 4 }} />
+      <motion.div variants={variants} style={{ height: 48, width: 8, background: color, borderRadius: 4 }} />
     </motion.div>
   );
 };

@@ -283,7 +283,7 @@ export default function Register() {
                               },
                             }}
                           >
-                            {loading ? <BarLoader /> : "Create Account"}
+                            {loading ? <BarLoader color="#fff" /> : "Create Account"}
                           </Button>
                         </motion.div>
 

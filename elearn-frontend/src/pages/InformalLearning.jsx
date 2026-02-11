@@ -575,7 +575,7 @@ export default function InformalLearning() {
           <Navbar />
           <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Box sx={{ textAlign: "center" }}>
-              <BarLoader />
+              <BarLoader color="#8B5CF6" />
             </Box>
           </Box>
         </Box>

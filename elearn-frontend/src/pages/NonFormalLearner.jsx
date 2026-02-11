@@ -290,7 +290,7 @@ export default function NonFormalLearner() {
         <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Navbar />
           <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, transition: "margin-left 0.3s ease", p: 4, display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <BarLoader />
+            <BarLoader color="#8B5CF6" />
           </Box>
         </Box>
       </Box>

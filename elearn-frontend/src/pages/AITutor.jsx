@@ -954,7 +954,7 @@ export default function AITutor() {
                   },
                 }}
               >
-                {loading ? <BarLoader /> : (<><span>Send</span><SendRoundedIcon sx={{ ml: 1, fontSize: 18 }} /></>)}
+                {loading ? <BarLoader color="#fff" /> : (<><span>Send</span><SendRoundedIcon sx={{ ml: 1, fontSize: 18 }} /></>)}
               </Button>
               </Box>
             </Box>
