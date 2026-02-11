@@ -305,13 +305,19 @@ export default function Dashboard() {
           <PageHeader
             title={
               user?.role === "teacher"
-                ? [`Welcome back, ${displayName}!`, "Ready to teach?"]
-                : [`Welcome back, ${displayName}!`, "Have fun learning!"]
+                ? [
+                    `Welcome back, ${displayName || "Student"}!`,
+                    "Ready to teach?"
+                  ]
+                : [
+                    `Welcome back, ${displayName || "Student"}!`,
+                    "Have fun learning!"
+                  ]
             }
             subtitle="Track your learning progress and achievements"
             backgroundGradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
             showAvatar={true}
-            userName={displayName}
+            userName={displayName || "Student"}
             avatarSrc={user?.avatar || null}
           />
         </Section>
