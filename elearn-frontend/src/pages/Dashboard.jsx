@@ -174,7 +174,7 @@ export default function Dashboard() {
 
   // Handler functions for stats actions
   const handleBrowseMore = () => {
-    navigate(user?.role === "teacher" ? "/formal" : "/formal");
+    window.location.href = user?.role === "teacher" ? "/formal" : "/formal";
   };
 
   const handleViewStats = () => {
