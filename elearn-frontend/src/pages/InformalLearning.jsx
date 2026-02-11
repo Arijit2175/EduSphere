@@ -752,8 +752,8 @@ export default function InformalLearning() {
 
             <Card sx={{ mb: 2, borderRadius: 2 }}>
               <CardContent sx={{ py: 2 }}>
-                <Box sx={{ position: "relative" }}>
-                  <SearchIcon sx={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                  <SearchIcon sx={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', zIndex: 2 }} />
                   <TextField
                     fullWidth
                     size="small"
@@ -761,10 +761,13 @@ export default function InformalLearning() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     sx={{
-                      "& .MuiOutlinedInput-root": {
-                        pl: 3.5,
+                      '& .MuiOutlinedInput-root': {
+                        pl: 5,
                         borderRadius: 2,
-                        bgcolor: "#f8fafc",
+                        bgcolor: '#f8fafc',
+                      },
+                      '& input': {
+                        pl: 2.5,
                       },
                     }}
                   />
