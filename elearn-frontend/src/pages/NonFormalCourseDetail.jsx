@@ -55,6 +55,11 @@ export default function NonFormalCourseDetail() {
     (c) => getCertUserId(c) === user?.id && String(getCertCourseId(c)) === String(courseId)
   );
 
+  // If user is enrolled, always redirect to NonFormalLearner for consistent player layout
+  if (enrolled) {
+    navigate(`/nonformal/learn/${courseId}`);
+    return null;
+  }
   if (!course) {
     return (
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
