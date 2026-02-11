@@ -598,7 +598,7 @@ export default function Dashboard() {
                                 <Button
                                   fullWidth
                                   variant="contained"
-                                  onClick={() => navigate(`/nonformal/learn/${course.id}`)}
+                                  onClick={() => { window.location.href = `/nonformal/learn/${course.id}`; }}
                                 >
                                   Continue Learning
                                 </Button>
@@ -606,7 +606,7 @@ export default function Dashboard() {
                               <Button
                                 fullWidth
                                 variant="outlined"
-                                onClick={() => navigate(`/nonformal/course/${course.id}`)}
+                                onClick={() => { window.location.href = `/nonformal/course/${course.id}`; }}
                               >
                                 Details
                               </Button>
