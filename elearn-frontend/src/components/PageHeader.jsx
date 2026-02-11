@@ -186,46 +186,24 @@ export default function PageHeader({
                 {titleComponent}
               </Box>
             ) : (
-              (() => {
-                // Debug statement to log title prop and TextType input
-                console.log("PageHeader Title prop:", title);
-                return (
-                  <Typography
-                    component={motion.h1}
-                    {...titleMotion}
-                    sx={{
-                      fontWeight: 800,
-                      mb: 1.5,
-                      fontSize: { xs: "2rem", md: "3.1rem" },
-                      letterSpacing: "-0.03em",
-                      textShadow: "0 6px 24px rgba(0,0,0,0.15)",
-                      color: "#ffffff",
-                      fontFamily: '"Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                    }}
-                  >
-                    <TextType
-                      text={Array.isArray(title) ? title : [title]}
-                      typingSpeed={75}
-                      pauseDuration={1500}
-                      deletingSpeed={50}
-                      showCursor
-                      cursorCharacter="|"
-                      cursorBlinkDuration={0.5}
-                      loop
-                      as="span"
-                      style={{
-                        fontWeight: 800,
-                        fontSize: "inherit",
-                        color: "inherit",
-                        fontFamily: 'inherit',
-                      }}
-                    />
-                  </Typography>
-                );
-              })()
+              <Typography
+                component={motion.h1}
+                {...titleMotion}
+                sx={{
+                  fontWeight: 800,
+                  mb: 1.5,
+                  fontSize: { xs: "2rem", md: "3.1rem" },
+                  letterSpacing: "-0.03em",
+                  textShadow: "0 6px 24px rgba(0,0,0,0.15)",
+                  color: "#ffffff",
+                  fontFamily: '"Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                {Array.isArray(title) ? title[0] : title}
+              </Typography>
             )}
             {subtitle && (
               <Typography
