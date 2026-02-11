@@ -58,6 +58,12 @@ const TextType = ({
     return () => observer.disconnect();
   }, [startOnVisible]);
 
+  // Reset animation when textArray or currentTextIndex changes
+  useEffect(() => {
+    setDisplayedText("");
+    setCurrentCharIndex(0);
+  }, [textArray, currentTextIndex]);
+
   useEffect(() => {
     if (!isVisible) return;
 
