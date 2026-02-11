@@ -755,10 +755,10 @@ export default function Dashboard() {
                   const printWindow = window.open('', '_blank');
                   printWindow.document.write(`
                     <html><head><title>Certificate</title>
-                    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+                    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
                     </head><body style="margin:0;padding:0;background:#f8fafc;">
                     <div style="
-                      font-family:'Roboto',sans-serif;
+                      font-family:'Inter',sans-serif;
                       padding:0;
                       min-height:100vh;
                       display:flex;
@@ -785,7 +785,7 @@ export default function Dashboard() {
                           <svg width="320" height="320" viewBox="0 0 320 320">
                             <circle cx="160" cy="160" r="140" fill="#fbbf24" stroke="#f59e0b" stroke-width="12" />
                             <text x="50%" y="54%" text-anchor="middle" fill="#fff" font-size="48" font-family='Playfair Display,serif' font-weight="bold">EduSphere</text>
-                            <text x="50%" y="70%" text-anchor="middle" fill="#fff" font-size="22" font-family='Roboto,sans-serif'>Official</text>
+                            <text x="50%" y="70%" text-anchor="middle" fill="#fff" font-size="22" font-family='Inter,sans-serif'>Official</text>
                           </svg>
                         </div>
                         <div style="position:relative;z-index:1;padding:64px 48px 40px 48px;text-align:center;">
@@ -797,9 +797,9 @@ export default function Dashboard() {
                             margin-bottom:18px;
                             letter-spacing:1px;">Certificate of Completion</h1>
                           <div style="font-size:1.25rem;color:#444;margin-bottom:18px;">This is to proudly certify that</div>
-                          <div style="font-size:2.1rem;font-weight:700;color:#222;margin-bottom:18px;">${user?.name || user?.firstName || "Student"}</div>
+                          <div style="font-size:2.1rem;font-weight:700;color:#222;margin-bottom:18px;font-family:'Inter',sans-serif;">${user?.name || user?.firstName || "Student"}</div>
                           <div style="font-size:1.15rem;color:#444;margin-bottom:18px;">has successfully completed the course</div>
-                          <div style="font-size:1.5rem;font-weight:700;color:#1d4ed8;margin-bottom:18px;">${viewCert.courseName}</div>
+                          <div style="font-size:1.5rem;font-weight:700;color:#1d4ed8;margin-bottom:18px;font-family:'Inter',sans-serif;">${viewCert.courseName}</div>
                           <div style="font-size:1.1rem;color:#666;margin-bottom:8px;">Instructor: <span style="color:#222;">${viewCert.instructor}</span></div>
                           <div style="font-size:1.1rem;color:#666;margin-bottom:8px;">Date: <span style="color:#222;">${new Date(viewCert.earnedAt).toLocaleDateString()}</span></div>
                           <div style="font-size:1.1rem;color:#666;margin-bottom:18px;">Certificate ID: <span style="color:#222;">${viewCert.certificateId}</span></div>
