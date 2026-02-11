@@ -57,7 +57,7 @@ const AssessmentDialog = ({ open, onClose, questions, onSubmit, onRetry, onGoToD
     if (isLast) {
       let correct = 0;
       questions.forEach((q) => {
-        if (answers[q.id] === q.correctAnswer) correct += 1;
+        if (answers[q.id] === parseInt(q.correctAnswer, 10)) correct += 1;
       });
       const pct = totalQ > 0 ? (correct / totalQ) * 100 : 0;
       setScore(pct);
