@@ -20,6 +20,7 @@ export default function PageHeader({
   useSplitTextTitle = false,
   titleComponent,
   children,
+  centered = false,
 }) {
   const fileInputRef = useRef(null);
 
@@ -97,7 +98,7 @@ export default function PageHeader({
         borderRadius: { xs: 3, md: 4 },
         overflow: "hidden",
         boxShadow: "0 18px 48px rgba(14, 116, 144, 0.25)",
-        textAlign: showAvatar ? "left" : "center",
+        textAlign: centered ? "center" : (showAvatar ? "left" : "center"),
       }}
     >
       <Box
@@ -169,12 +170,12 @@ export default function PageHeader({
             display: "flex",
             flexDirection: { xs: "column", md: "row" },
             alignItems: { xs: "center", md: "center" },
-            justifyContent: "space-between",
+            justifyContent: centered ? "center" : "space-between",
             gap: { xs: 3, md: 4 },
-            textAlign: showAvatar ? { xs: "center", md: "left" } : "center",
+            textAlign: centered ? "center" : (showAvatar ? { xs: "center", md: "left" } : "center"),
           }}
         >
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ flex: 1, width: centered ? '100%' : undefined }}>
             {titleComponent ? (
               <Box
                 sx={{
@@ -200,6 +201,7 @@ export default function PageHeader({
                   display: 'flex',
                   alignItems: 'center',
                   gap: 1,
+                  justifyContent: centered ? 'center' : undefined,
                 }}
               >
                 {Array.isArray(title) ? title[0] : title}
