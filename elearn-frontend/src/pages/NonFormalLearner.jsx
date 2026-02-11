@@ -408,7 +408,7 @@ export default function NonFormalLearner() {
 
           <Container maxWidth={false} sx={{ py: 3, px: { xs: 2, md: 4 } }}>
               <Grid container spacing={3}>
-                <Grid item xs={12} lg={9}>
+                <Grid item xs={12} md={9}>
                   <Box sx={{ borderRadius: 3, overflow: "hidden", bgcolor: cardBg, border: `1px solid ${borderColor}` }}>
                   <Box sx={{ aspectRatio: "16 / 9", minHeight: 450, bgcolor: "#000" }}>
                     <iframe
@@ -518,7 +518,7 @@ export default function NonFormalLearner() {
                 </Box>
               </Grid>
 
-                <Grid item xs={12} lg={3}>
+                <Grid item xs={12} md={3}>
                   <Box
                     sx={{
                       borderRadius: 3,
