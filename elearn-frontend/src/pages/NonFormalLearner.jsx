@@ -75,6 +75,243 @@ const AssessmentDialog = ({ open, onClose, questions, onSubmit, onRetry, onGoToD
 
   const handlePrev = () => setStep((s) => Math.max(0, s - 1));
 
+  const resetDialog = () => {
+    setStep(0);
+    setAnswers({});
+    setSubmitted(false);
+    setScore(0);
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={() => {
+        if (!submitted) {
+          resetDialog();
+          onClose();
+        }
+      }}
+      maxWidth="sm"
+      fullWidth
+      fullScreen={isMobile}
+      PaperProps={{
+        sx: {
+          bgcolor: "#1a1a2e",
+          color: "#fff",
+          borderRadius: isMobile ? 0 : 3,
+          border: "1px solid rgba(255,255,255,0.08)",
+        },
+      }}
+    >
+      <DialogTitle sx={{ borderBottom: "1px solid rgba(255,255,255,0.08)", pb: 2 }}>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <AssignmentIcon sx={{ color: "#e53935" }} />
+          <Typography variant="h6" fontWeight={700}>Final Assessment</Typography>
+        </Stack>
+      </DialogTitle>
+      <DialogContent sx={{ py: 3 }}>
+        {!submitted ? (
+          <Box>
+            <Stack direction="row" spacing={0.5} justifyContent="center" mb={3}>
+              {questions.map((_, i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    bgcolor:
+                      i === step
+                        ? "#e53935"
+                        : answers[questions[i]?.id] !== undefined
+                          ? "#66bb6a"
+                          : "rgba(255,255,255,0.15)",
+                    transition: "all 0.2s",
+                  }}
+                />
+              ))}
+            </Stack>
+
+            <Alert severity="info" sx={{ mb: 3, bgcolor: "rgba(33,150,243,0.1)", color: "#90caf9" }}>
+              You need <strong>70%</strong> to pass and earn the certificate
+            </Alert>
+
+            <Typography variant="subtitle1" fontWeight={700} mb={2}>
+              {step + 1}. {currentQ?.question}
+            </Typography>
+
+            <RadioGroup
+              value={answers[currentQ?.id]?.toString() ?? ""}
+              onChange={(e) => handleAnswer(e.target.value)}
+            >
+              {currentQ?.options.map((opt, i) => (
+                <Paper
+                  key={i}
+                  sx={{
+                    mb: 1,
+                    p: 1.5,
+                    borderRadius: 2,
+                    bgcolor: answers[currentQ.id] === i ? "rgba(229,57,53,0.15)" : "rgba(255,255,255,0.03)",
+                    border: answers[currentQ.id] === i ? "1px solid #e53935" : "1px solid rgba(255,255,255,0.08)",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    "&:hover": { bgcolor: "rgba(255,255,255,0.06)" },
+                  }}
+                  onClick={() => handleAnswer(i.toString())}
+                >
+                  <FormControlLabel
+                    value={i.toString()}
+                    control={<Radio sx={{ color: "rgba(255,255,255,0.3)", "&.Mui-checked": { color: "#e53935" } }} />}
+                    label={<Typography variant="body2" color="#e0e0e0">{opt}</Typography>}
+                    sx={{ m: 0, width: "100%" }}
+                  />
+                </Paper>
+              ))}
+            </RadioGroup>
+          </Box>
+        ) : (
+          <Stack alignItems="center" spacing={3} py={3}>
+            <Box
+              sx={{
+                width: 100,
+                height: 100,
+                borderRadius: "50%",
+                bgcolor: passed ? "rgba(102,187,106,0.15)" : "rgba(255,167,38,0.15)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography variant="h3" fontWeight={800} color={passed ? "#66bb6a" : "#ffa726"}>
+                {score.toFixed(0)}%
+              </Typography>
+            </Box>
+            <Typography variant="h6" fontWeight={700}>
+              {passed ? "🎉 Congratulations!" : "Almost there!"}
+            </Typography>
+            <Typography variant="body2" color="rgba(255,255,255,0.6)" textAlign="center">
+              {passed
+                ? "You passed! Your certificate has been generated."
+                : `You scored ${score.toFixed(0)}%. You need 70% to pass. Review the lessons and try again.`}
+            </Typography>
+          </Stack>
+        )}
+      </DialogContent>
+      <DialogActions sx={{ borderTop: "1px solid rgba(255,255,255,0.08)", p: 2 }}>
+        {!submitted ? (
+          <>
+            <Button onClick={handlePrev} disabled={step === 0} sx={{ color: "rgba(255,255,255,0.5)" }}>
+              Previous
+            </Button>
+            <Box sx={{ flex: 1 }} />
+            <Chip
+              label={`${step + 1} / ${totalQ}`}
+              size="small"
+              sx={{ bgcolor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)", mr: 1 }}
+            />
+            <Button
+              variant="contained"
+              onClick={handleNext}
+              disabled={answers[currentQ?.id] === undefined}
+              sx={{
+                bgcolor: "#e53935",
+                "&:hover": { bgcolor: "#c62828" },
+                "&:disabled": { bgcolor: "rgba(255,255,255,0.08)" },
+              }}
+            >
+              {isLast ? "Submit" : "Next"}
+            </Button>
+          </>
+        ) : (
+          <>
+            {passed ? (
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => {
+                  resetDialog();
+                  onGoToDashboard();
+                }}
+                sx={{ bgcolor: "#e53935", "&:hover": { bgcolor: "#c62828" } }}
+              >
+                Go to Dashboard
+              </Button>
+            ) : (
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => {
+                  resetDialog();
+                  onRetry();
+                }}
+                sx={{ bgcolor: "#e53935", "&:hover": { bgcolor: "#c62828" } }}
+              >
+                Review & Retry
+              </Button>
+            )}
+          </>
+        )}
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+
+export default function NonFormalLearner() {
+  const { isOpen } = useSidebar();
+  const { user } = useAuth();
+  const { courseId } = useParams();
+  const { courses, getCourseProgress, updateLessonProgress, updateAssessmentScore, resetCourseProgress, earnCertificate, enrollments, progress, isLoading } = useNonFormal();
+  const navigate = useNavigate();
+
+  // Debug logging after all hooks/vars
+  console.log('DEBUG: courseId param:', courseId);
+  console.log('DEBUG: courses array:', courses);
+  console.log('DEBUG: enrollments:', enrollments);
+  console.log('DEBUG: progress:', progress);
+
+  const course = courses.find((c) => String(c.id) === String(courseId));
+  const userProgress = getCourseProgress(user?.id, courseId);
+  const [currentLessonIdx, setCurrentLessonIdx] = useState(userProgress?.currentLessonIndex || 0);
+  const [openQuiz, setOpenQuiz] = useState(false);
+  const quizQuestions = course?.assessmentQuestions && Array.isArray(course.assessmentQuestions) && course.assessmentQuestions.length > 0
+    ? course.assessmentQuestions
+    : [];
+
+  // Show loading state while context is loading OR if we don't have courses/enrollments data yet
+  const isDataPending = isLoading || !courses || courses.length === 0 || !enrollments;
+  
+  if (isDataPending) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <Sidebar />
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, transition: "margin-left 0.3s ease", p: 4, display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <Typography variant="h5">Loading course...</Typography>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Only show error if data is fully loaded but course/progress not found
+  if (!course || !userProgress) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <Sidebar />
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, transition: "margin-left 0.3s ease", p: 4 }}>
+            <Typography variant="h5">Course not found or not enrolled</Typography>
+            <Button onClick={() => navigate("/nonformal") } sx={{ mt: 2 }}>
+              Back to Courses
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
   const currentLesson = course.lessons[currentLessonIdx];
   const progressPercentage = ((userProgress.completedLessons?.length || 0) / (course.lessons?.length || 1)) * 100;
