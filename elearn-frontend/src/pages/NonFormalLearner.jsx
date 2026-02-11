@@ -676,7 +676,9 @@ export default function NonFormalLearner() {
             onClose={() => setOpenQuiz(false)}
             questions={quizQuestions}
             onSubmit={(score) => {
-              updateAssessmentScore(user?.id, courseId, score);
+              if (score < 70) {
+                updateAssessmentScore(user?.id, courseId, score);
+              }
               if (score >= 70) {
                 earnCertificate(user?.id, courseId);
               } else {
