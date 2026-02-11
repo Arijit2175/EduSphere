@@ -1,5 +1,6 @@
 import API_URL from "../config";
-import { Box, Grid, Card, CardContent, Typography, Button, Stack, LinearProgress, Chip, Tab, Tabs, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress } from "@mui/material";
+import { Box, Grid, Card, CardContent, Typography, Button, Stack, LinearProgress, Chip, Tab, Tabs, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import BarLoader from "../components/BarLoader";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Section from "../components/Section";
@@ -100,12 +101,7 @@ export default function Dashboard() {
         <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Navbar />
           <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Box sx={{ textAlign: "center" }}>
-              <CircularProgress sx={{ mb: 2 }} />
-              <Typography variant="h6" sx={{ color: "#666" }}>
-                Loading your dashboard...
-              </Typography>
-            </Box>
+            <BarLoader />
           </Box>
         </Box>
       </Box>

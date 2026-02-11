@@ -26,8 +26,9 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  CircularProgress,
 } from "@mui/material";
+
+import BarLoader from "../components/BarLoader";
 
 
 
@@ -574,10 +575,7 @@ export default function InformalLearning() {
           <Navbar />
           <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Box sx={{ textAlign: "center" }}>
-              <CircularProgress sx={{ mb: 2 }} />
-              <Typography variant="h6" sx={{ color: "#666" }}>
-                Loading discussions...
-              </Typography>
+              <BarLoader />
             </Box>
           </Box>
         </Box>

@@ -1,4 +1,5 @@
-import { Box, Container, Grid, Card, CardContent, Typography, Button, Stack, Chip, LinearProgress, CircularProgress } from "@mui/material";
+import { Box, Container, Grid, Card, CardContent, Typography, Button, Stack, Chip, LinearProgress } from "@mui/material";
+import BarLoader from "../components/BarLoader";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -34,7 +35,7 @@ export default function NonFormalLearning() {
         <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Navbar />
           <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <CircularProgress />
+            <BarLoader />
           </Box>
         </Box>
       </Box>

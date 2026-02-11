@@ -1,3 +1,4 @@
+import BarLoader from "../components/BarLoader";
 import API_URL from "../config";
 
 import { Box, Container, Button, Typography, Card, CardContent, Link, Alert } from "@mui/material";
@@ -188,7 +189,7 @@ export default function ForgotPassword() {
                     }}
                     disabled={loading}
                   >
-                    {loading ? "Updating..." : "Reset Password"}
+                    {loading ? <BarLoader /> : "Reset Password"}
                   </Button>
 
                   <Typography variant="body2" sx={{ textAlign: "center", color: "#666", mb: 2 }}>

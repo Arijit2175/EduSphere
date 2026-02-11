@@ -1,3 +1,4 @@
+import BarLoader from "../components/BarLoader";
 import { Box, Container, Button, Typography, Card, CardContent, Link, Alert } from "@mui/material";
 import { motion } from "framer-motion";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
@@ -282,7 +283,7 @@ export default function Register() {
                               },
                             }}
                           >
-                            {loading ? "Creating Account..." : "Create Account"}
+                            {loading ? <BarLoader /> : "Create Account"}
                           </Button>
                         </motion.div>
 

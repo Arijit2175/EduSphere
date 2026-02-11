@@ -1,4 +1,5 @@
-import { Box, Container, Tabs, Tab, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress } from "@mui/material";
+import { Box, Container, Tabs, Tab, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
+import BarLoader from "../components/BarLoader";
 import { useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -41,7 +42,7 @@ export default function FormalLearning() {
         <Box sx={{ flexGrow: 1, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
           <Navbar />
           <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <CircularProgress />
+            <BarLoader />
           </Box>
         </Box>
       </Box>

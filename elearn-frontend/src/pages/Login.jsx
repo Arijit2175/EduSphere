@@ -1,3 +1,4 @@
+import BarLoader from "../components/BarLoader";
 import { Box, Container, Button, Typography, Card, CardContent, Link, Alert } from "@mui/material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -288,7 +289,7 @@ function Login() {
                       },
                     }}
                   >
-                    {loading ? "Signing in..." : "Sign In"}
+                    {loading ? <BarLoader /> : "Sign In"}
                   </Button>
                 </motion.div>
 

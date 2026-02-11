@@ -18,8 +18,8 @@ import {
   Drawer,
   useMediaQuery,
   useTheme,
-  CircularProgress,
 } from "@mui/material";
+import BarLoader from "../components/BarLoader";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EmojiEmotionsOutlinedIcon from '@mui/icons-material/EmojiEmotionsOutlined';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -594,12 +594,7 @@ export default function AITutor() {
         <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Navbar />
           <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Box sx={{ textAlign: "center" }}>
-              <CircularProgress sx={{ mb: 2 }} />
-              <Typography variant="h6" sx={{ color: "#666" }}>
-                Loading AI Tutor...
-              </Typography>
-            </Box>
+            <BarLoader />
           </Box>
         </Box>
       </Box>
@@ -959,8 +954,7 @@ export default function AITutor() {
                   },
                 }}
               >
-                {loading ? "Sending..." : "Send"}
-                {!loading && <SendRoundedIcon sx={{ ml: 1, fontSize: 18 }} />}
+                {loading ? <BarLoader /> : (<><span>Send</span><SendRoundedIcon sx={{ ml: 1, fontSize: 18 }} /></>)}
               </Button>
               </Box>
             </Box>

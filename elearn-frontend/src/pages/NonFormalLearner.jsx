@@ -18,6 +18,7 @@ import {
   Radio,
   Alert,
   Chip,
+  BarLoader,
   useMediaQuery,
   Paper,
 } from "@mui/material";
@@ -288,7 +289,7 @@ export default function NonFormalLearner() {
         <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Navbar />
           <Box sx={{ flexGrow: 1, ml: { xs: 0, md: isOpen ? 25 : 8.75 }, transition: "margin-left 0.3s ease", p: 4, display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <Typography variant="h5">Loading course...</Typography>
+            <BarLoader />
           </Box>
         </Box>
       </Box>
