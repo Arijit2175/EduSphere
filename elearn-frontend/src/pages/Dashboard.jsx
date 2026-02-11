@@ -306,11 +306,11 @@ export default function Dashboard() {
             title={
               user?.role === "teacher"
                 ? [
-                    `Welcome back, ${displayName || "Student"}!`,
+                    `Welcome back, ${displayName && displayName.trim() ? displayName : "Student"}!`,
                     "Ready to teach?"
                   ]
                 : [
-                    `Welcome back, ${displayName || "Student"}!`,
+                    `Welcome back, ${displayName && displayName.trim() ? displayName : "Student"}!`,
                     "Have fun learning!"
                   ]
             }
