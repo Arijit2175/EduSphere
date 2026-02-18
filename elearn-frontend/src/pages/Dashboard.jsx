@@ -365,38 +365,23 @@ export default function Dashboard() {
                     <Grid key={course.id}>
                       <Card>
                         <CardContent>
-                          <Stack direction="row" alignItems="flex-start">
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="h6" sx={{ fontWeight: 700 }}>{course.title}</Typography>
-                              <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                                {teacherCountsLoading ? "Loading..." : `${teacherStudentCounts[course.id] || 0} students`}
-                              </Typography>
-                            </Box>
-                            <Stack direction="row" spacing={2} sx={{ ml: 2 }}>
-                              <Button 
-                                size="small" 
-                                variant="outlined"
-                                startIcon={<EditIcon />}
-                                onClick={() => navigate("/formal")}
-                              >
-                                Manage
-                              </Button>
-                            </Stack>
-                          </Stack>
+                          <Box>
+                            <Typography variant="h6" sx={{ fontWeight: 700 }}>{course.title}</Typography>
+                            <Typography variant="caption" sx={{ color: "#6b7280" }}>
+                              {teacherCountsLoading ? "Loading..." : `${teacherStudentCounts[course.id] || 0} students`}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ mt: 2 }}>
+                            <Button 
+                              fullWidth
+                              variant="outlined"
+                              startIcon={<EditIcon />}
+                              onClick={() => navigate("/formal")}
+                            >
+                              Manage
+                            </Button>
+                          </Box>
 
-                          {(course.schedules && course.schedules.length > 0) && (
-                            <Box sx={{ mt: 2 }}>
-                              <Typography variant="subtitle2" sx={{ mb: 1 }}>Scheduled Class</Typography>
-                              <Stack spacing={1}>
-                                <Stack key={course.schedules[0].id} direction="row" spacing={1} alignItems="center">
-                                  <Chip icon={<VideocamIcon />} label={course.schedules[0].title} size="small" />
-                                  {course.schedules[0].meetLink && (
-                                    <Button size="small" href={course.schedules[0].meetLink} target="_blank" rel="noopener noreferrer">Open</Button>
-                                  )}
-                                </Stack>
-                              </Stack>
-                            </Box>
-                          )}
                         </CardContent>
                       </Card>
                     </Grid>
