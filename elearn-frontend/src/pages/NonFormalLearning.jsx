@@ -155,8 +155,9 @@ export default function NonFormalLearning() {
                 <Grid container spacing={3}>
                   {inProgressCourses.map((course) => {
                     const progress = getCourseProgress(user?.id, course.id);
-                    const progressPercent = progress?.completedLessons
-                      ? (progress.completedLessons.length / (course.lessons?.length || 1)) * 100
+                    const validCompletedLessons = progress?.completedLessons?.filter(idx => idx >= 0 && idx < (course.lessons?.length || 1)) || [];
+                    const progressPercent = validCompletedLessons.length
+                      ? Math.min(100, (validCompletedLessons.length / (course.lessons?.length || 1)) * 100)
                       : 0;
                     const hasCertificate = userCertificates.some(
                       (c) => String(getCertCourseId(c)) === String(course.id)
