@@ -316,15 +316,21 @@ export default function NonFormalLearner() {
   }
 
   const currentLesson = course.lessons[currentLessonIdx];
-  const progressPercentage = ((userProgress.completedLessons?.length || 0) / (course.lessons?.length || 1)) * 100;
+  // Clamp completedLessons to valid lesson indices
+  const validCompletedLessons = (userProgress.completedLessons || []).filter(idx => idx >= 0 && idx < course.lessons.length);
+  const progressPercentage = Math.min(100, (validCompletedLessons.length / (course.lessons?.length || 1)) * 100);
   const isLastLesson = currentLessonIdx === course.lessons.length - 1;
 
   const handleNextLesson = () => {
-    // Mark current lesson as complete before moving to next
-    updateLessonProgress(user?.id, courseId, currentLessonIdx);
-    
+    // Only update progress if within valid lesson range
+    if (currentLessonIdx < course.lessons.length) {
+      updateLessonProgress(user?.id, courseId, currentLessonIdx);
+    }
+    // If not last lesson, go to next; if last, show assessment
     if (!isLastLesson) {
-      setCurrentLessonIdx(currentLessonIdx + 1);
+      if (currentLessonIdx < course.lessons.length - 1) {
+        setCurrentLessonIdx(currentLessonIdx + 1);
+      }
     } else {
       setOpenQuiz(true);
     }
