@@ -380,9 +380,14 @@ export const NonFormalProvider = ({ children }) => {
           }
           setProgress(progressObj);
         }
+        console.log("Fetching certificates from /nonformal/certificates/");
         const certsRes = await fetch(`${API_URL}/nonformal/certificates/`, { headers: authHeader });
         if (certsRes.ok) {
-          setCertificates(await certsRes.json());
+          const certs = await certsRes.json();
+          console.log("Certificates fetched:", certs);
+          setCertificates(certs);
+        } else {
+          console.log("Failed to fetch certificates", certsRes.status);
         }
       } catch (err) {
         setCourses(DEFAULT_COURSES);
