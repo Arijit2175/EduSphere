@@ -368,10 +368,14 @@ export const NonFormalProvider = ({ children }) => {
           // Convert array to object keyed by userId-courseId
           const progressObj = {};
           for (const p of progressArr) {
+            // Find the course to get the lesson count
+            const course = (Array.isArray(fetchedCourses) ? fetchedCourses : DEFAULT_COURSES).find(c => String(c.id) === String(p.course_id));
+            const lessonCount = course?.lessons?.length || 1;
+            const cappedProgress = Math.min(p.progress || 0, lessonCount);
             progressObj[`${p.user_id || user.id}-${p.course_id}`] = {
               ...p,
-              currentLessonIndex: p.progress || 0,
-              completedLessons: Array.from({ length: p.progress || 0 }, (_, i) => i),
+              currentLessonIndex: cappedProgress,
+              completedLessons: Array.from({ length: cappedProgress }, (_, i) => i),
             };
           }
           setProgress(progressObj);
