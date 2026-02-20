@@ -310,92 +310,85 @@ export const NonFormalProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
+  // Expose a refresh function to fetch all non-formal data
+  const refreshNonFormalData = async () => {
+    setIsLoading(true);
+    if (!user || !user.access_token) {
+      setCourses(DEFAULT_COURSES);
+      setEnrollments([]);
+      setProgress({});
+      setCertificates([]);
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const token = user.access_token;
+      const authHeader = { Authorization: `Bearer ${token}` };
+      const coursesRes = await fetch(`${API_URL}/nonformal/courses/`, { headers: authHeader });
+      let fetchedCourses = DEFAULT_COURSES;
+      if (coursesRes.ok) {
+        fetchedCourses = await coursesRes.json();
+        if (!Array.isArray(fetchedCourses) || fetchedCourses.length === 0) {
+          fetchedCourses = DEFAULT_COURSES;
+        }
+      }
+      // Merge lessons and attachments from DEFAULT_COURSES by ID
+      const courseMap = Object.fromEntries(DEFAULT_COURSES.map(c => [String(c.id), c]));
+      const mergedCourses = fetchedCourses.map(c => {
+        let extra = courseMap[String(c.id)];
+        if (!extra) {
+          extra = DEFAULT_COURSES.find(dc => dc.title.toLowerCase() === (c.title || '').toLowerCase());
+        }
+        let merged = { ...c, lessons: extra?.lessons || [], attachments: extra?.attachments || [], outcomes: extra?.outcomes || [], assessmentQuestions: extra?.assessmentQuestions || [] };
+        if ((!merged.lessons || merged.lessons.length === 0) && c.title) {
+          const fallback = DEFAULT_COURSES.find(dc => dc.title.toLowerCase() === c.title.toLowerCase());
+          if (fallback) {
+            merged.lessons = fallback.lessons || [];
+            merged.attachments = fallback.attachments || [];
+            merged.outcomes = fallback.outcomes || [];
+            merged.assessmentQuestions = fallback.assessmentQuestions || [];
+          }
+        }
+        return merged;
+      });
+      setCourses(mergedCourses);
+      // Enrollments
+      const enrollmentsRes = await fetch(`${API_URL}/nonformal/enrollments/`, { headers: authHeader });
+      if (enrollmentsRes.ok) {
+        setEnrollments(await enrollmentsRes.json());
+      }
+      // Progress
+      const progressRes = await fetch(`${API_URL}/nonformal/progress/`, { headers: authHeader });
+      if (progressRes.ok) {
+        const progressArr = await progressRes.json();
+        const progressObj = {};
+        for (const p of progressArr) {
+          const course = mergedCourses.find(c => String(c.id) === String(p.course_id));
+          const lessonCount = course?.lessons?.length || 1;
+          const cappedProgress = Math.min(p.progress || 0, lessonCount);
+          progressObj[`${p.user_id || user.id}-${p.course_id}`] = {
+            ...p,
+            currentLessonIndex: cappedProgress,
+            completedLessons: Array.from({ length: cappedProgress }, (_, i) => i),
+          };
+        }
+        setProgress(progressObj);
+      }
+      // Certificates
+      const certsRes = await fetch(`${API_URL}/nonformal/certificates/`, { headers: authHeader });
+      if (certsRes.ok) {
+        setCertificates(await certsRes.json());
+      }
+    } catch (err) {
+      setCourses(DEFAULT_COURSES);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Fetch all non-formal data from backend when user/token changes
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      if (!user || !user.access_token) {
-        setCourses(DEFAULT_COURSES);
-        setEnrollments([]);
-        setProgress({});
-        setCertificates([]);
-        setIsLoading(false);
-        return;
-      }
-      try {
-        const token = user.access_token;
-        const authHeader = { Authorization: `Bearer ${token}` };
-        const coursesRes = await fetch(`${API_URL}/nonformal/courses/`, { headers: authHeader });
-        if (coursesRes.ok) {
-          const fetchedCourses = await coursesRes.json();
-          if (Array.isArray(fetchedCourses) && fetchedCourses.length > 0) {
-            // Merge lessons and attachments from DEFAULT_COURSES by ID
-            const courseMap = Object.fromEntries(DEFAULT_COURSES.map(c => [String(c.id), c]));
-            const mergedCourses = fetchedCourses.map(c => {
-              // Try to match by id or by title if id not found
-              let extra = courseMap[String(c.id)];
-              if (!extra) {
-                // Fallback: match by title (case-insensitive)
-                extra = DEFAULT_COURSES.find(dc => dc.title.toLowerCase() === (c.title || '').toLowerCase());
-              }
-              let merged = { ...c, lessons: extra?.lessons || [], attachments: extra?.attachments || [], outcomes: extra?.outcomes || [], assessmentQuestions: extra?.assessmentQuestions || [] };
-              // Final fallback: if no lessons, try to get from DEFAULT_COURSES by title
-              if ((!merged.lessons || merged.lessons.length === 0) && c.title) {
-                const fallback = DEFAULT_COURSES.find(dc => dc.title.toLowerCase() === c.title.toLowerCase());
-                if (fallback) {
-                  merged.lessons = fallback.lessons || [];
-                  merged.attachments = fallback.attachments || [];
-                  merged.outcomes = fallback.outcomes || [];
-                  merged.assessmentQuestions = fallback.assessmentQuestions || [];
-                }
-              }
-              return merged;
-            });
-            setCourses(mergedCourses);
-          } else {
-            setCourses(DEFAULT_COURSES);
-          }
-        } else {
-          setCourses(DEFAULT_COURSES);
-        }
-        const enrollmentsRes = await fetch(`${API_URL}/nonformal/enrollments/`, { headers: authHeader });
-        if (enrollmentsRes.ok) {
-          setEnrollments(await enrollmentsRes.json());
-        }
-        const progressRes = await fetch(`${API_URL}/nonformal/progress/`, { headers: authHeader });
-        if (progressRes.ok) {
-          const progressArr = await progressRes.json();
-          // Convert array to object keyed by userId-courseId
-          const progressObj = {};
-          for (const p of progressArr) {
-                        // Find the course to get the lesson count
-            const course = (Array.isArray(fetchedCourses) ? fetchedCourses : DEFAULT_COURSES).find(c => String(c.id) === String(p.course_id));
-            const lessonCount = course?.lessons?.length || 1;
-            const cappedProgress = Math.min(p.progress || 0, lessonCount);
-            progressObj[`${p.user_id || user.id}-${p.course_id}`] = {
-              ...p,
-                            currentLessonIndex: cappedProgress,
-              completedLessons: Array.from({ length: cappedProgress }, (_, i) => i),
-            };
-          }
-          setProgress(progressObj);
-        }
-        console.log("Fetching certificates from /nonformal/certificates/");
-        const certsRes = await fetch(`${API_URL}/nonformal/certificates/`, { headers: authHeader });
-        if (certsRes.ok) {
-          const certs = await certsRes.json();
-          console.log("Certificates fetched:", certs);
-          setCertificates(certs);
-        } else {
-          console.log("Failed to fetch certificates", certsRes.status);
-        }
-      } catch (err) {
-        setCourses(DEFAULT_COURSES);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
+    refreshNonFormalData();
   }, [user?.id, user?.access_token]);
 
   const enrollCourse = async (userId, courseId) => {
@@ -621,6 +614,7 @@ export const NonFormalProvider = ({ children }) => {
     resetCourseProgress,
     resetAllData,
     earnCertificate,
+    refreshNonFormalData,
   }), [courses, enrollments, progress, certificates, isLoading]);
 
   return (
