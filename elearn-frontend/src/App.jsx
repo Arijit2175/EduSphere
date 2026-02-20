@@ -243,17 +243,17 @@ export default function App() {
     } catch {}
   }, []);
   return (
-    <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <AuthProvider>
-          <LoadingProvider>
+    <AuthProvider>
+      <LoadingProvider>
+        <ThemeProvider theme={theme}>
+          <BrowserRouter>
             <SessionExpiredToast />
             <ErrorBoundary>
               <AppShell />
             </ErrorBoundary>
-          </LoadingProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </ThemeProvider>
+          </BrowserRouter>
+        </ThemeProvider>
+      </LoadingProvider>
+    </AuthProvider>
   );
 }
