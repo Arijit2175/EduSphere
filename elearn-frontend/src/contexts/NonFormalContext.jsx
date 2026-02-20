@@ -480,24 +480,28 @@ export const NonFormalProvider = ({ children }) => {
   const updateLessonProgress = async (userId, courseId, lessonIndex) => {
     try {
       const token = JSON.parse(localStorage.getItem("user"))?.access_token;
-      const res = await fetch(`${API_URL}/nonformal/progress/`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ course_id: courseId, lesson_index: lessonIndex }),
-      });
-      if (res.ok) {
-        setProgress((prev) => ({
+      // Compute the new completedLessons array
+      setProgress((prev) => {
+        const prevCompleted = prev[`${userId}-${courseId}`]?.completedLessons || [];
+        const completedLessons = [...new Set([...prevCompleted, lessonIndex])];
+        // Send completedLessons to backend
+        fetch(`${API_URL}/nonformal/progress/`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ course_id: courseId, completed_lessons: completedLessons }),
+        });
+        return {
           ...prev,
           [`${userId}-${courseId}`]: {
             ...(prev[`${userId}-${courseId}`] || {}),
             currentLessonIndex: lessonIndex,
-            completedLessons: [...new Set([...(prev[`${userId}-${courseId}`]?.completedLessons || []), lessonIndex])],
+            completedLessons,
           },
-        }));
-      }
+        };
+      });
     } catch (err) {}
   };
 
