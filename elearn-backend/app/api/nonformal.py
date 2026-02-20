@@ -4,25 +4,13 @@ def get_lesson_count(course_id):
     if not conn:
         return 1
     cursor = conn.cursor()
-    cursor.execute("SELECT lessons FROM courses WHERE id=%s", (course_id,))
-    course = cursor.fetchone()
+    cursor.execute("SELECT COUNT(*) FROM lessons WHERE course_id=%s", (course_id,))
+    count = cursor.fetchone()
     cursor.close()
     return_db_connection(conn)
-    if not course:
+    if not count:
         return 1
-    lessons = course[0]
-    if isinstance(lessons, list):
-        return len(lessons)
-    try:
-        parsed = ast.literal_eval(lessons)
-        if isinstance(parsed, list):
-            return len(parsed)
-    except Exception:
-        pass
-    try:
-        return int(lessons)
-    except Exception:
-        return 1
+    return count[0]
 import uuid
 from fastapi import APIRouter, HTTPException, Depends, Request
 from app.db import get_db_connection, return_db_connection
