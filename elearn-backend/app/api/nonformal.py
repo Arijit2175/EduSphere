@@ -162,7 +162,7 @@ async def claim_nonformal_certificate(request: Request, user=Depends(get_current
         cursor.close()
         return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Not enrolled")
-    progress = enrollment[0]
+    progress = enrollment["progress"]
     lesson_count = get_lesson_count(course_id)
     if int(progress) < int(lesson_count):
         cursor.close()
