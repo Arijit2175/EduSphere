@@ -693,6 +693,14 @@ export default function NonFormalLearner() {
                 updateAssessmentScore(user?.id, courseId, score);
               }
               if (score >= 70) {
+                // Mark all lessons as completed before claiming certificate
+                const totalLessons = course?.lessons?.length || 0;
+                if (totalLessons > 0) {
+                  // Complete all lessons (indexes 0 to totalLessons-1)
+                  for (let idx = 0; idx < totalLessons; idx++) {
+                    updateLessonProgress(user?.id, courseId, idx);
+                  }
+                }
                 earnCertificate(user?.id, courseId);
               } else {
                 resetCourseProgress(user?.id, courseId);
