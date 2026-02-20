@@ -10,7 +10,13 @@ def get_lesson_count(course_id):
     return_db_connection(conn)
     if not count:
         return 1
-    return count[0]
+    print("[DEBUG] lesson count result:", count)
+    if isinstance(count, tuple):
+        return count[0]
+    elif isinstance(count, dict):
+        return list(count.values())[0]
+    else:
+        raise Exception("Unexpected lesson count result type: {}".format(type(count)))
 import uuid
 from fastapi import APIRouter, HTTPException, Depends, Request
 from app.db import get_db_connection, return_db_connection
