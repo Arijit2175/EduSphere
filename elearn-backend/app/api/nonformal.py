@@ -1,3 +1,28 @@
+import ast
+def get_lesson_count(course_id):
+    conn = get_db_connection()
+    if not conn:
+        return 1
+    cursor = conn.cursor()
+    cursor.execute("SELECT lessons FROM courses WHERE id=%s", (course_id,))
+    course = cursor.fetchone()
+    cursor.close()
+    return_db_connection(conn)
+    if not course:
+        return 1
+    lessons = course[0]
+    if isinstance(lessons, list):
+        return len(lessons)
+    try:
+        parsed = ast.literal_eval(lessons)
+        if isinstance(parsed, list):
+            return len(parsed)
+    except Exception:
+        pass
+    try:
+        return int(lessons)
+    except Exception:
+        return 1
 import uuid
 from fastapi import APIRouter, HTTPException, Depends, Request
 from app.db import get_db_connection, return_db_connection
@@ -131,6 +156,18 @@ async def claim_nonformal_certificate(request: Request, user=Depends(get_current
         cursor.close()
         return_db_connection(conn)
         raise HTTPException(status_code=400, detail="Certificate already claimed")
+    cursor.execute("SELECT progress FROM enrollments WHERE user_id=%s AND course_id=%s", (user["id"], course_id))
+    enrollment = cursor.fetchone()
+    if not enrollment:
+        cursor.close()
+        return_db_connection(conn)
+        raise HTTPException(status_code=400, detail="Not enrolled")
+    progress = enrollment[0]
+    lesson_count = get_lesson_count(course_id)
+    if int(progress) < int(lesson_count):
+        cursor.close()
+        return_db_connection(conn)
+        raise HTTPException(status_code=400, detail="Course not completed. Complete all lessons to claim certificate.")
     cert_id = str(uuid.uuid4())
     cursor.execute("INSERT INTO certificates (student_id, course_id, certificate_id) VALUES (%s, %s, %s)", (user["id"], course_id, cert_id))
     conn.commit()
@@ -140,22 +177,3 @@ async def claim_nonformal_certificate(request: Request, user=Depends(get_current
     return_db_connection(conn)
     return cert
 
-@router.put("/progress/score")
-async def update_nonformal_progress_score(request: Request, user=Depends(get_current_user)):
-    data = await request.json()
-    course_id = data.get("course_id")
-    score = data.get("score")
-    if not course_id or score is None:
-        raise HTTPException(status_code=400, detail="Missing course_id or score")
-    conn = get_db_connection()
-    if not conn:
-        raise HTTPException(status_code=500, detail="DB connection error")
-    cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE enrollments SET progress=%s WHERE user_id=%s AND course_id=%s",
-        (score, user["id"], course_id)
-    )
-    conn.commit()
-    cursor.close()
-    return_db_connection(conn)
-    return {"message": "Progress score updated"}
