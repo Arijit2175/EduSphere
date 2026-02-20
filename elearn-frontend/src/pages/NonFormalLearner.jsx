@@ -322,16 +322,16 @@ export default function NonFormalLearner() {
   const isLastLesson = currentLessonIdx === course.lessons.length - 1;
 
   const handleNextLesson = () => {
-    // Only update progress if within valid lesson range
-    if (currentLessonIdx < course.lessons.length) {
-      updateLessonProgress(user?.id, courseId, currentLessonIdx);
-    }
-    // If not last lesson, go to next; if last, show assessment
+    // Always update progress for the current lesson
+    updateLessonProgress(user?.id, courseId, currentLessonIdx);
+    // If not last lesson, go to next; if last, mark last lesson as completed and show assessment
     if (!isLastLesson) {
       if (currentLessonIdx < course.lessons.length - 1) {
         setCurrentLessonIdx(currentLessonIdx + 1);
       }
     } else {
+      // Ensure last lesson is marked as completed before assessment
+      updateLessonProgress(user?.id, courseId, currentLessonIdx);
       setOpenQuiz(true);
     }
   };
