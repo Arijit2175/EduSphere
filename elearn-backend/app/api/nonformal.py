@@ -108,14 +108,19 @@ def enroll_nonformal_course(data: EnrollRequest, user=Depends(get_current_user))
 async def update_nonformal_progress(request: Request, user=Depends(get_current_user)):
     data = await request.json()
     course_id = data.get("course_id")
-    lesson_index = data.get("lesson_index")
+    completed_lessons = data.get("completed_lessons")
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
+    if completed_lessons is not None and isinstance(completed_lessons, list):
+        progress = len(set(completed_lessons))
+    else:
+        lesson_index = data.get("lesson_index")
+        progress = int(lesson_index) + 1 if lesson_index is not None else 0
     cursor.execute(
         "UPDATE enrollments SET progress=%s WHERE user_id=%s AND course_id=%s",
-        (lesson_index, user["id"], course_id)
+        (progress, user["id"], course_id)
     )
     conn.commit()
 
