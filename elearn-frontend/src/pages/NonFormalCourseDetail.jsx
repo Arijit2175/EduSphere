@@ -21,6 +21,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
+import BarLoader from "../components/BarLoader";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -37,6 +38,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 export default function NonFormalCourseDetail() {
+  const [enrolling, setEnrolling] = useState(false);
   const { isOpen } = useSidebar();
   const { user } = useAuth();
   const { courseId } = useParams();
@@ -75,11 +77,16 @@ export default function NonFormalCourseDetail() {
   }
 
   const handleEnroll = async () => {
-    const result = await enrollCourse(user?.id, courseId);
-    if (result?.success) {
-      navigate(`/nonformal/learn/${courseId}`);
-    } else {
-      setSnackbar({ open: true, message: result?.message || "Unable to enroll", severity: "info" });
+    setEnrolling(true);
+    try {
+      const result = await enrollCourse(user?.id, courseId);
+      if (result?.success) {
+        navigate(`/nonformal/learn/${courseId}`);
+      } else {
+        setSnackbar({ open: true, message: result?.message || "Unable to enroll", severity: "info" });
+      }
+    } finally {
+      setEnrolling(false);
     }
   };
 
@@ -296,7 +303,7 @@ export default function NonFormalCourseDetail() {
               variant="contained"
               size="large"
               onClick={handleEnroll}
-              disabled={hasCertificate}
+              disabled={hasCertificate || enrolling}
               sx={{
                 background: hasCertificate ? "#e2e8f0" : "#2563eb",
                 color: hasCertificate ? "#94a3b8" : "#ffffff",
@@ -305,8 +312,13 @@ export default function NonFormalCourseDetail() {
                   background: hasCertificate ? "#e2e8f0" : "#1d4ed8",
                 },
               }}
+              startIcon={enrolling ? (
+                <span style={{ display: 'flex', alignItems: 'center', height: 22 }}>
+                  <BarLoader color="#fff" />
+                </span>
+              ) : null}
             >
-              {hasCertificate ? "Completed" : enrolled ? "Continue Learning" : "Enroll Now"}
+              {enrolling ? "Enrolling..." : hasCertificate ? "Completed" : enrolled ? "Continue Learning" : "Enroll Now"}
             </Button>
             <Typography variant="caption" sx={{ color: "#64748b" }}>
               {enrolled ? "Access all lessons and materials" : "Get started with this course"}
