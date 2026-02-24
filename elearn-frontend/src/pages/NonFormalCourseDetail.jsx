@@ -20,8 +20,8 @@ import {
   TableRow,
   Snackbar,
   Alert,
+  CircularProgress,
 } from "@mui/material";
-import BarLoader from "../components/BarLoader";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -313,9 +313,7 @@ export default function NonFormalCourseDetail() {
                 },
               }}
               startIcon={enrolling ? (
-                <span style={{ display: 'flex', alignItems: 'center', height: 22 }}>
-                  <BarLoader color="#fff" />
-                </span>
+                <CircularProgress color="inherit" size={22} thickness={5} />
               ) : null}
             >
               {enrolling ? "Enrolling..." : hasCertificate ? "Completed" : enrolled ? "Continue Learning" : "Enroll Now"}
