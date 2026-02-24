@@ -13,6 +13,7 @@ import {
   InputAdornment,
   Alert,
   Snackbar,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -166,6 +167,23 @@ export default function NonFormalHome() {
       navigate(`/nonformal/course/${courseId}`);
     }
   };
+
+  // Defensive: always treat courses as array
+  const safeCourses = Array.isArray(courses) ? courses : [];
+  // Wait for certifiedIds to be computed (certificates loaded)
+  const certifiedIdsReady = useMemo(() => {
+    // certifiedIds is computed below, but we want to block until certificates are loaded
+    // If certificates is undefined/null, block
+    return certificates && Array.isArray(certificates);
+  }, [certificates]);
+
+  if (!certifiedIdsReady) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", background: "#f0fdf4" }}>
+        <CircularProgress color="secondary" size={64} thickness={4.5} />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
