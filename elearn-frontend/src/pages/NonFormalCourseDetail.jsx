@@ -494,15 +494,18 @@ export default function NonFormalCourseDetail() {
                       variant="contained"
                       size="large"
                       onClick={handleEnroll}
-                      disabled={hasCertificate}
+                      disabled={hasCertificate || enrolling}
                       sx={{ 
                         width: { xs: "100%", md: "auto" },
                         background: hasCertificate ? "#e5e7eb" : "white", 
                         color: hasCertificate ? "#9ca3af" : "#667eea", 
-                        fontWeight: 700 
+                        fontWeight: 700,
+                        position: "relative"
                       }}
                     >
-                      {hasCertificate ? "Completed" : enrolled ? "Continue Learning" : "Enroll Now"}
+                      {enrolling ? (
+                        <CircularProgress size={24} color="inherit" />
+                      ) : hasCertificate ? "Completed" : enrolled ? "Continue Learning" : "Enroll Now"}
                     </Button>
                   </Stack>
                 </Grid>
