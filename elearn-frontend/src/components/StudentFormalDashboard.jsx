@@ -1,6 +1,7 @@
 import API_URL from "../config";
 import { Box, Card, CardContent, Button, Grid, Typography, LinearProgress, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Stack } from "@mui/material";
 import { useState, useEffect, useMemo } from "react";
+import { decodeHtmlEntities } from "../utils/decodeHtmlEntities";
 import { useFormalEducation } from "../contexts/FormalEducationContext";
 import { useAuth } from "../contexts/AuthContext";
 import Section from "./Section";
@@ -667,7 +668,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                     ✓ Already Submitted
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Your Answer:</strong> {existingSubmission.content}
+                    <strong>Your Answer:</strong> {decodeHtmlEntities(existingSubmission.content)}
                   </Typography>
                   <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 1 }}>
                     Submitted: {existingSubmission.submittedAt && !isNaN(Date.parse(existingSubmission.submittedAt.replace(' ', 'T'))) ? new Date(existingSubmission.submittedAt.replace(' ', 'T')).toLocaleString() : 'N/A'}
