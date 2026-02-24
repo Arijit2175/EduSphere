@@ -60,13 +60,16 @@ export default function NonFormalHome() {
   const isFiltering = searchQuery.length > 0 || selectedCategory !== null;
 
   // Show loader until all courses are loaded
-  if (isLoading || !courses || courses.length === 0) {
+  // Defensive: always treat courses as array
+  const safeCourses = Array.isArray(courses) ? courses : [];
+  if (isLoading || safeCourses.length === 0) {
     return (
       <Box sx={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", background: "#f0fdf4" }}>
         <BarLoader color="#8B5CF6" />
       </Box>
     );
   }
+  // ...existing code...
 
   useEffect(() => {
     if (isFiltering && resultsRef.current) {
