@@ -21,7 +21,6 @@ import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
 import Grainient from "../components/Grainient";
 import GlassIcons from "../components/GlassIcons";
-import BarLoader from "../components/BarLoader";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useNonFormal } from "../contexts/NonFormalContext";
@@ -46,11 +45,10 @@ const CATEGORIES = [
 
 const GLASS_COLORS = ["blue", "purple", "orange", "indigo", "red", "green"];
 
-
 export default function NonFormalHome() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
-  const { courses, certificates, isLoading } = useNonFormal();
+  const { courses, certificates } = useNonFormal();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -58,18 +56,6 @@ export default function NonFormalHome() {
   const resultsRef = useRef(null);
 
   const isFiltering = searchQuery.length > 0 || selectedCategory !== null;
-
-  // Show loader until all courses are loaded
-  // Defensive: always treat courses as array
-  const safeCourses = Array.isArray(courses) ? courses : [];
-  if (isLoading || safeCourses.length === 0) {
-    return (
-      <Box sx={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", background: "#f0fdf4" }}>
-        <BarLoader color="#8B5CF6" />
-      </Box>
-    );
-  }
-  // ...existing code...
 
   useEffect(() => {
     if (isFiltering && resultsRef.current) {
