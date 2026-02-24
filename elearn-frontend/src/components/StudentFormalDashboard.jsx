@@ -466,17 +466,16 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                                     {openAssignmentsDialog.course.assignments.map((assignment) => {
                                                       const completed = openAssignmentsDialog.enrollment?.completedAssignments || [];
                                                       const isSubmitted = completed.includes(assignment.id);
-                                                      
-                                                      // Check if assignment is expired
                                                       const dueDate = new Date(assignment.due_date);
                                                       const now = new Date();
                                                       const isExpired = now > dueDate;
-                                                      
+                                                      // Only overdue and not submitted assignments are red
+                                                      const isOverdue = isExpired && !isSubmitted;
                                                       return (
-                                                        <TableRow key={assignment.id} sx={{ 
-                                                          background: isExpired ? "#fee2e2" : "transparent",
+                                                        <TableRow key={assignment.id} sx={{
+                                                          background: isOverdue ? "#fee2e2" : (isSubmitted ? "#e0f7e9" : "transparent"),
                                                           "&:hover": {
-                                                            background: isExpired ? "#fecaca" : "#f9fafb"
+                                                            background: isOverdue ? "#fecaca" : (isSubmitted ? "#bbf7d0" : "#f9fafb")
                                                           }
                                                         }}>
                                                           <TableCell>{assignment.title}</TableCell>
@@ -487,8 +486,8 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                                             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
                                                               {isSubmitted ? (
                                                                 <Chip label="Submitted" color="success" size="small" />
-                                                              ) : isExpired ? (
-                                                                <Chip label="Date is Over" color="error" size="small" />
+                                                              ) : isOverdue ? (
+                                                                <Chip label="Overdue" color="error" size="small" />
                                                               ) : (
                                                                 <Chip label="Pending" color="warning" size="small" />
                                                               )}
@@ -500,10 +499,10 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                                                 size="small"
                                                                 variant="contained"
                                                                 onClick={() => {
-                                                                  setSelectedAssignment({ 
-                                                                    ...assignment, 
-                                                                    courseId: openAssignmentsDialog.course.id, 
-                                                                    enrollmentId: openAssignmentsDialog.enrollment.id 
+                                                                  setSelectedAssignment({
+                                                                    ...assignment,
+                                                                    courseId: openAssignmentsDialog.course.id,
+                                                                    enrollmentId: openAssignmentsDialog.enrollment.id
                                                                   });
                                                                   setOpenAssignment(true);
                                                                   setOpenAssignmentsDialog({ open: false, course: null, enrollment: null });
@@ -516,7 +515,7 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                                                                 Submit
                                                               </Button>
                                                             )}
-                                                            {isExpired && !isSubmitted && (
+                                                            {isOverdue && (
                                                               <Chip label="Cannot Submit" size="small" variant="outlined" color="error" />
                                                             )}
                                                             {isSubmitted && (
