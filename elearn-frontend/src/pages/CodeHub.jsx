@@ -24,6 +24,8 @@ function greet(name) {
 
 export default CodeHub;
 
+export default CodeHub;
+
 console.log(greet("Student"));
 console.log("Welcome to CodeHub!");`,
   },
