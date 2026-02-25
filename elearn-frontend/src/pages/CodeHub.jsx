@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import { Code2, Play, RotateCcw, Copy, Check, Download, ChevronDown, Terminal, Clock, Zap, Keyboard } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -20,6 +21,8 @@ const languages = [
 function greet(name) {
   return "Hello, " + name + "!";
 }
+
+export default CodeHub;
 
 console.log(greet("Student"));
 console.log("Welcome to CodeHub!");`,
@@ -256,7 +259,7 @@ const ActionButtons = ({ onRun, onReset, onCopy, onDownload, copied, isRunning, 
   );
 };
 
-export default function CodeHub() {
+function CodeHub() {
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
   const [code, setCode] = useState(languages[0].template);
   const [input, setInput] = useState("");
@@ -269,6 +272,7 @@ export default function CodeHub() {
   const [lastRunTime, setLastRunTime] = useState(0);
   const COOLDOWN_SECONDS = 3;
   const MAX_CODE_SIZE = 10000; // 10KB limit
+  const { user } = useAuth();
 
   const handleLanguageChange = (lang) => {
     setSelectedLanguage(lang);
@@ -314,6 +318,7 @@ export default function CodeHub() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(user?.access_token ? { "Authorization": `Bearer ${user.access_token}` } : {})
         },
         body: JSON.stringify({
           code,
