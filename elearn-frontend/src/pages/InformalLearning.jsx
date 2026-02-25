@@ -311,16 +311,13 @@ export default function InformalLearning() {
         { headers: { Authorization: `Bearer ${user.access_token}` } }
       );
       if (res.data && res.data.success) {
-        // Re-fetch all posts to guarantee sync with DB
-        axios.get(`${API_URL}/informal-posts/`)
-          .then(res2 => {
-            const postsArray = res2.data.data || res2.data || [];
-            const posts = (Array.isArray(postsArray) ? postsArray : []).map(normalizePost);
-            setPosts(posts);
-          })
-          .catch(() => {
-            setPosts([]);
-          });
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === id
+              ? { ...p, savers: res.data.savers, /* optionally update other fields if returned */ }
+              : p
+          )
+        );
       }
     } catch (err) {
       // Optionally show error
