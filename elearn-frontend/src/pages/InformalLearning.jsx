@@ -193,7 +193,7 @@ export default function InformalLearning() {
     localStorage.setItem("informalPosts", JSON.stringify(posts));
   }, [posts]);
 
-  // Fetch initial posts from backend
+  // Fetch posts from backend on mount and whenever user changes (login/logout)
   useEffect(() => {
     setInitialLoading(true);
     axios.get(`${API_URL}/informal-posts/`)
@@ -209,7 +209,7 @@ export default function InformalLearning() {
         setPosts([]);
         setInitialLoading(false);
       });
-    }, []);
+  }, [user]);
 
   // Fetch topics and followed topics from backend
   useEffect(() => {
