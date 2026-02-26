@@ -516,6 +516,8 @@ export default function TeacherDashboard() {
                   const absentCount = session.attendees?.filter(a => a.status === "absent")?.length || 0;
                   // Helper to get student name from enrolled students for this course
                   const getStudentName = (studentId) => {
+                                        // Debug log for mapping
+                                        console.log('[DEBUG] getStudentName: studentId', studentId, 'enrolled:', attendanceDetailsEnrolledStudents.map(s => s.user_id));
                     // Always match attendance student_id with enrolled user_id for correct name
                     const stu = attendanceDetailsEnrolledStudents.find(
   s => String(s.user_id) === String(studentId || student.student_id || student.id)
@@ -714,6 +716,8 @@ export default function TeacherDashboard() {
                   (attendanceDetailsDialog.type === "Absent" && student.status === "absent"))
                 )
                 .map((student, idx) => {
+                                    // Debug log for each student in dialog
+                                    console.log('[DEBUG] Dialog student:', student, 'Enrolled:', attendanceDetailsEnrolledStudents);
                   // Always join attendance student_id with enrolled user_id for full name
                   const match = attendanceDetailsEnrolledStudents.find(
   s => String(s.user_id) === String(student.student_id || student.studentId || student.id)
