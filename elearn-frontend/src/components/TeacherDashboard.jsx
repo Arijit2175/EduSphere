@@ -218,37 +218,35 @@ export default function TeacherDashboard() {
   const [liveClasses, setLiveClasses] = useState([]);
 
   // Fetch live classes and attendance records on mount or when courses change
-  useEffect(() => {
-    const fetchAttendanceForSessions = async () => {
-      if (!user || !user.access_token) return;
-      // Build sessions from teacherCourses
-      const sessions = teacherCourses.flatMap((course) =>
-        (course.schedules || []).map((s) => ({
-          ...s,
-          courseTitle: course.title,
-          courseId: course.id,
-        }))
-      ).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  const fetchAttendanceForSessions = async () => {
+    if (!user || !user.access_token) return;
+    // Build sessions from teacherCourses
+    const sessions = teacherCourses.flatMap((course) =>
+      (course.schedules || []).map((s) => ({
+        ...s,
+        courseTitle: course.title,
+        courseId: course.id,
+      }))
+    ).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
-      // For each session, fetch attendance from backend
-      const sessionsWithAttendance = await Promise.all(
-        sessions.map(async (session) => {
-          try {
-            const res = await fetch(`${API_URL}/attendance/?schedule_id=${session.id}`, {
-              headers: { Authorization: `Bearer ${user.access_token}` }
-            });
-            if (res.ok) {
-              const attendees = await res.json();
-              return { ...session, attendees };
-            }
-          } catch {}
-          return { ...session, attendees: [] };
-        })
-      );
-      setLiveClasses(sessionsWithAttendance);
-    };
-    fetchAttendanceForSessions();
-  }, [courses, user?.id, user?.access_token]);
+    // For each session, fetch attendance from backend
+    const sessionsWithAttendance = await Promise.all(
+      sessions.map(async (session) => {
+        try {
+          const res = await fetch(`${API_URL}/attendance/?schedule_id=${session.id}`, {
+            headers: { Authorization: `Bearer ${user.access_token}` }
+          });
+          if (res.ok) {
+            const attendees = await res.json();
+            return { ...session, attendees };
+          }
+        } catch {}
+        return { ...session, attendees: [] };
+      })
+    );
+    setLiveClasses(sessionsWithAttendance);
+  };
+  useEffect(() => { fetchAttendanceForSessions(); }, [courses, user?.id, user?.access_token]);
 
   const handleCreate = () => {
     if (formData.title && formData.description) {
@@ -292,23 +290,23 @@ export default function TeacherDashboard() {
   };
 
   // Actually mark attendance after confirmation
-  const confirmMarkAttendance = () => {
+  const confirmMarkAttendance = async () => {
     const { student, status } = confirmDialog;
     const { courseId, scheduleId } = attendanceDialog;
     if (!courseId || !scheduleId || !student) return;
     // Find the session in liveClasses
     const session = liveClasses.find(s => s.id === scheduleId);
-    let attendanceId = null;
     let alreadyMarked = false;
     if (session && Array.isArray(session.attendees)) {
       const existing = session.attendees.find(a => (a.student_id || a.studentId || a.id) === student);
       if (existing) {
-        attendanceId = existing.id;
         alreadyMarked = true;
       }
     }
     if (!alreadyMarked) {
-      markAttendanceForClass(courseId, scheduleId, student, status);
+      await markAttendanceForClass(courseId, scheduleId, student, status);
+      // After marking, re-fetch attendance for all sessions
+      await fetchAttendanceForSessions();
     }
     setConfirmDialog({ open: false, student: null, status: "" });
     setAttendanceDialog({ ...attendanceDialog });
@@ -704,26 +702,32 @@ export default function TeacherDashboard() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {attendanceDetailsDialog.students.map((student, idx) => {
-                // Robustly join with enrolled students to get name fields
-                const match = attendanceDetailsEnrolledStudents.find(s =>
-                  s.id === student.student_id ||
-                  s.user_id === student.student_id ||
-                  s.studentId === student.student_id ||
-                  s.id === student.studentId ||
-                  s.user_id === student.studentId ||
-                  s.studentId === student.studentId
-                );
-                const first_name = match?.first_name || student.first_name;
-                const last_name = match?.last_name || student.last_name;
-                const name = match?.name || student.name;
-                const email = match?.email || student.email;
-                return (
-                  <TableRow key={idx}>
-                    <TableCell>{(first_name && last_name) ? `${first_name} ${last_name}` : (name || email || "Student")}</TableCell>
-                  </TableRow>
-                );
-              })}
+              {attendanceDetailsDialog.students
+                .filter(student =>
+                  (attendanceDetailsDialog.type === "Present" && student.status === "present") ||
+                  (attendanceDetailsDialog.type === "Absent" && student.status === "absent")
+                )
+                .map((student, idx) => {
+                  // Robustly join with enrolled students to get name fields
+                  const match = attendanceDetailsEnrolledStudents.find(s =>
+                    s.id === student.student_id ||
+                    s.user_id === student.student_id ||
+                    s.studentId === student.student_id ||
+                    s.id === student.studentId ||
+                    s.user_id === student.studentId ||
+                    s.studentId === student.studentId
+                  );
+                  const first_name = match?.first_name || student.first_name;
+                  const last_name = match?.last_name || student.last_name;
+                  const name = match?.name || student.name;
+                  const email = match?.email || student.email;
+                  return (
+                    <TableRow key={idx}>
+                      <TableCell>{(first_name && last_name) ? `${first_name} ${last_name}` : (name || email || "Student")}</TableCell>
+                    </TableRow>
+                  );
+                })
+              }
             </TableBody>
           </Table>
         ) : (
