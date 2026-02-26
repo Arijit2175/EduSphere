@@ -757,12 +757,12 @@ export default function TeacherDashboard() {
               {enrolledStudents.length > 0 ? (
                 enrolledStudents.map((student) => {
                   // Check if already marked in liveClasses for this session
-                  let alreadyMarked = false;
                   const session = liveClasses.find(s => s.id === attendanceDialog.scheduleId);
-                  if (session && Array.isArray(session.attendees)) {
-                    const existing = session.attendees.find(a => (a.student_id || a.studentId || a.id) === (student.user_id || student.id));
-                    if (existing) alreadyMarked = true;
-                  }
+                  const studentId = student.user_id || student.id;
+                  // Marked if attendance record exists for this session/student
+                  const alreadyMarked = session && Array.isArray(session.attendees)
+                    ? session.attendees.some(a => a.schedule_id === attendanceDialog.scheduleId && a.student_id === studentId)
+                    : false;
                   return (
                     <TableRow key={student.id}>
                       <TableCell>{(student.first_name && student.last_name) ? `${student.first_name} ${student.last_name}` : (student.name || student.studentName || student.email || "Student")}</TableCell>
@@ -773,7 +773,7 @@ export default function TeacherDashboard() {
                             variant="contained"
                             color="success"
                             startIcon={<Check />}
-                            onClick={() => handleMarkAttendance(student.user_id || student.id, "present")}
+                            onClick={() => handleMarkAttendance(studentId, "present")}
                             sx={{ minWidth: 100 }}
                             disabled={alreadyMarked}
                           >
@@ -784,7 +784,7 @@ export default function TeacherDashboard() {
                             variant="contained"
                             color="error"
                             startIcon={<Close />}
-                            onClick={() => handleMarkAttendance(student.user_id || student.id, "absent")}
+                            onClick={() => handleMarkAttendance(studentId, "absent")}
                             sx={{ minWidth: 100 }}
                             disabled={alreadyMarked}
                           >
