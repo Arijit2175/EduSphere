@@ -11,7 +11,7 @@ limiter = Limiter(key_func=get_remote_address)
 
 class AttendanceRequest(BaseModel):
     schedule_id: int
-    student_id: int
+    user_id: int  
     status: str
 
 router = APIRouter(prefix="/attendance", tags=["attendance"])
@@ -56,16 +56,23 @@ async def mark_attendance(request: Request, data: AttendanceRequest, user=Depend
     check_teacher_role(user)
     
     schedule_id = data.schedule_id
-    student_id = data.student_id
+    user_id = data.user_id
     status = sanitize_string(data.status, max_length=20)
-    
-    if status not in ("present", "absent"):
-        raise HTTPException(status_code=400, detail="Invalid status")
-    
+
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
+    cursor.execute("SELECT student_id FROM users WHERE id=%s", (user_id,))
+    user_row = cursor.fetchone()
+    if not user_row or not user_row.get("student_id"):
+        cursor.close()
+        return_db_connection(conn)
+        raise HTTPException(status_code=404, detail="Student not found for user")
+    student_id = user_row["student_id"]
+    
+    if status not in ("present", "absent"):
+        raise HTTPException(status_code=400, detail="Invalid status")
     
     cursor.execute("""
         SELECT s.*, c.instructor_id 
