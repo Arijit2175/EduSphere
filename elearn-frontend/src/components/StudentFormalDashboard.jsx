@@ -167,6 +167,12 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
               const course = getCourseById(enrollment.courseId);
               if (!course) return null;
 
+              // Helper: get attendance for a student/session
+              const getAttendanceStatus = (studentId, scheduleId) => {
+                const record = attendanceRecords.find(a => a.student_id === studentId && a.schedule_id === scheduleId);
+                return record ? record.status : null;
+              };
+
               return (
                 <Grid item xs={12} sm={6} md={4} lg={3} key={enrollment.id}>
                   <Card 
@@ -288,27 +294,32 @@ export default function StudentFormalDashboard({ onExploreCourses }) {
                             🎥 Live Classes
                           </Typography>
                           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                            
-                            <Button
-                              fullWidth
-                              variant="contained"
-                              size="small"
-                              startIcon={<VideoCall />}
-                              onClick={() => setOpenClassesDialog({ open: true, course })}
-                              sx={{
-                                justifyContent: "flex-start",
-                                textTransform: "none",
-                                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                                color: "white",
-                                fontWeight: 600,
-                                mt: 1,
-                                '&:hover': {
-                                  background: "linear-gradient(135deg, #5568d3 0%, #63398e 100%)"
-                                }
-                              }}
-                            >
-                              View All Classes
-                            </Button>
+                            {course.schedules.map((session) => {
+                              const attendanceStatus = getAttendanceStatus(enrollment.studentId, session.id);
+                              return (
+                                <Box key={session.id} sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                                  <Typography sx={{ flex: 1 }}>{session.title || "Session"}</Typography>
+                                  <Button
+                                    variant="contained"
+                                    color="success"
+                                    disabled={attendanceStatus === "present" || attendanceStatus === "absent"}
+                                    sx={{ mr: 1 }}
+                                  >
+                                    Present
+                                  </Button>
+                                  <Button
+                                    variant="contained"
+                                    color="error"
+                                    disabled={attendanceStatus === "present" || attendanceStatus === "absent"}
+                                  >
+                                    Absent
+                                  </Button>
+                                  {attendanceStatus && (
+                                    <Chip label={attendanceStatus.charAt(0).toUpperCase() + attendanceStatus.slice(1)} color={attendanceStatus === "present" ? "success" : "error"} sx={{ ml: 1 }} />
+                                  )}
+                                </Box>
+                              );
+                            })}
                           </Box>
                         </Box>
                       )}
