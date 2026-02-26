@@ -126,9 +126,8 @@ export default function TeacherDashboard() {
   useEffect(() => {
     const fetchEnrolled = async () => {
       if (attendanceDetailsDialog.open) {
-        // Try to get courseId from the first student (they have schedule/course info)
-        const first = attendanceDetailsDialog.students?.[0];
-        const courseId = first?.courseId || first?.course_id;
+        // Get courseId from the session in dialog (students array may be empty)
+        const courseId = attendanceDetailsDialog.students?.[0]?.courseId || attendanceDetailsDialog.students?.[0]?.course_id || attendanceDialog.courseId;
         if (courseId) {
           try {
             const res = await fetch(`${API_URL}/enrollments/course/${courseId}/students`);
@@ -150,7 +149,7 @@ export default function TeacherDashboard() {
       }
     };
     fetchEnrolled();
-  }, [attendanceDetailsDialog.open]);
+  }, [attendanceDetailsDialog.open, attendanceDialog.courseId, attendanceDetailsDialog.students]);
 
   // Now all logic and hooks
   const { user } = useAuth();
