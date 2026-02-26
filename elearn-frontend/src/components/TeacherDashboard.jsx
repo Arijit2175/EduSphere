@@ -686,7 +686,10 @@ export default function TeacherDashboard() {
     {/* Attendance Details Dialog - Show Present/Absent Students */}
     <Dialog 
       open={attendanceDetailsDialog.open} 
-      onClose={() => setAttendanceDetailsDialog({ open: false, students: [], type: "" })} 
+      onClose={() => {
+        setAttendanceDetailsDialog({ open: false, students: [], type: "" });
+        fetchAttendanceForSessions(); // Always re-fetch after dialog close
+      }} 
       maxWidth="sm" 
       fullWidth
     >
@@ -704,11 +707,11 @@ export default function TeacherDashboard() {
             <TableBody>
               {attendanceDetailsDialog.students
                 .filter(student =>
-                  (attendanceDetailsDialog.type === "Present" && student.status === "present") ||
-                  (attendanceDetailsDialog.type === "Absent" && student.status === "absent")
+                  student.schedule_id === attendanceDialog.scheduleId &&
+                  ((attendanceDetailsDialog.type === "Present" && student.status === "present") ||
+                  (attendanceDetailsDialog.type === "Absent" && student.status === "absent"))
                 )
                 .map((student, idx) => {
-                  // Robustly join with enrolled students to get name fields
                   const match = attendanceDetailsEnrolledStudents.find(s =>
                     s.id === student.student_id ||
                     s.user_id === student.student_id ||
