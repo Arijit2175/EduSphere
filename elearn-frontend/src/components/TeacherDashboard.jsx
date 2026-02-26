@@ -712,21 +712,16 @@ export default function TeacherDashboard() {
                   (attendanceDetailsDialog.type === "Absent" && student.status === "absent"))
                 )
                 .map((student, idx) => {
+                  // Always join with enrolled students for full name
                   const match = attendanceDetailsEnrolledStudents.find(s =>
                     s.id === student.student_id ||
                     s.user_id === student.student_id ||
-                    s.studentId === student.student_id ||
-                    s.id === student.studentId ||
-                    s.user_id === student.studentId ||
-                    s.studentId === student.studentId
+                    s.studentId === student.student_id
                   );
-                  const first_name = match?.first_name || student.first_name;
-                  const last_name = match?.last_name || student.last_name;
-                  const name = match?.name || student.name;
-                  const email = match?.email || student.email;
+                  const fullName = match ? ((match.first_name && match.last_name) ? `${match.first_name} ${match.last_name}` : (match.name || match.email || "Student")) : (student.name || student.email || "Student");
                   return (
                     <TableRow key={idx}>
-                      <TableCell>{(first_name && last_name) ? `${first_name} ${last_name}` : (name || email || "Student")}</TableCell>
+                      <TableCell>{fullName}</TableCell>
                     </TableRow>
                   );
                 })
@@ -779,6 +774,7 @@ export default function TeacherDashboard() {
                             onClick={() => handleMarkAttendance(studentId, "present")}
                             sx={{ minWidth: 100 }}
                             disabled={alreadyMarked}
+                            style={alreadyMarked ? { backgroundColor: '#e5e7eb', color: '#9ca3af', borderColor: '#e5e7eb' } : {}}
                           >
                             Present
                           </Button>
@@ -790,6 +786,7 @@ export default function TeacherDashboard() {
                             onClick={() => handleMarkAttendance(studentId, "absent")}
                             sx={{ minWidth: 100 }}
                             disabled={alreadyMarked}
+                            style={alreadyMarked ? { backgroundColor: '#e5e7eb', color: '#9ca3af', borderColor: '#e5e7eb' } : {}}
                           >
                             Absent
                           </Button>
