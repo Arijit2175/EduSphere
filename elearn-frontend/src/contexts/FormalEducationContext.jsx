@@ -411,7 +411,7 @@ export const FormalEducationProvider = ({ children }) => {
           "Content-Type": "application/json",
           ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {})
         },
-        body: JSON.stringify({ schedule_id: scheduleId, student_id: studentId, status }),
+        body: JSON.stringify({ schedule_id: scheduleId, user_id: studentId, status }),
       });
       if (res.ok) {
         // After marking, fetch all attendance for this student in this course
