@@ -516,8 +516,8 @@ export default function TeacherDashboard() {
                   const absentCount = session.attendees?.filter(a => a.status === "absent")?.length || 0;
                   // Helper to get student name from enrolled students for this course
                   const getStudentName = (studentId) => {
-                    // Use attendanceDetailsEnrolledStudents if dialog is open for this course, else fallback
-                    const stu = attendanceDetailsEnrolledStudents.find(s => s.id === studentId || s.studentId === studentId || s.user_id === studentId);
+                    // Always match attendance student_id with enrolled user_id for correct name
+                    const stu = attendanceDetailsEnrolledStudents.find(s => String(s.user_id) === String(studentId));
                     return stu ? (stu.first_name && stu.last_name ? `${stu.first_name} ${stu.last_name}` : (stu.name || stu.email || "Student")) : "Student";
                   };
                   // For present/absent dialogs, only show names if dialog is open for this course
@@ -712,12 +712,8 @@ export default function TeacherDashboard() {
                   (attendanceDetailsDialog.type === "Absent" && student.status === "absent"))
                 )
                 .map((student, idx) => {
-                  // Always join with enrolled students for full name
-                  const match = attendanceDetailsEnrolledStudents.find(s =>
-                    s.id === student.student_id ||
-                    s.user_id === student.student_id ||
-                    s.studentId === student.student_id
-                  );
+                  // Always join attendance student_id with enrolled user_id for full name
+                  const match = attendanceDetailsEnrolledStudents.find(s => String(s.user_id) === String(student.student_id));
                   const fullName = match ? ((match.first_name && match.last_name) ? `${match.first_name} ${match.last_name}` : (match.name || match.email || "Student")) : (student.name || student.email || "Student");
                   return (
                     <TableRow key={idx}>
