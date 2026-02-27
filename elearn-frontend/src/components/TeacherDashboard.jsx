@@ -714,20 +714,21 @@ export default function TeacherDashboard() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {attendanceDetailsDialog.students
-                // Show all attendance records for the session, filter by status
-                .filter(student =>
-                  ((attendanceDetailsDialog.type === "Present" && student.status === "present") ||
-                  (attendanceDetailsDialog.type === "Absent" && student.status === "absent"))
-                )
-                .map((student, idx) => {
-                  // Debug log for each student in dialog
-                  console.log('[DEBUG] Dialog student:', student, 'Enrolled:', attendanceDetailsEnrolledStudents);
-                  // Always join attendance student_id with enrolled user_id for full name
-                  const match = attendanceDetailsEnrolledStudents.find(
-                    s => String(s.user_id) === String(student.student_id)
-                  );
-                  const fullName = match ? ((match.first_name && match.last_name) ? `${match.first_name} ${match.last_name}` : (match.name || match.email || "Student")) : (student.name || student.email || "Student");
+              {attendanceDetailsEnrolledStudents
+                .filter(enrolled => {
+                  const att = attendanceDetailsDialog.students.find(a => String(a.student_id) === String(enrolled.user_id));
+                  if (attendanceDetailsDialog.type === "Present") {
+                    return att && att.status === "present";
+                  } else if (attendanceDetailsDialog.type === "Absent") {
+                    // Absent if status is "absent" or if no attendance record exists
+                    return !att || att.status === "absent";
+                  }
+                  return false;
+                })
+                .map((enrolled, idx) => {
+                  const fullName = (enrolled.first_name && enrolled.last_name)
+                    ? `${enrolled.first_name} ${enrolled.last_name}`
+                    : (enrolled.name || enrolled.email || "Student");
                   return (
                     <TableRow key={idx}>
                       <TableCell>{fullName}</TableCell>
