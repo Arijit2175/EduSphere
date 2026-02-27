@@ -126,19 +126,21 @@ export default function TeacherDashboard() {
   useEffect(() => {
     const fetchEnrolled = async () => {
       if (attendanceDetailsDialog.open) {
-        // Get courseId from the session in dialog (students array may be empty)
         const courseId = attendanceDetailsDialog.students?.[0]?.courseId || attendanceDetailsDialog.students?.[0]?.course_id || attendanceDialog.courseId;
+        console.log('[DEBUG] Fetching enrolled students for courseId:', courseId);
         if (courseId) {
           try {
             const res = await fetch(`${API_URL}/enrollments/course/${courseId}/students`);
             if (res.ok) {
               const response = await res.json();
               const students = response.data || response || [];
+              console.log('[DEBUG] Enrolled students fetched:', students);
               setAttendanceDetailsEnrolledStudents(Array.isArray(students) ? students : []);
             } else {
               setAttendanceDetailsEnrolledStudents([]);
             }
-          } catch {
+          } catch (err) {
+            console.log('[DEBUG] Error fetching enrolled students:', err);
             setAttendanceDetailsEnrolledStudents([]);
           }
         } else {
