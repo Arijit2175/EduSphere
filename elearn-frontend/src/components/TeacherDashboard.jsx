@@ -518,7 +518,11 @@ export default function TeacherDashboard() {
                   // Helper to get student name from enrolled students for this course
                   const getStudentName = (studentId) => {
                                         // Debug log for mapping
-                                        console.log('[DEBUG] getStudentName: studentId', studentId, 'enrolled:', attendanceDetailsEnrolledStudents.map(s => s.user_id));
+                                        console.log('[DEBUG] getStudentName: studentId', studentId, 'enrolled:', attendanceDetailsEnrolledStudents);
+                                        attendanceDetailsEnrolledStudents.forEach(s => {
+                                          const match = String(s.user_id) === String(studentId);
+                                          console.log('[DEBUG] Compare', s.user_id, '==', studentId, '=>', match, '| Full:', s);
+                                        });
                     // Always match attendance student_id with enrolled user_id for correct name
                     const stu = attendanceDetailsEnrolledStudents.find(
   s => String(s.user_id) === String(studentId || student.student_id || student.id)
