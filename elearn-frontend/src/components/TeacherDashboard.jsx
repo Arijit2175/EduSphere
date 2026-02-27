@@ -715,18 +715,18 @@ export default function TeacherDashboard() {
             </TableHead>
             <TableBody>
               {attendanceDetailsDialog.students
+                // Show all attendance records for the session, filter by status
                 .filter(student =>
-                  student.schedule_id === attendanceDialog.scheduleId &&
                   ((attendanceDetailsDialog.type === "Present" && student.status === "present") ||
                   (attendanceDetailsDialog.type === "Absent" && student.status === "absent"))
                 )
                 .map((student, idx) => {
-                                    // Debug log for each student in dialog
-                                    console.log('[DEBUG] Dialog student:', student, 'Enrolled:', attendanceDetailsEnrolledStudents);
+                  // Debug log for each student in dialog
+                  console.log('[DEBUG] Dialog student:', student, 'Enrolled:', attendanceDetailsEnrolledStudents);
                   // Always join attendance student_id with enrolled user_id for full name
                   const match = attendanceDetailsEnrolledStudents.find(
-  s => String(s.user_id) === String(student.student_id || student.studentId || student.id)
-);
+                    s => String(s.user_id) === String(student.student_id)
+                  );
                   const fullName = match ? ((match.first_name && match.last_name) ? `${match.first_name} ${match.last_name}` : (match.name || match.email || "Student")) : (student.name || student.email || "Student");
                   return (
                     <TableRow key={idx}>
