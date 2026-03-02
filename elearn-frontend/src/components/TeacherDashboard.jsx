@@ -513,8 +513,15 @@ export default function TeacherDashboard() {
                 {liveClasses.map((session) => {
                   // Defensive: ensure schedules is always an array
                   const schedules = Array.isArray(session.schedules) ? session.schedules : [];
-                  const presentCount = session.attendees?.filter(a => a.status === "present")?.length || 0;
-                  const absentCount = session.attendees?.filter(a => a.status === "absent")?.length || 0;
+                  // Count present and absent based on enrolled students, not just attendees
+                  const presentCount = attendanceDetailsEnrolledStudents.filter(enrolled => {
+                    const att = session.attendees?.find(a => String(a.student_id) === String(enrolled.user_id));
+                    return att && att.status === "present";
+                  }).length;
+                  const absentCount = attendanceDetailsEnrolledStudents.filter(enrolled => {
+                    const att = session.attendees?.find(a => String(a.student_id) === String(enrolled.user_id));
+                    return att && att.status === "absent";
+                  }).length;
                   // Helper to get student name from enrolled students for this course
                   const getStudentName = (studentId) => {
                                         // Debug log for mapping
@@ -721,8 +728,7 @@ export default function TeacherDashboard() {
                   if (attendanceDetailsDialog.type === "Present") {
                     return att && att.status === "present";
                   } else if (attendanceDetailsDialog.type === "Absent") {
-                    // Absent if status is "absent" or if no attendance record exists
-                    return !att || att.status === "absent";
+                    return att && att.status === "absent";
                   }
                   return false;
                 })
