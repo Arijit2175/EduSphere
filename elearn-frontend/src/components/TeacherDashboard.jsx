@@ -716,6 +716,7 @@ export default function TeacherDashboard() {
             <TableBody>
               {attendanceDetailsEnrolledStudents
                 .filter(enrolled => {
+                  // Find attendance record for this enrolled student in the dialog's students (attendees)
                   const att = attendanceDetailsDialog.students.find(a => String(a.student_id) === String(enrolled.user_id));
                   if (attendanceDetailsDialog.type === "Present") {
                     return att && att.status === "present";
@@ -767,9 +768,9 @@ export default function TeacherDashboard() {
                   // Check if already marked in liveClasses for this session
                   const session = liveClasses.find(s => s.id === attendanceDialog.scheduleId);
                   const studentId = student.user_id || student.id;
-                  // Marked if attendance record exists for this session/student
+                  // Marked if attendance record exists for this session/student (present or absent)
                   const alreadyMarked = session && Array.isArray(session.attendees)
-                    ? session.attendees.some(a => a.schedule_id === attendanceDialog.scheduleId && a.student_id === studentId)
+                    ? session.attendees.some(a => a.schedule_id === attendanceDialog.scheduleId && String(a.student_id) === String(studentId))
                     : false;
                   return (
                     <TableRow key={student.id}>
