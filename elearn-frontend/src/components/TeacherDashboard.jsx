@@ -717,13 +717,6 @@ export default function TeacherDashboard() {
               {attendanceDetailsEnrolledStudents
                 .filter(enrolled => {
                   const att = attendanceDetailsDialog.students.find(a => String(a.student_id) === String(enrolled.user_id));
-                  console.log('[DEBUG] Dialog filter:', {
-                    enrolled,
-                    att,
-                    type: attendanceDetailsDialog.type,
-                    absentCondition: (!att || att.status === "absent"),
-                    presentCondition: (att && att.status === "present")
-                  });
                   if (attendanceDetailsDialog.type === "Present") {
                     return att && att.status === "present";
                   } else if (attendanceDetailsDialog.type === "Absent") {
