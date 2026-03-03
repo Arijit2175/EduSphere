@@ -343,7 +343,6 @@ export default function TeacherDashboard() {
       <Box sx={{ position: 'relative', minHeight: '100vh' }}>
         <AnimatedBackground />
         <Section background="transparent">
-  // --- Attendance UI ---
   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Box>
             {/* Animated Welcome Banner */}
