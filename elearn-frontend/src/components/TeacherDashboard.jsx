@@ -513,32 +513,24 @@ export default function TeacherDashboard() {
                 {liveClasses.map((session) => {
                   // Defensive: ensure schedules is always an array
                   const schedules = Array.isArray(session.schedules) ? session.schedules : [];
-                  // Count present and absent based on enrolled students, not just attendees
-                  const presentCount = attendanceDetailsEnrolledStudents.filter(enrolled => {
-                    const att = session.attendees?.find(a => String(a.student_id) === String(enrolled.user_id));
-                    return att && att.status === "present";
-                  }).length;
-                  const absentCount = attendanceDetailsEnrolledStudents.filter(enrolled => {
-                    const att = session.attendees?.find(a => String(a.student_id) === String(enrolled.user_id));
-                    return att && att.status === "absent";
-                  }).length;
                   // Helper to get student name from enrolled students for this course
                   const getStudentName = (studentId) => {
-                                        // Debug log for mapping
-                                        console.log('[DEBUG] getStudentName: studentId', studentId, 'enrolled:', attendanceDetailsEnrolledStudents);
-                                        attendanceDetailsEnrolledStudents.forEach(s => {
-                                          const match = String(s.user_id) === String(studentId);
-                                          console.log('[DEBUG] Compare', s.user_id, '==', studentId, '=>', match, '| Full:', s);
-                                        });
-                    // Always match attendance student_id with enrolled user_id for correct name
                     const stu = attendanceDetailsEnrolledStudents.find(
-  s => String(s.user_id) === String(studentId || student.student_id || student.id)
-);
+                      s => String(s.user_id) === String(studentId)
+                    );
                     return stu ? (stu.first_name && stu.last_name ? `${stu.first_name} ${stu.last_name}` : (stu.name || stu.email || "Student")) : "Student";
                   };
-                  // For present/absent dialogs, only show names if dialog is open for this course
-                  const presentStudents = (session.attendees?.filter(a => a.status === "present") || []).map(a => ({ ...a, displayName: getStudentName(a.student_id || a.studentId || a.id), courseId: session.courseId }));
-                  const absentStudents = (session.attendees?.filter(a => a.status === "absent") || []).map(a => ({ ...a, displayName: getStudentName(a.student_id || a.studentId || a.id), courseId: session.courseId }));
+                  // Build present/absent lists from enrolled students and attendance
+                  const presentStudents = attendanceDetailsEnrolledStudents.filter(enrolled => {
+                    const att = session.attendees?.find(a => String(a.student_id) === String(enrolled.user_id));
+                    return att && att.status === "present";
+                  }).map(enrolled => ({ ...enrolled, displayName: getStudentName(enrolled.user_id), courseId: session.courseId }));
+                  const absentStudents = attendanceDetailsEnrolledStudents.filter(enrolled => {
+                    const att = session.attendees?.find(a => String(a.student_id) === String(enrolled.user_id));
+                    return att && att.status === "absent";
+                  }).map(enrolled => ({ ...enrolled, displayName: getStudentName(enrolled.user_id), courseId: session.courseId }));
+                  const presentCount = presentStudents.length;
+                  const absentCount = absentStudents.length;
                   return (
                   <TableRow key={session.id} sx={{ "&:hover": { background: "#f9f9f9" }, height: 72 }}>
                     <TableCell sx={{ fontWeight: 600, fontSize: 16 }}>{session.title}</TableCell>
