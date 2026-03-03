@@ -326,7 +326,7 @@ export default function TeacherDashboard() {
           })
         });
         if (res.ok) {
-          fetchAttendanceForSessions();
+          await fetchAttendanceForSessions();
           setConfirmDialog({ open: false, student: null, status: "" });
         } else {
           const errorData = await res.json().catch(() => ({}));
@@ -767,7 +767,7 @@ export default function TeacherDashboard() {
               {enrolledStudents.length > 0 ? (
                 enrolledStudents.map((student) => {
                   // Check if already marked in liveClasses for this session
-                  const session = liveClasses.find(s => s.id === attendanceDialog.scheduleId);
+                  const session = liveClasses.find(s => String(s.id) === String(attendanceDialog.scheduleId));
                   const userId = student.user_id || student.id;
                   const studentProfileId = student.student_id || student.studentId || userId;
                   // Marked if attendance record exists for this session/student (present or absent)

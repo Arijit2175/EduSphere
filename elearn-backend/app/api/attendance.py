@@ -40,7 +40,8 @@ async def list_attendance(request: Request, user=Depends(get_current_user), sche
                 SELECT a.*
                 FROM attendance a
                 JOIN class_schedules s ON a.schedule_id = s.id
-                JOIN enrollments e ON a.student_id = e.user_id AND s.course_id = e.course_id
+                JOIN users u ON a.student_id = u.student_id
+                JOIN enrollments e ON u.id = e.user_id AND s.course_id = e.course_id
                 WHERE a.schedule_id=%s AND a.student_id=%s
             """, (schedule_id, student_id))
         elif schedule_id:
@@ -48,7 +49,8 @@ async def list_attendance(request: Request, user=Depends(get_current_user), sche
                 SELECT a.*
                 FROM attendance a
                 JOIN class_schedules s ON a.schedule_id = s.id
-                JOIN enrollments e ON a.student_id = e.user_id AND s.course_id = e.course_id
+                JOIN users u ON a.student_id = u.student_id
+                JOIN enrollments e ON u.id = e.user_id AND s.course_id = e.course_id
                 WHERE a.schedule_id=%s
             """, (schedule_id,))
         elif student_id:
