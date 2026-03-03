@@ -415,8 +415,8 @@ export default function NonFormalLearner() {
           </Box>
 
           <Container maxWidth={false} sx={{ py: 3, px: { xs: 2, md: 4 } }}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={9}>
+              <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3 }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Box sx={{ borderRadius: 3, overflow: "hidden", bgcolor: cardBg, border: `1px solid ${borderColor}` }}>
                   <Box sx={{ aspectRatio: "16 / 9", minHeight: 450, bgcolor: "#000" }}>
                     <iframe
@@ -524,16 +524,16 @@ export default function NonFormalLearner() {
                     )}
                   </Box>
                 </Box>
-              </Grid>
+              </Box>
 
-                <Grid item xs={12} md={3}>
+                <Box sx={{ width: { xs: "100%", md: 340 }, flexShrink: 0 }}>
                   <Box
                     sx={{
                       borderRadius: 3,
                       bgcolor: cardBg,
                       border: `1px solid ${borderColor}`,
-                      position: { lg: "sticky" },
-                      top: { lg: 72 },
+                      position: "sticky",
+                      top: 72,
                     }}
                   >
                   <Box sx={{ p: 2, borderBottom: `1px solid ${borderColor}` }}>
@@ -563,7 +563,7 @@ export default function NonFormalLearner() {
                     </Typography>
                   </Box>
 
-                  <Box sx={{ p: 1, maxHeight: { xs: "40vh", lg: "60vh" }, overflowY: "auto" }}>
+                  <Box sx={{ p: 1, maxHeight: { xs: "40vh", md: "60vh" }, overflowY: "auto" }}>
                     {course.lessons.map((lesson, idx) => {
                       const isActive = currentLessonIdx === idx;
                       const isCompleted = userProgress.completedLessons?.includes(idx);
@@ -680,8 +680,8 @@ export default function NonFormalLearner() {
                     </Box>
                   )}
                   </Box>
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
           </Container>
 
           <AssessmentDialog
