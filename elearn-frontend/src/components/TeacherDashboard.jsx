@@ -41,8 +41,29 @@ const getGradeColor = (grade) => {
 };
 
 export default function TeacherDashboard() {
-      // Animated Background Component (from AITutor)
-      const AnimatedBackground = () => (
+  // --- Attendance State ---
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [attendanceList, setAttendanceList] = useState([]);
+  const [showAssignmentsList, setShowAssignmentsList] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, student: null, status: "" });
+  const [openDialog, setOpenDialog] = useState(false);
+  const [formData, setFormData] = useState({ title: "", description: "", duration: "", schedule: "" });
+  const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
+  const [scheduleForm, setScheduleForm] = useState({ title: "", startTime: "", duration: 60, meetLink: "", courseId: "" });
+  const [attendanceDialog, setAttendanceDialog] = useState({ open: false, courseId: "", scheduleId: "" });
+  const [attendanceDetailsDialog, setAttendanceDetailsDialog] = useState({ open: false, students: [], type: "" });
+  const [attendanceDetailsEnrolledStudents, setAttendanceDetailsEnrolledStudents] = useState([]);
+  const [manageDialog, setManageDialog] = useState({ open: false, course: null });
+  const [enrolledStudents, setEnrolledStudents] = useState([]);
+  const [materialForm, setMaterialForm] = useState({ name: "", file: null });
+  const [assignmentForm, setAssignmentForm] = useState({ title: "", description: "", dueDate: "" });
+  const [gradeDialog, setGradeDialog] = useState({ open: false, assignment: null, submissions: [], gradeSub: null });
+  const [gradeForm, setGradeForm] = useState({ grade: "", feedback: "" });
+  const [showMaterialsList, setShowMaterialsList] = useState(false);
+  const [liveClasses, setLiveClasses] = useState([]);
+
+  // Animated Background Component (from AITutor)
+  const AnimatedBackground = () => (
         <Box
           sx={{
             position: 'absolute',
@@ -102,60 +123,37 @@ export default function TeacherDashboard() {
           ))}
         </Box>
       );
-    // Show/hide assignments list in Manage dialog
-    const [showAssignmentsList, setShowAssignmentsList] = useState(false);
-  // For attendance confirmation dialog
-  const [confirmDialog, setConfirmDialog] = useState({ open: false, student: null, status: "" });
-  // All useState declarations at the top
-  const [openDialog, setOpenDialog] = useState(false);
-  const [formData, setFormData] = useState({ title: "", description: "", duration: "", schedule: "" });
-  const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
-  const [scheduleForm, setScheduleForm] = useState({ title: "", startTime: "", duration: 60, meetLink: "", courseId: "" });
-  const [attendanceDialog, setAttendanceDialog] = useState({ open: false, courseId: "", scheduleId: "" });
-  const [attendanceDetailsDialog, setAttendanceDetailsDialog] = useState({ open: false, students: [], type: "" });
-  const [attendanceDetailsEnrolledStudents, setAttendanceDetailsEnrolledStudents] = useState([]); // For present/absent dialog
-  const [manageDialog, setManageDialog] = useState({ open: false, course: null });
-  const [enrolledStudents, setEnrolledStudents] = useState([]);
-  const [materialForm, setMaterialForm] = useState({ name: "", file: null });
-  const [assignmentForm, setAssignmentForm] = useState({ title: "", description: "", dueDate: "" });
-  const [gradeDialog, setGradeDialog] = useState({ open: false, submission: null });
-  const [gradeForm, setGradeForm] = useState({ grade: "", feedback: "" });
-  // Show/hide materials list in Manage dialog
-  const [showMaterialsList, setShowMaterialsList] = useState(false);
-  // Fetch enrolled students for present/absent dialog when it opens
+
+  // Now all logic and hooks
+  const { user } = useAuth();
+  const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass, updateAttendanceForClass, getAssignmentSubmissions, reviewSubmission, deleteMaterial, addMaterial, createAssignment } = useFormalEducation();
+
   useEffect(() => {
     const fetchEnrolled = async () => {
-      if (attendanceDetailsDialog.open) {
-        const courseId = attendanceDetailsDialog.students?.[0]?.courseId || attendanceDetailsDialog.students?.[0]?.course_id || attendanceDialog.courseId;
-        console.log('[DEBUG] Fetching enrolled students for courseId:', courseId);
-        if (courseId) {
-          try {
-            const res = await fetch(`${API_URL}/enrollments/course/${courseId}/students`);
-            if (res.ok) {
-              const response = await res.json();
-              const students = response.data || response || [];
-              console.log('[DEBUG] Enrolled students fetched:', students);
-              setAttendanceDetailsEnrolledStudents(Array.isArray(students) ? students : []);
-            } else {
-              setAttendanceDetailsEnrolledStudents([]);
-            }
-          } catch (err) {
-            console.log('[DEBUG] Error fetching enrolled students:', err);
-            setAttendanceDetailsEnrolledStudents([]);
-          }
+      if (!attendanceDetailsDialog.open) {
+        setAttendanceDetailsEnrolledStudents([]);
+        return;
+      }
+      const courseId = attendanceDetailsDialog.students?.[0]?.courseId || attendanceDetailsDialog.students?.[0]?.course_id || attendanceDialog.courseId;
+      if (!courseId) {
+        setAttendanceDetailsEnrolledStudents([]);
+        return;
+      }
+      try {
+        const res = await fetch(`${API_URL}/enrollments/course/${courseId}/students`);
+        if (res.ok) {
+          const response = await res.json();
+          const students = response.data || response || [];
+          setAttendanceDetailsEnrolledStudents(Array.isArray(students) ? students : []);
         } else {
           setAttendanceDetailsEnrolledStudents([]);
         }
-      } else {
+      } catch {
         setAttendanceDetailsEnrolledStudents([]);
       }
     };
     fetchEnrolled();
   }, [attendanceDetailsDialog.open, attendanceDialog.courseId, attendanceDetailsDialog.students]);
-
-  // Now all logic and hooks
-  const { user } = useAuth();
-  const { courses, getTeacherCourses, createCourse, scheduleClass, getCourseStudents, markAttendanceForClass, updateAttendanceForClass, getAssignmentSubmissions, reviewSubmission, deleteMaterial, addMaterial, createAssignment } = useFormalEducation();
 
   useEffect(() => {
     if (attendanceDialog.open && attendanceDialog.courseId) {
@@ -170,6 +168,25 @@ export default function TeacherDashboard() {
       setEnrolledStudents([]);
     }
   }, [attendanceDialog.open, attendanceDialog.courseId]);
+
+  // --- Attendance Fetch Logic ---
+  const fetchAttendanceData = async () => {
+    if (!selectedCourse) return;
+    // Logic can be implemented as needed
+  };
+
+  useEffect(() => {
+    fetchAttendanceData();
+  }, [selectedCourse]);
+
+  // --- Mark Attendance ---
+  const markAttendance = async (studentId, status) => {
+    // Logic can be implemented as needed
+  };
+
+  // --- Present & Absent Lists ---
+  const presentStudents = attendanceList.filter(s => s.status === "present");
+  const absentStudents = attendanceList.filter(s => s.status === "absent");
 
   // Delete assignment helper
   async function handleDeleteAssignment(courseId, assignmentId) {
@@ -215,8 +232,6 @@ export default function TeacherDashboard() {
   }, [manageDialog.open, manageDialog.course?.id]);
 
   const teacherCourses = useMemo(() => getTeacherCourses(user?.teacher_id || user?.id), [getTeacherCourses, user?.teacher_id, user?.id]);
-
-  const [liveClasses, setLiveClasses] = useState([]);
 
   // Fetch live classes and attendance records on mount or when courses change
   const fetchAttendanceForSessions = async () => {
@@ -285,40 +300,42 @@ export default function TeacherDashboard() {
     setOpenScheduleDialog(false);
   };
 
-  // Show confirmation dialog before marking attendance
-  const handleMarkAttendance = (studentId, status) => {
+  const handleMarkAttendance = async (studentId, status) => {
     setConfirmDialog({ open: true, student: studentId, status });
   };
 
-  // Actually mark attendance after confirmation
   const confirmMarkAttendance = async () => {
-    const { student, status } = confirmDialog;
-    const { courseId, scheduleId } = attendanceDialog;
-    if (!courseId || !scheduleId || !student) return;
-    // Find the session in liveClasses
-    const session = liveClasses.find(s => s.id === scheduleId);
-    let alreadyMarked = false;
-    if (session && Array.isArray(session.attendees)) {
-      const existing = session.attendees.find(a => (a.student_id || a.studentId || a.id) === student);
-      if (existing) {
-        alreadyMarked = true;
+    if (confirmDialog.student && confirmDialog.status && attendanceDialog.scheduleId) {
+      try {
+        const res = await fetch(`${API_URL}/attendance/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {})
+          },
+          body: JSON.stringify({
+            student_id: confirmDialog.student,
+            schedule_id: attendanceDialog.scheduleId,
+            status: confirmDialog.status
+          })
+        });
+        if (res.ok) {
+          fetchAttendanceForSessions();
+          setConfirmDialog({ open: false, student: null, status: "" });
+        }
+      } catch (err) {
+        console.error(err);
       }
     }
-    if (!alreadyMarked) {
-      await markAttendanceForClass(courseId, scheduleId, student, status);
-      // After marking, re-fetch attendance for all sessions
-      await fetchAttendanceForSessions();
-    }
-    setConfirmDialog({ open: false, student: null, status: "" });
-    setAttendanceDialog({ ...attendanceDialog });
   };
 
   return (
     <>
-    <Box sx={{ position: 'relative', minHeight: '100vh' }}>
-      <AnimatedBackground />
-      <Section background="transparent">
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+      <Box sx={{ position: 'relative', minHeight: '100vh' }}>
+        <AnimatedBackground />
+        <Section background="transparent">
+  // --- Attendance UI ---
+  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Box>
             {/* Animated Welcome Banner */}
             <Box
