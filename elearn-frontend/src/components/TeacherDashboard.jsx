@@ -314,7 +314,7 @@ export default function TeacherDashboard() {
             ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {})
           },
           body: JSON.stringify({
-            student_id: confirmDialog.student,
+            user_id: confirmDialog.student,
             schedule_id: attendanceDialog.scheduleId,
             status: confirmDialog.status
           })
@@ -322,6 +322,9 @@ export default function TeacherDashboard() {
         if (res.ok) {
           fetchAttendanceForSessions();
           setConfirmDialog({ open: false, student: null, status: "" });
+        } else {
+          const errorData = await res.json().catch(() => ({}));
+          console.error("Failed to mark attendance:", errorData);
         }
       } catch (err) {
         console.error(err);
