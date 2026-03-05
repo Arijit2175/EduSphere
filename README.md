@@ -9,7 +9,7 @@ This project demonstrates the integration of **modern frontend frameworks, scala
 
 ---
 
-# 🧩 Key Features
+## 🧩 Key Features
 
 ### 🎓 Student Features
 - Course browsing and enrollment
@@ -30,7 +30,7 @@ This project demonstrates the integration of **modern frontend frameworks, scala
 
 ---
 
-# 🗂 Project Structure
+## 🗂 Project Structure
 
 ```
 EduSphere
@@ -58,9 +58,9 @@ EduSphere
 
 ---
 
-# 🛠 Technology Stack
+## 🛠 Technology Stack
 
-## Frontend
+### Frontend
 
 | Technology | Purpose |
 |-----------|--------|
@@ -69,9 +69,7 @@ EduSphere
 | ShadCN UI | Modern UI elements |
 | Vite | Fast development bundler |
 
----
-
-## Backend
+### Backend
 
 | Technology | Purpose |
 |-----------|--------|
@@ -79,9 +77,7 @@ EduSphere
 | Python | Backend programming language |
 | REST API | Communication layer |
 
----
-
-## Database & Deployment
+### Database & Deployment
 
 | Technology | Purpose |
 |-----------|--------|
@@ -89,6 +85,20 @@ EduSphere
 | Vercel | Frontend deployment |
 | Render | Backend deployment |
 | GitHub | Version control |
+
+---
+
+## 🔒 Security Considerations
+
+The platform includes:
+
+- API validation
+
+- Secure backend routing
+
+- Cloud database authentication
+
+- Input sanitization
 
 ---
 
