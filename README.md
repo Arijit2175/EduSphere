@@ -30,3 +30,31 @@ This project demonstrates the integration of **modern frontend frameworks, scala
 
 ---
 
+# 🗂 Project Structure
+
+```
+EduSphere
+│
+├── elearn-frontend
+│ ├── src
+│ │ ├── components
+│ │ ├── pages
+│ │ ├── hooks
+│ │ └── utils
+│ │
+│ └── package.json
+│
+├── elearn-backend
+│ ├── app
+│ │ ├── routers
+│ │ ├── models
+│ │ ├── schemas
+│ │ └── services
+│ │
+│ └── main.py
+│
+└── README.md
+```
+
+---
+
