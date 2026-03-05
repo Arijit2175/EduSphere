@@ -58,3 +58,37 @@ EduSphere
 
 ---
 
+# 🛠 Technology Stack
+
+## Frontend
+
+| Technology | Purpose |
+|-----------|--------|
+| React | Frontend UI framework |
+| Material UI | UI component library |
+| ShadCN UI | Modern UI elements |
+| Vite | Fast development bundler |
+
+---
+
+## Backend
+
+| Technology | Purpose |
+|-----------|--------|
+| FastAPI | High-performance backend framework |
+| Python | Backend programming language |
+| REST API | Communication layer |
+
+---
+
+## Database & Deployment
+
+| Technology | Purpose |
+|-----------|--------|
+| Supabase | Cloud database |
+| Vercel | Frontend deployment |
+| Render | Backend deployment |
+| GitHub | Version control |
+
+---
+
