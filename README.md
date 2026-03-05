@@ -102,3 +102,15 @@ The platform includes:
 
 ---
 
+## 🧪 Evaluation Factors
+
+| Factor | Measurement | Result |
+|------|-------------|-------|
+| Usability | User interface simplicity | Good |
+| Performance | API speed & UI rendering | Varies |
+| Scalability | Backend architecture | Scalable |
+| Maintainability | Modular code structure | Easy to maintain |
+| Security | Authentication and API validation | Secure |
+
+---
+
