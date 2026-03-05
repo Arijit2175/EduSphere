@@ -128,3 +128,22 @@ The following metrics evaluate the performance and efficiency of the EduSphere p
 
 ---
 
+## 🧠 System Architecture
+
+```
+User (Browser)
+    │
+    ▼
+Frontend (React + MUI + Vite)
+    │
+REST API
+    │
+    ▼
+Backend (FastAPI - Python)
+    │
+    ▼
+Database (Supabase)
+```
+
+---
+
