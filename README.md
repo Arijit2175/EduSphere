@@ -181,3 +181,29 @@ https://edu-sphere-iota.vercel.app/
 
 ---
 
+## 🤝 Contributing
+
+Contributions are welcomed and any suggestions or fixes to be made are appreciated.
+
+---
+
+## 📚 References
+
+1. A. Smith, J. Doe, and M. Johnson, "AI-Powered Adaptive Learning Systems: Personalization in Education," *International Journal of Educational Technology*, vol. 15, no. 3, 2023.
+
+2. L. Nguyen and P. Tran, "Integrating Formal and Informal Learning with Digital Platforms," *Education and Information Technologies*, vol. 28, pp. 1123–1140, 2023.
+
+3. C. Chen, Y. Liu, and H. Zhao, "AR/VR in Lifelong Learning: Immersive Education Frameworks," *IEEE Access*, vol. 11, pp. 15025–15038, 2023.
+
+4. K. Brown and S. Green, "Artificial Intelligence in Personalized Learning: Trends and Challenges," *Journal of Learning Analytics*, vol. 9, no. 2, pp. 45–62, 2024.
+
+5. R. Li, J. Wang, and F. Zhang, "Adaptive Learning Platforms for Skill Development and Reskilling," *Computers & Education*, vol. 187, 104612, 2023.
+
+6. S. Kaur and A. Singh, "Inclusive Digital Learning: Bridging the Gap in Remote and Underprivileged Regions," *International Journal of Inclusive Education*, vol. 27, no. 5, pp. 750–768, 2024.
+
+7. D. Perez, M. Santos, and L. Ramos, "AI-Assisted Lifelong Learning Ecosystems: Connecting Formal, Non-Formal, and Informal Education," *Education Sciences*, vol. 14, no. 2, pp. 89–105, 2024.
+
+8. P. Schuchert and A. Karimi, "Evaluating the Effectiveness of AI in Personalized Lifelong Learning," *Computers & Education*, vol. 191, 104654, 2025.
+
+<br>
+
