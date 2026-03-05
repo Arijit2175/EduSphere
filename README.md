@@ -158,3 +158,17 @@ Database (Supabase)
 
 ---
 
+## 🖼️ EduSphere Preview
+
+EduSphere is a comprehensive educational platform offering dashboards, AI-powered tutoring, community features, and a built-in code editor. Here's a visual overview of its core features:
+
+| Feature | Description | Screenshot |
+|---------|-------------|------------|
+| **Student Dashboard** | Track learning progress, view enrolled courses, and monitor performance. | `![Student Dashboard](assets/student_dashboard.png)` |
+| **Teacher Dashboard** | Manage courses, assignments, and student progress efficiently. | `![Teacher Dashboard](assets/teacher_dashboard.png)` |
+| **Community** | Connect with peers, share resources, and collaborate through discussions. | `![Community](assets/community.png)` |
+| **AI Tutor** | Personalized guidance and explanations for learning topics. | `![AI Tutor](assets/ai_tutor.png)` |
+| **Code Editor** | Hands-on coding practice with live execution and task tracking. | `![Code Editor](assets/code_editor.png)` |
+
+---
+
