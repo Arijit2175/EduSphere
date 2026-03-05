@@ -9,3 +9,24 @@ This project demonstrates the integration of **modern frontend frameworks, scala
 
 ---
 
+# 🧩 Key Features
+
+### 🎓 Student Features
+- Course browsing and enrollment
+- Interactive learning interface
+- Responsive UI for multiple devices
+- Organized course content
+
+### 👨‍🏫 Instructor Features
+- Course content management
+- Upload learning materials
+- Manage course structure
+
+### 🔐 Platform Features
+- Secure authentication
+- Scalable cloud database
+- RESTful API architecture
+- Modern responsive UI design
+
+---
+
