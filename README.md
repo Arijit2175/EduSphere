@@ -172,3 +172,12 @@ EduSphere is a comprehensive educational platform offering dashboards, AI-powere
 
 ---
 
+# 🚀 Live Demo
+
+Here is the link for the deployed website, you can check it out.
+
+🌐 **Live Website:**  
+https://edu-sphere-iota.vercel.app/
+
+---
+
