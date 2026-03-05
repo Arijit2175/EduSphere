@@ -145,5 +145,16 @@ Backend (FastAPI - Python)
 Database (Supabase)
 ```
 
+### Architecture Components
+
+| Layer | Technology | Description |
+|------|-------------|-------------|
+| Frontend | React | Interactive user interface |
+| UI Framework | Material UI + ShadCN | Modern UI components |
+| Backend | FastAPI | High-performance Python API framework |
+| Database | Supabase | Cloud PostgreSQL database |
+| Deployment | Vercel | Frontend hosting |
+| API Communication | REST APIs | Data exchange between frontend and backend |
+
 ---
 
