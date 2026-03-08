@@ -32,7 +32,6 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         
         return response
 
-# CORS middleware MUST come before custom middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -112,4 +111,3 @@ async def shutdown_event():
 @limiter.limit(f"{RATE_LIMIT_PER_MINUTE}/minute")
 async def read_root(request: Request):
     return {"message": "EduSphere Backend API is running!"}
-

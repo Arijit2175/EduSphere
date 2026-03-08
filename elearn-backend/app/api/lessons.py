@@ -49,7 +49,6 @@ def create_lesson(course_id: int, title: str, content: str = "", video_url: str 
         lesson_id = cursor.fetchone()['id']
         conn.commit()
         
-        # Clear cache when new lesson is created
         cache_clear("lessons")
         
         return {"id": lesson_id, "course_id": course_id, "title": title}
@@ -88,7 +87,6 @@ def update_lesson(lesson_id: int, title: str = None, content: str = None, video_
         cursor.execute(f"UPDATE lessons SET {', '.join(update_fields)} WHERE id=%s", tuple(params))
         conn.commit()
         
-        # Clear cache when lesson is updated
         cache_clear("lessons")
         
         return {"id": lesson_id, "updated": True}
@@ -110,7 +108,6 @@ def delete_lesson(lesson_id: int):
         cursor.execute("DELETE FROM lessons WHERE id=%s", (lesson_id,))
         conn.commit()
         
-        # Clear cache when lesson is deleted
         cache_clear("lessons")
         
         return {"id": lesson_id, "deleted": True}

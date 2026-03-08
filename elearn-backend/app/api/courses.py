@@ -37,7 +37,6 @@ async def list_courses(
     - type: filter by course type (formal, non-formal, informal)
     - category: filter by category
     """
-    # Create cache key based on parameters
     cache_key = f"courses:{skip}:{limit}:{type}:{category}"
     cached_result = cache_get(cache_key)
     if cached_result:
@@ -50,7 +49,6 @@ async def list_courses(
     try:
         cursor = conn.cursor()
         
-        # Build query dynamically
         where_clauses = []
         params = []
         
@@ -64,11 +62,9 @@ async def list_courses(
         
         where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
         
-        # Get total count
         cursor.execute(f"SELECT COUNT(*) as count FROM courses{where_clause}", params)
         total = cursor.fetchone()['count']
         
-        # Get paginated results
         query = f"SELECT id, title, description, type, category, level, duration, instructor_id, created_at FROM courses{where_clause} ORDER BY created_at DESC LIMIT %s OFFSET %s"
         params.extend([limit, skip])
         cursor.execute(query, params)
@@ -81,7 +77,6 @@ async def list_courses(
             "limit": limit
         }
         
-        # Cache for 5 minutes
         cache_set(cache_key, result, ttl_seconds=300)
         return result
     finally:
@@ -108,7 +103,6 @@ async def get_course(request: Request, course_id: int):
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
         
-        # Cache for 5 minutes
         cache_set(cache_key, course, ttl_seconds=300)
         return course
     finally:
@@ -144,7 +138,6 @@ async def create_course(request: Request, course: CourseCreate, user=Depends(get
         course_id = cursor.fetchone()['id']
         conn.commit()
         
-        # Clear cache when new course is created
         cache_clear("courses")
         
         return {"id": course_id, "title": title}
@@ -195,7 +188,6 @@ async def update_course(request: Request, course_id: int, user=Depends(get_curre
         cursor.execute(f"UPDATE courses SET {', '.join(update_fields)} WHERE id=%s", tuple(params))
         conn.commit()
         
-        # Clear cache when course is updated
         cache_clear("courses")
         cache_clear(f"course:{course_id}")
         
@@ -227,7 +219,6 @@ async def delete_course(request: Request, course_id: int, user=Depends(get_curre
         cursor.execute("DELETE FROM courses WHERE id=%s", (course_id,))
         conn.commit()
         
-        # Clear cache when course is deleted
         cache_clear("courses")
         cache_clear(f"course:{course_id}")
         

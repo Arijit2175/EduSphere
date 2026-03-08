@@ -167,7 +167,6 @@ def create_informal_post(post: dict, user=Depends(get_current_user)):
         cursor.execute("SELECT * FROM informal_posts WHERE id=%s", (post_id,))
         new_post = cursor.fetchone()
         
-        # Clear cache when new post is created
         cache_clear("informal_posts")
         
         return new_post
@@ -191,18 +190,15 @@ def get_informal_posts(skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, 
         cursor = conn.cursor()
         import json
         
-        # Build query with optional topic filter
         where_clause = ""
         params = []
         if topic:
             where_clause = "WHERE p.topic = %s"
             params.append(topic)
         
-        # Get total count
         cursor.execute(f"SELECT COUNT(*) as count FROM informal_posts p {where_clause}", params)
         total = cursor.fetchone()['count']
         
-        # Get paginated results
         query = f"""
             SELECT p.*, u.email AS creator_email, u.role AS creator_role
             FROM informal_posts p
@@ -215,7 +211,6 @@ def get_informal_posts(skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, 
         cursor.execute(query, params)
         posts = cursor.fetchall()
         
-        # Process savers field
         for post in posts:
             savers = post.get("savers")
             if savers is None or savers == "":
@@ -230,7 +225,7 @@ def get_informal_posts(skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, 
                     post["savers"] = []
         
         result = {"data": posts, "total": total, "skip": skip, "limit": limit}
-        cache_set(cache_key, result, ttl_seconds=120)  # 2 min cache for dynamic content
+        cache_set(cache_key, result, ttl_seconds=120)  
         return result
     finally:
         cursor.close()

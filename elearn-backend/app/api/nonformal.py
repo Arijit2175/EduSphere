@@ -175,4 +175,3 @@ async def claim_nonformal_certificate(request: Request, user=Depends(get_current
     cursor.close()
     return_db_connection(conn)
     return cert
-

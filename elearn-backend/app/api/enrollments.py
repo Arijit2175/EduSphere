@@ -21,11 +21,9 @@ def get_course_students(course_id: int, skip: int = Query(0, ge=0), limit: int =
     try:
         cursor = conn.cursor()
         
-        # Get total count
         cursor.execute("SELECT COUNT(*) as count FROM enrollments WHERE course_id = %s", (course_id,))
         total = cursor.fetchone()['count']
         
-        # Get paginated results with JOIN optimized
         cursor.execute('''
             SELECT e.id, e.user_id, e.course_id, e.enrolled_at, e.progress, e.status,
                    u.first_name, u.last_name, u.student_id, u.email
@@ -72,7 +70,6 @@ def get_my_enrollments(user=Depends(get_current_user)):
         """, (user["id"],))
         enrollments = cursor.fetchall()
         
-        # Cache for 10 minutes (longer for user data)
         cache_set(cache_key, enrollments, ttl_seconds=600)
         return enrollments
     finally:
@@ -94,11 +91,9 @@ def list_enrollments(skip: int = Query(0, ge=0), limit: int = Query(100, ge=1, l
     try:
         cursor = conn.cursor()
         
-        # Get total count
         cursor.execute("SELECT COUNT(*) as count FROM enrollments")
         total = cursor.fetchone()['count']
         
-        # Get paginated results
         cursor.execute("SELECT * FROM enrollments ORDER BY enrolled_at DESC LIMIT %s OFFSET %s", (limit, skip))
         enrollments = cursor.fetchall()
         
@@ -121,13 +116,11 @@ def enroll_student(data: EnrollRequest):
     try:
         cursor = conn.cursor()
         
-        # Check if already enrolled
         cursor.execute("SELECT id FROM enrollments WHERE user_id=%s AND course_id=%s", (student_id, course_id))
         existing = cursor.fetchone()
         if existing:
             raise HTTPException(status_code=400, detail="Student already enrolled")
         
-        # Insert enrollment
         cursor.execute(
             "INSERT INTO enrollments (user_id, course_id) VALUES (%s, %s) RETURNING id",
             (student_id, course_id)
@@ -135,11 +128,9 @@ def enroll_student(data: EnrollRequest):
         enrollment_id = cursor.fetchone()['id']
         conn.commit()
         
-        # Fetch the created enrollment
         cursor.execute("SELECT * FROM enrollments WHERE id=%s", (enrollment_id,))
         enrollment = cursor.fetchone()
         
-        # Clear cache
         cache_clear("enrollments")
         
         return enrollment
@@ -163,7 +154,6 @@ def remove_enrollment(enrollment_id: int):
         cursor.execute("DELETE FROM enrollments WHERE id=%s", (enrollment_id,))
         conn.commit()
         
-        # Clear cache
         cache_clear("enrollments")
         
         return {"id": enrollment_id, "deleted": True}

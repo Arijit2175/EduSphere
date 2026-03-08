@@ -7,13 +7,12 @@ from app.core.config import JDOODLE_CLIENT_ID, JDOODLE_CLIENT_SECRET
 
 router = APIRouter(prefix="/code-execution", tags=["code-execution"])
 
-# Supported languages on JDoodle
 SUPPORTED_LANGUAGES = {
     "nodejs", "python3", "java", "cpp17", "csharp",
     "python2", "cpp14", "cpp", "c", "rb", "go", "php", "scala"
 }
 
-MAX_CODE_SIZE = 10000  # 10KB limit
+MAX_CODE_SIZE = 10000  
 
 
 class CodeExecutionRequest(BaseModel):
