@@ -5,7 +5,7 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from app.db import get_db_connection, return_db_connection
+from app.db import get_db_connection, return_db_connection, cache_get, cache_set
 from app.core.config import SECRET_KEY, ALGORITHM, RATE_LIMIT_AUTH_PER_MINUTE
 from app.core.security import (
     sanitize_string, 
@@ -30,16 +30,38 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
+
+    if payload.get("role") and ("student_id" in payload) and ("teacher_id" in payload):
+        return {
+            "id": int(user_id),
+            "role": payload.get("role"),
+            "student_id": payload.get("student_id"),
+            "teacher_id": payload.get("teacher_id"),
+            "email": payload.get("email"),
+            "first_name": payload.get("first_name"),
+            "last_name": payload.get("last_name"),
+        }
+
+    cache_key = f"auth_user:{user_id}"
+    cached_user = cache_get(cache_key)
+    if cached_user:
+        return cached_user
+
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB connection error")
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))
-    user = cursor.fetchone()
-    cursor.close()
-    return_db_connection(conn)
+    try:
+        cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))
+        user = cursor.fetchone()
+    finally:
+        cursor.close()
+        return_db_connection(conn)
+
     if user is None:
         raise credentials_exception
+
+    cache_set(cache_key, user, ttl_seconds=60)
     return user
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -144,5 +166,13 @@ async def login(request: Request):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     if user["role"] != role:
         raise HTTPException(status_code=403, detail=f"No {role} account found with these credentials.")
-    access_token = create_access_token({"sub": str(user["id"]), "role": user["role"]})
+    access_token = create_access_token({
+        "sub": str(user["id"]),
+        "role": user["role"],
+        "student_id": user.get("student_id"),
+        "teacher_id": user.get("teacher_id"),
+        "email": user.get("email"),
+        "first_name": user.get("first_name"),
+        "last_name": user.get("last_name"),
+    })
     return {"access_token": access_token, "token_type": "bearer"}
